@@ -168,7 +168,10 @@
               <option value="users">เฉพาะสมาชิก</option>
             </select>
           </div>
-          <button id="notiBtn" class="w-full px-5 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึกแจ้งเตือน</button>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="notiBtn" type="submit" class="w-full px-5 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก (Draft)</button>
+            <button id="notiSendBtn" type="button" class="w-full px-5 py-3 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">ส่งจริง</button>
+          </div>
         </form>
 
         <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600">
@@ -285,7 +288,38 @@
       } finally { setLoading(btn, false); }
     });
 
-    qs("#notiForm").addEventListener("submit", async (e) => {
+    
+
+    // ส่งจริง: สร้างแจ้งเตือน + บันทึก log การส่ง (notification_logs)
+    qs("#notiSendBtn").addEventListener("click", async () => {
+      const btn = qs("#notiSendBtn");
+      setLoading(btn, true);
+      try {
+        const title = qs("#nTitle").value.trim();
+        const message = qs("#nMessage").value.trim();
+        if (!title || !message) {
+          toast("กรุณากรอกหัวข้อและข้อความ", "warning");
+          return;
+        }
+
+        const created = await api.notificationsCreate({
+          title,
+          message,
+          channel: qs("#nChannel").value,
+          target: qs("#nTarget").value,
+          status: "Ready"
+        });
+
+        const sent = await api.notificationsSend(created.notificationId);
+        toast(`ส่งจริงแล้ว (${sent.count || 0} ราย)`, "success");
+        qs("#notiForm").reset();
+      } catch (err) {
+        toast(err?.error?.message || "ส่งไม่สำเร็จ", "danger");
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+qs("#notiForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = qs("#notiBtn");
       setLoading(btn, true);

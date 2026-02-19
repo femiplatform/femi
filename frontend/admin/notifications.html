@@ -161,7 +161,7 @@
               <div class="text-xs text-slate-500 mt-1">${formatDate(n.updatedAt || n.createdAt)}</div>
             </div>
             <div class="flex gap-2 shrink-0">
-              <button data-act="send" data-id="${n.notificationId}" class="px-3 py-2 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">ส่ง</button>
+              <button data-act="send" data-id="${n.notificationId}" ${String(n.status||"").toLowerCase()==="sent" ? "disabled" : ""} class="px-3 py-2 rounded-2xl ${String(n.status||"").toLowerCase()==="sent" ? "bg-slate-200 text-slate-600 cursor-not-allowed" : "bg-brand-600 text-white hover:bg-brand-700"}">ส่งจริง</button>
               <button data-act="edit" data-id="${n.notificationId}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white">แก้ไข</button>
               <button data-act="del" data-id="${n.notificationId}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
             </div>
