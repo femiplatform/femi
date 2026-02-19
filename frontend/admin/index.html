@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI Admin | Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <div class="min-h-screen grid lg:grid-cols-[280px_1fr]">
+    <aside class="bg-white/80 backdrop-blur border-r border-slate-200 p-4 lg:p-6">
+      <a href="/admin/index.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+
+      <div class="mt-6">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Admin</div>
+        <div id="hello" class="mt-1 text-sm font-semibold text-slate-900">—</div>
+      </div>
+
+      <nav class="mt-6 space-y-2">
+        <a data-nav="dashboard" href="/admin/index.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+        </a>
+        <a data-nav="users" href="/admin/users.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="users" class="w-5 h-5"></i> Users
+        </a>
+        <a data-nav="content" href="/admin/content.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="file-text" class="w-5 h-5"></i> Content
+        </a>
+        <a data-nav="notifications" href="/admin/notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="bell" class="w-5 h-5"></i> Notifications
+        </a>
+        <a data-nav="settings" href="/admin/settings.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="settings" class="w-5 h-5"></i> Settings
+        </a>
+      </nav>
+
+      <div class="mt-8">
+        <a href="/app/dashboard.html" class="flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 hover:bg-slate-50">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i> ไปฝั่งผู้ใช้
+        </a>
+        <button id="logout" class="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">
+          <i data-lucide="log-out" class="w-5 h-5"></i> ออกจากระบบ
+        </button>
+      </div>
+
+      <div class="mt-8 text-xs text-slate-500">
+        FEMI Admin
+      </div>
+    </aside>
+
+    <main class="p-4 lg:p-10">
+
+  <div class="max-w-6xl">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+        <p class="text-slate-600 mt-1">ภาพรวมระบบ + ป้อนข้อมูลด่วน (Quick Actions)</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="refresh" class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50">รีเฟรช</button>
+      </div>
+    </div>
+
+    <section class="mt-6 grid md:grid-cols-4 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
+        <div class="text-sm text-slate-500">Users</div>
+        <div id="statUsers" class="text-2xl font-bold mt-1">—</div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
+        <div class="text-sm text-slate-500">News</div>
+        <div id="statNews" class="text-2xl font-bold mt-1">—</div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
+        <div class="text-sm text-slate-500">Knowledge</div>
+        <div id="statKb" class="text-2xl font-bold mt-1">—</div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
+        <div class="text-sm text-slate-500">Quiz Results</div>
+        <div id="statResults" class="text-2xl font-bold mt-1">—</div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid lg:grid-cols-3 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="megaphone" class="w-5 h-5 text-brand-700"></i> สร้างข่าว/ประกาศ
+        </div>
+        <form id="newsForm" class="mt-4 space-y-3">
+          <input id="newsTitle" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="หัวข้อ" required>
+          <textarea id="newsSummary" class="w-full px-4 py-3 rounded-2xl border border-slate-200" rows="3" placeholder="สรุปสั้น ๆ"></textarea>
+          <textarea id="newsContent" class="w-full px-4 py-3 rounded-2xl border border-slate-200" rows="5" placeholder="เนื้อหา"></textarea>
+          <div class="grid grid-cols-2 gap-3">
+            <select id="newsCategory" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="ประกาศ">ประกาศ</option>
+              <option value="ข่าวสาร">ข่าวสาร</option>
+              <option value="กิจกรรม">กิจกรรม</option>
+            </select>
+            <select id="newsStatus" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="Published">Published</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+          <button id="newsBtn" class="w-full px-5 py-3 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">บันทึก</button>
+        </form>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="clipboard-check" class="w-5 h-5 text-accent-700"></i> เพิ่มคำถามควิซ
+        </div>
+        <form id="quizForm" class="mt-4 space-y-3">
+          <input id="qText" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="คำถาม" required>
+          <div class="grid grid-cols-2 gap-3">
+            <select id="qCategory" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="health">สุขภาพทั่วไป</option>
+              <option value="pregnancy">ตั้งครรภ์</option>
+              <option value="nutrition">โภชนาการ</option>
+            </select>
+            <select id="qDifficulty" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="easy">ง่าย</option>
+              <option value="medium">กลาง</option>
+              <option value="hard">ยาก</option>
+            </select>
+          </div>
+
+          <div class="space-y-2">
+            <input id="c1" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 1" required>
+            <input id="c2" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 2" required>
+            <input id="c3" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 3">
+            <input id="c4" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 4">
+            <select id="correct" class="w-full px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="1">คำตอบที่ถูก: ตัวเลือก 1</option>
+              <option value="2">คำตอบที่ถูก: ตัวเลือก 2</option>
+              <option value="3">คำตอบที่ถูก: ตัวเลือก 3</option>
+              <option value="4">คำตอบที่ถูก: ตัวเลือก 4</option>
+            </select>
+          </div>
+
+          <button id="quizBtn" class="w-full px-5 py-3 rounded-2xl bg-accent-600 text-white hover:bg-accent-700">บันทึกคำถาม</button>
+        </form>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="bell" class="w-5 h-5 text-slate-700"></i> สร้างแจ้งเตือน
+        </div>
+        <form id="notiForm" class="mt-4 space-y-3">
+          <input id="nTitle" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="หัวข้อ" required>
+          <textarea id="nMessage" class="w-full px-4 py-3 rounded-2xl border border-slate-200" rows="5" placeholder="ข้อความ" required></textarea>
+          <div class="grid grid-cols-2 gap-3">
+            <select id="nChannel" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="inapp">In-app</option>
+              <option value="line">LINE (บันทึก log)</option>
+            </select>
+            <select id="nTarget" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="all">ทั้งหมด</option>
+              <option value="users">เฉพาะสมาชิก</option>
+            </select>
+          </div>
+          <button id="notiBtn" class="w-full px-5 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึกแจ้งเตือน</button>
+        </form>
+
+        <div class="mt-5 rounded-2xl bg-slate-50 border border-slate-200 p-4 text-sm text-slate-600">
+          การส่งจริงสามารถขยายต่อ (เช่น LINE Messaging API) ได้ภายหลัง
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-8 grid md:grid-cols-2 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <h2 class="font-bold">รายการล่าสุด (News)</h2>
+        <div id="latestNews" class="mt-4 space-y-2 text-sm text-slate-700"></div>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <h2 class="font-bold">รายการล่าสุด (Quiz Results)</h2>
+        <div id="latestResults" class="mt-4 space-y-2 text-sm text-slate-700"></div>
+      </div>
+    </section>
+  </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initAdminShell, loadAdminMe } from "/admin/admin.js";
+    initAdminShell("dashboard");
+    await loadAdminMe();
+    
+    import { api } from "/js/api.js";
+    import { qs, toast, setLoading, formatDate } from "/js/ui.js";
+
+    async function loadStats() {
+      try {
+        const data = await api.request("admin.stats", {});
+        qs("#statUsers").textContent = data.users || 0;
+        qs("#statNews").textContent = data.news || 0;
+        qs("#statKb").textContent = data.knowledge || 0;
+        qs("#statResults").textContent = data.quizResults || 0;
+
+        qs("#latestNews").innerHTML = (data.latestNews||[]).map(n => `
+          <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 p-3">
+            <div class="truncate">${n.title || "-"}</div>
+            <div class="text-xs text-slate-500">${n.status || ""}</div>
+          </div>
+        `).join("") || `<div class="text-slate-600">—</div>`;
+
+        qs("#latestResults").innerHTML = (data.latestResults||[]).map(r => `
+          <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 p-3">
+            <div class="truncate">คะแนน ${r.score}/${r.total}</div>
+            <div class="text-xs text-slate-500">${formatDate(r.takenAt)}</div>
+          </div>
+        `).join("") || `<div class="text-slate-600">—</div>`;
+
+      } catch (err) {
+        toast(err?.error?.message || "โหลดสถิติไม่สำเร็จ", "danger");
+      }
+    }
+
+    qs("#refresh").addEventListener("click", loadStats);
+
+    qs("#newsForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = qs("#newsBtn");
+      setLoading(btn, true);
+      try {
+        await api.newsCreate({
+          title: qs("#newsTitle").value.trim(),
+          summary: qs("#newsSummary").value.trim(),
+          content: qs("#newsContent").value.trim(),
+          category: qs("#newsCategory").value,
+          status: qs("#newsStatus").value
+        });
+        toast("บันทึกข่าว/ประกาศแล้ว", "success");
+        e.target.reset();
+        loadStats();
+      } catch (err) {
+        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    qs("#quizForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = qs("#quizBtn");
+      setLoading(btn, true);
+      try {
+        const question = await api.request("quiz.questions.create", {
+          questionText: qs("#qText").value.trim(),
+          category: qs("#qCategory").value,
+          difficulty: qs("#qDifficulty").value,
+          status: "Published"
+        });
+
+        const choices = [
+          qs("#c1").value.trim(),
+          qs("#c2").value.trim(),
+          qs("#c3").value.trim(),
+          qs("#c4").value.trim()
+        ].filter(Boolean);
+
+        const correctIndex = parseInt(qs("#correct").value, 10) - 1;
+
+        for (let i=0; i<choices.length; i++) {
+          await api.request("quiz.choices.create", {
+            questionId: question.questionId,
+            choiceText: choices[i],
+            isCorrect: (i === correctIndex) ? "TRUE" : "FALSE"
+          });
+        }
+
+        toast("บันทึกคำถามแล้ว", "success");
+        e.target.reset();
+      } catch (err) {
+        toast(err?.error?.message || "บันทึกคำถามไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    qs("#notiForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = qs("#notiBtn");
+      setLoading(btn, true);
+      try {
+        await api.notificationsCreate({
+          title: qs("#nTitle").value.trim(),
+          message: qs("#nMessage").value.trim(),
+          channel: qs("#nChannel").value,
+          target: qs("#nTarget").value,
+          status: "Draft"
+        });
+        toast("บันทึกแจ้งเตือนแล้ว", "success");
+        e.target.reset();
+      } catch (err) {
+        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    loadStats();
+
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

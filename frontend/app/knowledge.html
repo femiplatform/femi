@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI | ความรู้</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/app/dashboard.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แดชบอร์ด</a>
+        <a href="/app/quiz.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แบบทดสอบ</a>
+        <button id="logout" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-3xl font-bold">ความรู้ & ข่าวประกาศ</h1>
+        <p class="text-slate-600 mt-1">อ่านบทความและประกาศล่าสุด</p>
+      </div>
+    </div>
+
+    <section class="mt-6 grid lg:grid-cols-2 gap-6">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="book-open" class="w-5 h-5 text-accent-700"></i>
+          บทความความรู้
+        </div>
+        <div id="kbList" class="mt-4 space-y-3"></div>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="megaphone" class="w-5 h-5 text-brand-700"></i>
+          ข่าว/ประกาศ
+        </div>
+        <div id="newsList" class="mt-4 space-y-3"></div>
+      </div>
+    </section>
+
+    <section id="detail" class="hidden mt-8 rounded-2xl border border-slate-200 bg-white shadow-soft p-6"></section>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { clearSession } from "/js/auth.js";
+    import { qs, toast, formatDate } from "/js/ui.js";
+
+    function renderItem(item, kind) {
+      const id = kind === "news" ? item.newsId : item.kbId;
+      const cat = kind === "news" ? (item.category || "ประกาศ") : (item.tags || "ความรู้");
+      const title = item.title || "-";
+      const summary = item.summary || "";
+      return `
+        <button data-kind="${kind}" data-id="${id}" class="w-full text-left rounded-2xl border border-slate-200 p-4 hover:shadow-soft transition">
+          <div class="text-xs text-slate-500">${cat}</div>
+          <div class="font-semibold mt-1">${title}</div>
+          <div class="text-sm text-slate-600 mt-2 line-clamp-2">${summary}</div>
+        </button>
+      `;
+    }
+
+    async function loadLists() {
+      try {
+        const [kb, news] = await Promise.all([api.knowledgeList(), api.newsList()]);
+        qs("#kbList").innerHTML = (kb||[]).slice(0, 20).map(x => renderItem(x, "kb")).join("") || `<div class="text-sm text-slate-600">ยังไม่มีบทความ</div>`;
+        qs("#newsList").innerHTML = (news||[]).slice(0, 20).map(x => renderItem(x, "news")).join("") || `<div class="text-sm text-slate-600">ยังไม่มีประกาศ</div>`;
+      } catch (err) {
+        toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
+      }
+    }
+
+    async function openDetail(kind, id) {
+      const box = qs("#detail");
+      box.classList.remove("hidden");
+      box.innerHTML = `<div class="text-slate-600">กำลังโหลด...</div>`;
+      try {
+        const item = kind === "news" ? await api.newsGet(id) : await api.knowledgeGet(id);
+        box.innerHTML = `
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-xs text-slate-500">${kind === "news" ? (item.category || "ประกาศ") : (item.tags || "ความรู้")}</div>
+              <h2 class="text-2xl font-bold mt-1">${item.title || "-"}</h2>
+              <div class="text-sm text-slate-500 mt-2">${formatDate(item.publishedAt || item.updatedAt || item.createdAt)}</div>
+            </div>
+            <button id="close" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="mt-4 text-slate-700 leading-relaxed whitespace-pre-wrap">${item.content || item.summary || ""}</div>
+        `;
+        lucide.createIcons();
+        qs("#close").addEventListener("click", ()=> box.classList.add("hidden"));
+      } catch (err) {
+        box.innerHTML = `<div class="text-rose-700">ไม่สามารถเปิดรายละเอียดได้</div>`;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-kind]");
+      if (!btn) return;
+      openDetail(btn.dataset.kind === "kb" ? "kb" : "news", btn.dataset.id);
+    });
+
+    // hash deep link
+    const hash = location.hash || "";
+    if (hash.startsWith("#news:")) openDetail("news", hash.replace("#news:",""));
+    if (hash.startsWith("#kb:")) openDetail("kb", hash.replace("#kb:",""));
+
+    qs("#logout").addEventListener("click", async () => {
+      try { await api.logout(); } catch {}
+      clearSession();
+      window.location.href = "/index.html";
+    });
+
+    loadLists();
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

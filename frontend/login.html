@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI | เข้าสู่ระบบ</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <header class="border-b border-slate-200 bg-white/70 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/index.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+      <a href="/register.html" class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50">สมัครสมาชิก</a>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 py-12">
+    <div class="card-surface rounded-2xl border border-slate-200 shadow-card p-6">
+      <h1 class="text-2xl font-bold">เข้าสู่ระบบ</h1>
+      <p class="text-slate-600 mt-1">กรอกอีเมลและรหัสผ่านเพื่อเข้าใช้งาน FEMI</p>
+
+      <form id="form" class="mt-6 space-y-4">
+        <div>
+          <label class="text-sm font-medium">อีเมล</label>
+          <input id="email" type="email" required class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="you@example.com">
+        </div>
+        <div>
+          <label class="text-sm font-medium">รหัสผ่าน</label>
+          <input id="password" type="password" required class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200" placeholder="••••••••">
+        </div>
+        <button id="btn" type="submit" class="w-full px-5 py-3 rounded-2xl bg-brand-600 text-white shadow-soft hover:bg-brand-700">
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <div class="mt-5 text-sm text-slate-600">
+        ยังไม่มีบัญชี? <a class="text-brand-700 font-semibold hover:underline" href="/register.html">สมัครสมาชิก</a>
+      </div>
+
+      <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm">
+        <div class="flex items-center gap-2 font-semibold">
+          <i data-lucide="key-round" class="w-4 h-4"></i> แอดมินเริ่มต้น
+        </div>
+        <div class="mt-2 text-slate-600">
+          Email: <code>admin@femi.local</code><br>
+          Password: <code>Admin@12345</code>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { setSession } from "/js/auth.js";
+    import { toast, setLoading, qs } from "/js/ui.js";
+
+    const form = qs("#form");
+    const btn = qs("#btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setLoading(btn, true);
+      try {
+        const email = qs("#email").value.trim();
+        const password = qs("#password").value;
+        const data = await api.login(email, password);
+        setSession(data);
+        toast("เข้าสู่ระบบสำเร็จ", "success");
+        window.location.href = (data.role === "admin") ? "/admin/index.html" : "/app/dashboard.html";
+      } catch (err) {
+        toast(err?.error?.message || "เข้าสู่ระบบไม่สำเร็จ", "danger");
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

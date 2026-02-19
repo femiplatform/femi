@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI Admin | Users</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <div class="min-h-screen grid lg:grid-cols-[280px_1fr]">
+    <aside class="bg-white/80 backdrop-blur border-r border-slate-200 p-4 lg:p-6">
+      <a href="/admin/index.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+
+      <div class="mt-6">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Admin</div>
+        <div id="hello" class="mt-1 text-sm font-semibold text-slate-900">—</div>
+      </div>
+
+      <nav class="mt-6 space-y-2">
+        <a data-nav="dashboard" href="/admin/index.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+        </a>
+        <a data-nav="users" href="/admin/users.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="users" class="w-5 h-5"></i> Users
+        </a>
+        <a data-nav="content" href="/admin/content.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="file-text" class="w-5 h-5"></i> Content
+        </a>
+        <a data-nav="notifications" href="/admin/notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="bell" class="w-5 h-5"></i> Notifications
+        </a>
+        <a data-nav="settings" href="/admin/settings.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="settings" class="w-5 h-5"></i> Settings
+        </a>
+      </nav>
+
+      <div class="mt-8">
+        <a href="/app/dashboard.html" class="flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 hover:bg-slate-50">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i> ไปฝั่งผู้ใช้
+        </a>
+        <button id="logout" class="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">
+          <i data-lucide="log-out" class="w-5 h-5"></i> ออกจากระบบ
+        </button>
+      </div>
+
+      <div class="mt-8 text-xs text-slate-500">
+        FEMI Admin
+      </div>
+    </aside>
+
+    <main class="p-4 lg:p-10">
+
+  <div class="max-w-6xl">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-3xl font-bold">Users</h1>
+        <p class="text-slate-600 mt-1">จัดการสมาชิก (สร้าง/ค้นหา/แก้ไข/ลบ)</p>
+      </div>
+      <div class="flex gap-2 items-center">
+        <input id="q" class="px-4 py-2 rounded-2xl border border-slate-200 bg-white" placeholder="ค้นหาอีเมล/ชื่อ">
+        <button id="search" class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50">ค้นหา</button>
+      </div>
+    </div>
+
+    <section class="mt-6 grid lg:grid-cols-3 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <h2 class="font-bold flex items-center gap-2">
+          <i data-lucide="user-plus" class="w-5 h-5"></i> เพิ่มผู้ใช้
+        </h2>
+        <form id="createForm" class="mt-4 space-y-3">
+          <input id="email" type="email" required class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="อีเมล">
+          <input id="password" type="password" required minlength="8" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="รหัสผ่าน (อย่างน้อย 8)">
+          <div class="grid grid-cols-2 gap-3">
+            <input id="firstName" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ชื่อ">
+            <input id="lastName" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="นามสกุล">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <select id="role" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="user">user</option>
+              <option value="admin">admin</option>
+            </select>
+            <select id="status" class="px-4 py-3 rounded-2xl border border-slate-200">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <button id="createBtn" class="w-full px-5 py-3 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">สร้างผู้ใช้</button>
+        </form>
+      </div>
+
+      <div class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <h2 class="font-bold">รายการผู้ใช้</h2>
+          <div class="text-sm text-slate-500">รวม <span id="count">0</span> รายการ</div>
+        </div>
+
+        <div class="mt-4 overflow-auto">
+          <table class="w-full text-sm">
+            <thead class="text-slate-600">
+              <tr class="border-b">
+                <th class="text-left py-3 pr-3">อีเมล</th>
+                <th class="text-left py-3 pr-3">ชื่อ</th>
+                <th class="text-left py-3 pr-3">Role</th>
+                <th class="text-left py-3 pr-3">Status</th>
+                <th class="text-right py-3">จัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <dialog id="editDialog" class="rounded-2xl p-0 w-full max-w-lg border border-slate-200 shadow-card">
+      <form method="dialog" class="bg-white rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+          <div class="font-bold">แก้ไขผู้ใช้</div>
+          <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-3">
+          <input id="e_userId" type="hidden">
+          <div>
+            <label class="text-sm font-medium">อีเมล (อ่านอย่างเดียว)</label>
+            <input id="e_email" disabled class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">ชื่อ</label>
+              <input id="e_firstName" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
+            </div>
+            <div>
+              <label class="text-sm font-medium">นามสกุล</label>
+              <input id="e_lastName" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">Role</label>
+              <select id="e_role" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">Status</label>
+              <select id="e_status" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium">เปลี่ยนรหัสผ่าน (ถ้าต้องการ)</label>
+            <input id="e_password" type="password" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ปล่อยว่างหากไม่เปลี่ยน">
+          </div>
+        </div>
+        <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
+          <button class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
+          <button id="saveBtn" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initAdminShell, loadAdminMe } from "/admin/admin.js";
+    initAdminShell("users");
+    await loadAdminMe();
+    
+    import { api } from "/js/api.js";
+    import { qs, toast, setLoading } from "/js/ui.js";
+
+    const rows = qs("#rows");
+    const dialog = qs("#editDialog");
+
+    function rowHtml(u) {
+      const name = `${u.firstName || ""} ${u.lastName || ""}`.trim();
+      return `
+        <tr class="border-b hover:bg-slate-50">
+          <td class="py-3 pr-3">${u.email || "-"}</td>
+          <td class="py-3 pr-3">${name || "-"}</td>
+          <td class="py-3 pr-3"><span class="px-2 py-1 rounded-full text-xs bg-slate-100">${u.role || "user"}</span></td>
+          <td class="py-3 pr-3">${u.status || "-"}</td>
+          <td class="py-3 text-right">
+            <button data-act="edit" data-id="${u.userId}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white">แก้ไข</button>
+            <button data-act="del" data-id="${u.userId}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    async function load() {
+      try {
+        const q = qs("#q").value.trim();
+        const list = await api.usersList(q);
+        qs("#count").textContent = list.length;
+        rows.innerHTML = list.map(rowHtml).join("") || `<tr><td class="py-4 text-slate-600" colspan="5">ไม่พบข้อมูล</td></tr>`;
+      } catch (err) {
+        toast(err?.error?.message || "โหลดผู้ใช้ไม่สำเร็จ", "danger");
+      }
+    }
+
+    qs("#search").addEventListener("click", load);
+
+    qs("#createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = qs("#createBtn");
+      setLoading(btn, true);
+      try {
+        await api.usersCreate({
+          email: qs("#email").value.trim(),
+          password: qs("#password").value,
+          firstName: qs("#firstName").value.trim(),
+          lastName: qs("#lastName").value.trim(),
+          role: qs("#role").value,
+          status: qs("#status").value
+        });
+        toast("สร้างผู้ใช้แล้ว", "success");
+        e.target.reset();
+        load();
+      } catch (err) {
+        toast(err?.error?.message || "สร้างผู้ใช้ไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (btn.dataset.act === "edit") {
+        try {
+          const u = await api.usersGet(id);
+          qs("#e_userId").value = u.userId;
+          qs("#e_email").value = u.email || "";
+          qs("#e_firstName").value = u.firstName || "";
+          qs("#e_lastName").value = u.lastName || "";
+          qs("#e_role").value = u.role || "user";
+          qs("#e_status").value = u.status || "Active";
+          qs("#e_password").value = "";
+          dialog.showModal();
+          lucide.createIcons();
+        } catch (err) {
+          toast("เปิดข้อมูลไม่สำเร็จ", "danger");
+        }
+      }
+      if (btn.dataset.act === "del") {
+        if (!confirm("ยืนยันลบผู้ใช้นี้?")) return;
+        try {
+          await api.usersDelete(id);
+          toast("ลบแล้ว", "success");
+          load();
+        } catch (err) {
+          toast(err?.error?.message || "ลบไม่สำเร็จ", "danger");
+        }
+      }
+    });
+
+    qs("#saveBtn").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const btn = qs("#saveBtn");
+      setLoading(btn, true);
+      try {
+        const userId = qs("#e_userId").value;
+        const patch = {
+          firstName: qs("#e_firstName").value.trim(),
+          lastName: qs("#e_lastName").value.trim(),
+          role: qs("#e_role").value,
+          status: qs("#e_status").value
+        };
+        const pw = qs("#e_password").value;
+        if (pw) patch.password = pw;
+        await api.usersUpdate(userId, patch);
+        toast("บันทึกแล้ว", "success");
+        dialog.close();
+        load();
+      } catch (err) {
+        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    load();
+
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

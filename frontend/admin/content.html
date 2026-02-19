@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI Admin | Content</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <div class="min-h-screen grid lg:grid-cols-[280px_1fr]">
+    <aside class="bg-white/80 backdrop-blur border-r border-slate-200 p-4 lg:p-6">
+      <a href="/admin/index.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+
+      <div class="mt-6">
+        <div class="text-xs uppercase tracking-wide text-slate-500">Admin</div>
+        <div id="hello" class="mt-1 text-sm font-semibold text-slate-900">—</div>
+      </div>
+
+      <nav class="mt-6 space-y-2">
+        <a data-nav="dashboard" href="/admin/index.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+        </a>
+        <a data-nav="users" href="/admin/users.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="users" class="w-5 h-5"></i> Users
+        </a>
+        <a data-nav="content" href="/admin/content.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="file-text" class="w-5 h-5"></i> Content
+        </a>
+        <a data-nav="notifications" href="/admin/notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="bell" class="w-5 h-5"></i> Notifications
+        </a>
+        <a data-nav="settings" href="/admin/settings.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
+          <i data-lucide="settings" class="w-5 h-5"></i> Settings
+        </a>
+      </nav>
+
+      <div class="mt-8">
+        <a href="/app/dashboard.html" class="flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-200 hover:bg-slate-50">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i> ไปฝั่งผู้ใช้
+        </a>
+        <button id="logout" class="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">
+          <i data-lucide="log-out" class="w-5 h-5"></i> ออกจากระบบ
+        </button>
+      </div>
+
+      <div class="mt-8 text-xs text-slate-500">
+        FEMI Admin
+      </div>
+    </aside>
+
+    <main class="p-4 lg:p-10">
+
+  <div class="max-w-6xl">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-3xl font-bold">Content</h1>
+        <p class="text-slate-600 mt-1">จัดการข่าว/ความรู้/คำถามควิซ</p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-2">
+      <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50" data-tab="news">News</button>
+      <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50" data-tab="kb">Knowledge</button>
+      <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50" data-tab="quiz">Quiz</button>
+    </div>
+
+    <section id="pane_news" class="mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="font-bold flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-brand-700"></i> News</h2>
+        <button id="newNews" class="px-4 py-2 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">+ สร้างข่าว</button>
+      </div>
+      <div id="newsList" class="mt-4 space-y-2"></div>
+    </section>
+
+    <section id="pane_kb" class="hidden mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="font-bold flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-accent-700"></i> Knowledge</h2>
+        <button id="newKb" class="px-4 py-2 rounded-2xl bg-accent-600 text-white hover:bg-accent-700">+ สร้างบทความ</button>
+      </div>
+      <div id="kbList" class="mt-4 space-y-2"></div>
+    </section>
+
+    <section id="pane_quiz" class="hidden mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <h2 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5 text-slate-700"></i> Quiz Questions</h2>
+        <button id="newQuiz" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">+ สร้างคำถาม</button>
+      </div>
+      <div id="quizList" class="mt-4 space-y-2"></div>
+    </section>
+
+    <dialog id="contentDialog" class="rounded-2xl p-0 w-full max-w-2xl border border-slate-200 shadow-card">
+      <form method="dialog" class="bg-white rounded-2xl overflow-hidden">
+        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+          <div id="dlgTitle" class="font-bold">—</div>
+          <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-3">
+          <input id="dlg_kind" type="hidden">
+          <input id="dlg_id" type="hidden">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">หัวข้อ</label>
+              <input id="dlg_title" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" required>
+            </div>
+            <div>
+              <label class="text-sm font-medium">หมวด/แท็ก</label>
+              <input id="dlg_cat" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="เช่น ประกาศ / สุขภาพผู้หญิง">
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium">สรุป</label>
+            <textarea id="dlg_summary" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" rows="3"></textarea>
+          </div>
+          <div>
+            <label class="text-sm font-medium">เนื้อหา</label>
+            <textarea id="dlg_content" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" rows="8"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm font-medium">สถานะ</label>
+              <select id="dlg_status" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium">Cover URL (optional)</label>
+              <input id="dlg_cover" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="https://...">
+            </div>
+          </div>
+
+          <div id="quizChoicesBox" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+            <div class="font-semibold text-sm mb-2">ตัวเลือก (สำหรับ Quiz)</div>
+            <div class="space-y-2">
+              <input id="qc1" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 1">
+              <input id="qc2" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 2">
+              <input id="qc3" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 3">
+              <input id="qc4" class="w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="ตัวเลือก 4">
+              <select id="qcCorrect" class="w-full px-4 py-3 rounded-2xl border border-slate-200">
+                <option value="1">คำตอบที่ถูก: ตัวเลือก 1</option>
+                <option value="2">คำตอบที่ถูก: ตัวเลือก 2</option>
+                <option value="3">คำตอบที่ถูก: ตัวเลือก 3</option>
+                <option value="4">คำตอบที่ถูก: ตัวเลือก 4</option>
+              </select>
+              <div class="grid grid-cols-2 gap-3">
+                <select id="qcCategory" class="px-4 py-3 rounded-2xl border border-slate-200">
+                  <option value="health">สุขภาพทั่วไป</option>
+                  <option value="pregnancy">ตั้งครรภ์</option>
+                  <option value="nutrition">โภชนาการ</option>
+                </select>
+                <select id="qcDifficulty" class="px-4 py-3 rounded-2xl border border-slate-200">
+                  <option value="easy">ง่าย</option>
+                  <option value="medium">กลาง</option>
+                  <option value="hard">ยาก</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
+          <button class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
+          <button id="saveContentBtn" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initAdminShell, loadAdminMe } from "/admin/admin.js";
+    initAdminShell("content");
+    await loadAdminMe();
+    
+    import { api } from "/js/api.js";
+    import { qs, qsa, toast, setLoading } from "/js/ui.js";
+
+    const dlg = qs("#contentDialog");
+
+    function setActive(tab) {
+      qsa(".tab").forEach(b => {
+        b.classList.toggle("bg-slate-900", b.dataset.tab === tab);
+        b.classList.toggle("text-white", b.dataset.tab === tab);
+      });
+      qs("#pane_news").classList.toggle("hidden", tab !== "news");
+      qs("#pane_kb").classList.toggle("hidden", tab !== "kb");
+      qs("#pane_quiz").classList.toggle("hidden", tab !== "quiz");
+    }
+
+    document.addEventListener("click", (e) => {
+      const t = e.target.closest(".tab");
+      if (t) setActive(t.dataset.tab);
+    });
+
+    function itemRow(kind, item) {
+      const id = kind === "news" ? item.newsId : (kind === "kb" ? item.kbId : item.questionId);
+      const title = item.title || item.questionText || "-";
+      const meta = kind === "quiz" ? (item.category || "") : (kind === "news" ? (item.category||"") : (item.tags||""));
+      return `
+        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
+          <div class="min-w-0">
+            <div class="font-semibold truncate">${title}</div>
+            <div class="text-xs text-slate-500 mt-1">${meta} • ${item.status || ""}</div>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button data-act="edit" data-kind="${kind}" data-id="${id}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white">แก้ไข</button>
+            <button data-act="del" data-kind="${kind}" data-id="${id}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadAll() {
+      try {
+        const [news, kb, quiz] = await Promise.all([
+          api.request("news.listAdmin", {}),
+          api.request("knowledge.listAdmin", {}),
+          api.request("quiz.questions.listAdmin", {})
+        ]);
+        qs("#newsList").innerHTML = (news||[]).map(n => itemRow("news", n)).join("") || `<div class="text-sm text-slate-600">—</div>`;
+        qs("#kbList").innerHTML = (kb||[]).map(x => itemRow("kb", x)).join("") || `<div class="text-sm text-slate-600">—</div>`;
+        qs("#quizList").innerHTML = (quiz||[]).map(q => itemRow("quiz", q)).join("") || `<div class="text-sm text-slate-600">—</div>`;
+      } catch (err) {
+        toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
+      }
+    }
+
+    function openDialog(kind, item=null) {
+      qs("#dlg_kind").value = kind;
+      qs("#dlg_id").value = item ? (item.newsId || item.kbId || item.questionId || "") : "";
+      qs("#dlg_title").value = item?.title || item?.questionText || "";
+      qs("#dlg_summary").value = item?.summary || "";
+      qs("#dlg_content").value = item?.content || "";
+      qs("#dlg_status").value = item?.status || "Published";
+      qs("#dlg_cover").value = item?.coverImageUrl || "";
+      qs("#dlg_cat").value = (kind==="news" ? (item?.category||"") : kind==="kb" ? (item?.tags||"") : (item?.category||""));
+      qs("#dlgTitle").textContent = (item ? "แก้ไข" : "สร้าง") + " " + (kind==="news"?"News":kind==="kb"?"Knowledge":"Quiz");
+
+      const quizBox = qs("#quizChoicesBox");
+      quizBox.classList.toggle("hidden", kind !== "quiz");
+      if (kind === "quiz") {
+        qs("#qc1").value = "";
+        qs("#qc2").value = "";
+        qs("#qc3").value = "";
+        qs("#qc4").value = "";
+        qs("#qcCorrect").value = "1";
+        qs("#qcCategory").value = item?.category || "health";
+        qs("#qcDifficulty").value = item?.difficulty || "easy";
+      }
+      dlg.showModal();
+      lucide.createIcons();
+    }
+
+    qs("#newNews").addEventListener("click", () => openDialog("news"));
+    qs("#newKb").addEventListener("click", () => openDialog("kb"));
+    qs("#newQuiz").addEventListener("click", () => openDialog("quiz"));
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const kind = btn.dataset.kind;
+      const id = btn.dataset.id;
+
+      if (btn.dataset.act === "del") {
+        if (!confirm("ยืนยันลบรายการนี้?")) return;
+        try {
+          if (kind === "news") await api.newsDelete(id);
+          else if (kind === "kb") await api.knowledgeDelete(id);
+          else await api.request("quiz.questions.delete", { questionId: id });
+          toast("ลบแล้ว", "success");
+          loadAll();
+        } catch (err) { toast(err?.error?.message || "ลบไม่สำเร็จ", "danger"); }
+      }
+
+      if (btn.dataset.act === "edit") {
+        try {
+          let item;
+          if (kind === "news") item = await api.request("news.getAdmin", { newsId: id });
+          else if (kind === "kb") item = await api.request("knowledge.getAdmin", { kbId: id });
+          else item = await api.request("quiz.questions.getAdmin", { questionId: id });
+          openDialog(kind, item);
+        } catch (err) { toast("เปิดข้อมูลไม่สำเร็จ", "danger"); }
+      }
+    });
+
+    qs("#saveContentBtn").addEventListener("click", async (e) => {
+      e.preventDefault();
+      const btn = qs("#saveContentBtn");
+      setLoading(btn, true);
+      try {
+        const kind = qs("#dlg_kind").value;
+        const id = qs("#dlg_id").value;
+        const payload = {
+          title: qs("#dlg_title").value.trim(),
+          summary: qs("#dlg_summary").value.trim(),
+          content: qs("#dlg_content").value.trim(),
+          status: qs("#dlg_status").value,
+          coverImageUrl: qs("#dlg_cover").value.trim()
+        };
+
+        if (kind === "news") {
+          payload.category = qs("#dlg_cat").value.trim() || "ประกาศ";
+          if (!id) await api.newsCreate(payload);
+          else await api.newsUpdate(id, payload);
+        } else if (kind === "kb") {
+          payload.tags = qs("#dlg_cat").value.trim();
+          if (!id) await api.knowledgeCreate(payload);
+          else await api.knowledgeUpdate(id, payload);
+        } else {
+          // quiz
+          const qPayload = {
+            questionText: qs("#dlg_title").value.trim(),
+            category: qs("#qcCategory").value,
+            difficulty: qs("#qcDifficulty").value,
+            status: qs("#dlg_status").value
+          };
+
+          let q;
+          if (!id) q = await api.request("quiz.questions.create", qPayload);
+          else {
+            await api.request("quiz.questions.update", { questionId: id, patch: qPayload });
+            q = { questionId: id };
+          }
+
+          if (!id) {
+            const choices = [qs("#qc1").value.trim(), qs("#qc2").value.trim(), qs("#qc3").value.trim(), qs("#qc4").value.trim()].filter(Boolean);
+            const correct = parseInt(qs("#qcCorrect").value, 10) - 1;
+            for (let i=0; i<choices.length; i++) {
+              await api.request("quiz.choices.create", { questionId: q.questionId, choiceText: choices[i], isCorrect: (i===correct) ? "TRUE":"FALSE" });
+            }
+          }
+        }
+
+        toast("บันทึกแล้ว", "success");
+        dlg.close();
+        loadAll();
+      } catch (err) {
+        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
+      } finally { setLoading(btn, false); }
+    });
+
+    setActive("news");
+    loadAll();
+
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>

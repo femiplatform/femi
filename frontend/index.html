@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI | แพลตฟอร์มสุขภาพผู้หญิง</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/index.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+      <nav class="flex items-center gap-2">
+        <a href="/login.html" class="px-4 py-2 rounded-2xl text-slate-700 hover:bg-slate-100">เข้าสู่ระบบ</a>
+        <a href="/register.html" class="px-4 py-2 rounded-2xl bg-brand-600 text-white shadow-soft hover:bg-brand-700">สมัครสมาชิก</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <section class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="space-y-4">
+        <p class="inline-flex items-center gap-2 text-sm px-3 py-1 rounded-full bg-slate-900 text-white/90 shadow-soft">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          สุขภาพผู้หญิง • ความรู้ • แบบทดสอบ
+        </p>
+        <h1 class="text-4xl md:text-5xl font-bold leading-tight">
+          FEMI — แพลตฟอร์มสุขภาพอัจฉริยะสำหรับผู้หญิง
+        </h1>
+        <p class="text-slate-600 text-lg">
+          อ่านความรู้ที่เชื่อถือได้ ทำแบบทดสอบสั้น ๆ และบันทึกข้อมูลสุขภาพของคุณในที่เดียว
+        </p>
+        <div class="flex flex-wrap gap-3 pt-2">
+          <a href="/register.html" class="px-5 py-3 rounded-2xl bg-brand-600 text-white shadow-card hover:bg-brand-700">เริ่มต้นใช้งาน</a>
+          <a href="/login.html" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50">เข้าสู่ระบบ</a>
+          <a href="/app/knowledge.html" class="px-5 py-3 rounded-2xl bg-white/70 border border-slate-200 hover:bg-white">ดูเนื้อหาความรู้</a>
+        </div>
+      </div>
+
+      <div class="card-surface rounded-2xl border border-slate-200 shadow-card p-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center gap-2 font-semibold">
+              <i data-lucide="book-open" class="w-5 h-5 text-accent-700"></i>
+              ความรู้
+            </div>
+            <p class="text-slate-600 text-sm mt-2">บทความ/แนวทางดูแลสุขภาพ อ่านง่าย</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center gap-2 font-semibold">
+              <i data-lucide="clipboard-check" class="w-5 h-5 text-brand-700"></i>
+              แบบทดสอบ
+            </div>
+            <p class="text-slate-600 text-sm mt-2">ตอบคำถามสั้น ๆ และบันทึกผล</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center gap-2 font-semibold">
+              <i data-lucide="heart-pulse" class="w-5 h-5 text-rose-700"></i>
+              บันทึกสุขภาพ
+            </div>
+            <p class="text-slate-600 text-sm mt-2">เก็บข้อมูลของคุณเพื่อดูย้อนหลัง</p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white p-4">
+            <div class="flex items-center gap-2 font-semibold">
+              <i data-lucide="shield-check" class="w-5 h-5 text-slate-700"></i>
+              ปลอดภัย
+            </div>
+            <p class="text-slate-600 text-sm mt-2">มีระบบสิทธิ์ผู้ใช้/แอดมิน</p>
+          </div>
+        </div>
+        <div class="mt-6 rounded-2xl bg-slate-900 text-white p-5 flex items-start gap-3">
+          <i data-lucide="info" class="w-5 h-5 mt-0.5"></i>
+          <div>
+            <p class="font-semibold">สำหรับผู้ดูแลระบบ (อสม.)</p>
+            <p class="text-white/80 text-sm">สามารถจัดการผู้ใช้ เนื้อหา ควิซ และแจ้งเตือนได้จากหน้า Admin</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12 grid md:grid-cols-3 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <p class="text-sm text-slate-600">เริ่มต้น</p>
+        <p class="font-semibold mt-1">สมัครสมาชิก</p>
+        <p class="text-slate-600 text-sm mt-2">สร้างบัญชีและเริ่มใช้งานระบบได้ทันที</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <p class="text-sm text-slate-600">ใช้งาน</p>
+        <p class="font-semibold mt-1">อ่านความรู้ + ทำแบบทดสอบ</p>
+        <p class="text-slate-600 text-sm mt-2">ดูเนื้อหา และทำแบบทดสอบเพื่อประเมินความเข้าใจ</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <p class="text-sm text-slate-600">ติดตาม</p>
+        <p class="font-semibold mt-1">ดูประวัติของคุณ</p>
+        <p class="text-slate-600 text-sm mt-2">ระบบบันทึกผลและแสดงประวัติย้อนหลัง</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white/60 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-slate-600 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
+      <div>© FEMI</div>
+      <div class="flex items-center gap-4">
+        <a class="hover:text-slate-900" href="/docs.html">เอกสาร</a>
+        <a class="hover:text-slate-900" href="/login.html">เข้าสู่ระบบ</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>
