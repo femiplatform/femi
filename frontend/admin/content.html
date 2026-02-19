@@ -77,16 +77,16 @@
 
     <section id="pane_news" class="mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
       <div class="flex items-center justify-between gap-3 flex-wrap">
-        <h2 class="font-bold flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-brand-700"></i> News</h2>
-        <button id="newNews" class="px-4 py-2 rounded-2xl bg-brand-600 text-white hover:bg-brand-700">+ สร้างข่าว</button>
+        <h2 class="font-bold flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5 text-rose-700"></i> News</h2>
+        <button id="newNews" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700">+ สร้างข่าว</button>
       </div>
       <div id="newsList" class="mt-4 space-y-2"></div>
     </section>
 
     <section id="pane_kb" class="hidden mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
       <div class="flex items-center justify-between gap-3 flex-wrap">
-        <h2 class="font-bold flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-accent-700"></i> Knowledge</h2>
-        <button id="newKb" class="px-4 py-2 rounded-2xl bg-accent-600 text-white hover:bg-accent-700">+ สร้างบทความ</button>
+        <h2 class="font-bold flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-cyan-700"></i> Knowledge</h2>
+        <button id="newKb" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white hover:from-cyan-700 hover:to-teal-700">+ สร้างบทความ</button>
       </div>
       <div id="kbList" class="mt-4 space-y-2"></div>
     </section>
@@ -193,9 +193,22 @@
 
     function setActive(tab) {
       qsa(".tab").forEach(b => {
-        b.classList.toggle("bg-slate-900", b.dataset.tab === tab);
-        b.classList.toggle("text-white", b.dataset.tab === tab);
+        const active = b.dataset.tab === tab;
+
+        // Active styles
+        b.classList.toggle("bg-slate-900", active);
+        b.classList.toggle("text-white", active);
+
+        // Inactive styles (important: remove bg-white when active to avoid white-on-white)
+        b.classList.toggle("bg-white", !active);
+        b.classList.toggle("text-slate-700", !active);
+        b.classList.toggle("hover:bg-slate-50", !active);
+
+        // Keep border consistent
+        b.classList.add("border");
+        b.classList.add("border-slate-200");
       });
+
       qs("#pane_news").classList.toggle("hidden", tab !== "news");
       qs("#pane_kb").classList.toggle("hidden", tab !== "kb");
       qs("#pane_quiz").classList.toggle("hidden", tab !== "quiz");
