@@ -2,122 +2,268 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FEMI | แพลตฟอร์มสุขภาพผู้หญิง</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>FEMI | เข้าสู่ระบบ</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+  <!-- Tailwind (Play CDN) + FEMI theme -->
   <script src="/assets/tailwind-theme.cdn.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/assets/app.css" />
 </head>
-<body class="gradient-bg text-slate-900">
+<body class="min-h-screen gradient-bg text-slate-900">
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Mobile-first header -->
   <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/index.html" class="flex items-center gap-3">
-        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+    <div class="px-4 py-3 flex items-center justify-between">
+      <a href="/index.html" class="flex items-center gap-2">
+        <img
+          src="/assets/logo_femi_1.png"
+          onerror="this.onerror=null; this.src='/assets/logo_femi_1.svg';"
+          class="h-8 w-auto"
+          alt="FEMI"
+        />
       </a>
-      <nav class="flex items-center gap-2">
-        <a href="/login.html" class="px-4 py-2 rounded-2xl text-slate-700 hover:bg-slate-100">เข้าสู่ระบบ</a>
-        <a href="/register.html" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-soft hover:from-rose-700 hover:to-pink-700">สมัครสมาชิก</a>
-      </nav>
+      <div class="text-xs text-slate-500">เข้าสู่ระบบ / สมัครสมาชิก</div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-10">
-    <section class="grid md:grid-cols-2 gap-8 items-center">
-      <div class="space-y-4">
-        <p class="inline-flex items-center gap-2 text-sm px-3 py-1 rounded-full bg-slate-900 text-white/90 shadow-soft">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          สุขภาพผู้หญิง • ความรู้ • แบบทดสอบ
-        </p>
-        <h1 class="">
-          FEMI — แพลตฟอร์มสุขภาพอัจฉริยะสำหรับผู้หญิง
-        </h1>
-        <p class="text-slate-600 text-lg">
-          อ่านความรู้ที่เชื่อถือได้ ทำแบบทดสอบสั้น ๆ และบันทึกข้อมูลสุขภาพของคุณในที่เดียว
-        </p>
-        <div class="flex flex-wrap gap-3 pt-2">
-          <a href="/register.html" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-card hover:from-rose-700 hover:to-pink-700">เริ่มต้นใช้งาน</a>
-          <a href="/login.html" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50">เข้าสู่ระบบ</a>
-          <a href="/app/knowledge.html" class="px-5 py-3 rounded-2xl bg-white/70 border border-slate-200 hover:bg-white">ดูเนื้อหาความรู้</a>
+  <main class="px-4 py-8 pb-10">
+    <div class="mx-auto w-full max-w-md">
+      <section class="card-surface rounded-2xl border border-slate-200 shadow-card p-6">
+        <div class="flex flex-col items-center text-center">
+          <img
+            src="/assets/logo_femi_2.png"
+            onerror="this.onerror=null; this.src='/assets/logo_femi_2.svg';"
+            class="h-16 w-auto"
+            alt="FEMI"
+          />
+          <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-600 to-pink-600">
+            FEMI
+          </h1>
+          <p class="mt-1 text-sm text-slate-600">
+            ดูแลสุขภาพผู้หญิงในที่เดียว
+          </p>
         </div>
-      </div>
 
-      <div class="card-surface rounded-2xl border border-slate-200 shadow-card p-6">
-        <div class="grid grid-cols-2 gap-4">
-          <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex items-center gap-2 font-semibold">
-              <i data-lucide="book-open" class="w-5 h-5 text-cyan-700"></i>
-              ความรู้
-            </div>
-            <p class="text-slate-600 text-sm mt-2">บทความ/แนวทางดูแลสุขภาพ อ่านง่าย</p>
-          </div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex items-center gap-2 font-semibold">
-              <i data-lucide="clipboard-check" class="w-5 h-5 text-rose-700"></i>
-              แบบทดสอบ
-            </div>
-            <p class="text-slate-600 text-sm mt-2">ตอบคำถามสั้น ๆ และบันทึกผล</p>
-          </div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex items-center gap-2 font-semibold">
-              <i data-lucide="heart-pulse" class="w-5 h-5 text-rose-700"></i>
-              บันทึกสุขภาพ
-            </div>
-            <p class="text-slate-600 text-sm mt-2">เก็บข้อมูลของคุณเพื่อดูย้อนหลัง</p>
-          </div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-4">
-            <div class="flex items-center gap-2 font-semibold">
-              <i data-lucide="shield-check" class="w-5 h-5 text-slate-700"></i>
-              ปลอดภัย
-            </div>
-            <p class="text-slate-600 text-sm mt-2">มีระบบสิทธิ์ผู้ใช้/แอดมิน</p>
+        <!-- Tabs -->
+        <div class="mt-6">
+          <div class="grid grid-cols-2 rounded-2xl bg-slate-100 p-1" role="tablist" aria-label="เลือกโหมด">
+            <button id="tabLogin" type="button" role="tab" aria-selected="true"
+              class="rounded-xl px-4 py-2 font-semibold transition shadow-soft bg-gradient-to-r from-rose-600 to-pink-600 text-white">
+              เข้าสู่ระบบ
+            </button>
+            <button id="tabRegister" type="button" role="tab" aria-selected="false"
+              class="rounded-xl px-4 py-2 font-semibold transition text-slate-700 hover:bg-white">
+              สมัครสมาชิก
+            </button>
           </div>
         </div>
-        <div class="mt-6 rounded-2xl bg-slate-900 text-white p-5 flex items-start gap-3">
-          <i data-lucide="info" class="w-5 h-5 mt-0.5"></i>
-          <div>
-            <p class="font-semibold">สำหรับผู้ดูแลระบบ (อสม.)</p>
-            <p class="text-white/80 text-sm">สามารถจัดการผู้ใช้ เนื้อหา ควิซ และแจ้งเตือนได้จากหน้า Admin</p>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <section class="mt-12 grid md:grid-cols-3 gap-4">
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <p class="text-sm text-slate-600">เริ่มต้น</p>
-        <p class="font-semibold mt-1">สมัครสมาชิก</p>
-        <p class="text-slate-600 text-sm mt-2">สร้างบัญชีและเริ่มใช้งานระบบได้ทันที</p>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <p class="text-sm text-slate-600">ใช้งาน</p>
-        <p class="font-semibold mt-1">อ่านความรู้ + ทำแบบทดสอบ</p>
-        <p class="text-slate-600 text-sm mt-2">ดูเนื้อหา และทำแบบทดสอบเพื่อประเมินความเข้าใจ</p>
-      </div>
-      <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <p class="text-sm text-slate-600">ติดตาม</p>
-        <p class="font-semibold mt-1">ดูประวัติของคุณ</p>
-        <p class="text-slate-600 text-sm mt-2">ระบบบันทึกผลและแสดงประวัติย้อนหลัง</p>
-      </div>
-    </section>
+        <!-- Login panel -->
+        <section id="panelLogin" class="mt-6" role="tabpanel" aria-label="เข้าสู่ระบบ">
+          <form id="formLogin" class="space-y-4">
+            <div>
+              <label class="text-sm font-medium">อีเมล</label>
+              <input id="loginEmail" type="email" required
+                class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+                placeholder="you@example.com" autocomplete="email" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">รหัสผ่าน</label>
+              <input id="loginPassword" type="password" required
+                class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-200"
+                placeholder="••••••••" autocomplete="current-password" />
+            </div>
+
+            <button id="btnLogin" type="submit"
+              class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-card hover:from-rose-700 hover:to-pink-700">
+              เข้าสู่ระบบ
+            </button>
+          </form>
+
+          <p class="mt-5 text-xs text-slate-500 text-center">
+            หากยังไม่มีบัญชี ให้เลือกแท็บ <span class="font-semibold text-slate-700">สมัครสมาชิก</span>
+          </p>
+        </section>
+
+        <!-- Register panel -->
+        <section id="panelRegister" class="mt-6 hidden" role="tabpanel" aria-label="สมัครสมาชิก">
+          <form id="formRegister" class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-sm font-medium">ชื่อ</label>
+                <input id="regFirstName" required
+                  class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200"
+                  placeholder="ชื่อ" autocomplete="given-name" />
+              </div>
+              <div>
+                <label class="text-sm font-medium">นามสกุล</label>
+                <input id="regLastName" required
+                  class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200"
+                  placeholder="นามสกุล" autocomplete="family-name" />
+              </div>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">อีเมล</label>
+              <input id="regEmail" type="email" required
+                class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200"
+                placeholder="you@example.com" autocomplete="email" />
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">รหัสผ่าน</label>
+              <input id="regPassword" type="password" required minlength="8"
+                class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200"
+                placeholder="อย่างน้อย 8 ตัวอักษร" autocomplete="new-password" />
+              <p class="text-xs text-slate-500 mt-1">อย่างน้อย 8 ตัวอักษร</p>
+            </div>
+
+            <div>
+              <label class="text-sm font-medium">ยืนยันรหัสผ่าน</label>
+              <input id="regPassword2" type="password" required minlength="8"
+                class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200"
+                placeholder="พิมพ์รหัสผ่านอีกครั้ง" autocomplete="new-password" />
+            </div>
+
+            <button id="btnRegister" type="submit"
+              class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-card hover:from-cyan-700 hover:to-teal-700">
+              สมัครสมาชิก
+            </button>
+          </form>
+
+          <p class="mt-5 text-xs text-slate-500 text-center">
+            มีบัญชีแล้ว? เลือกแท็บ <span class="font-semibold text-slate-700">เข้าสู่ระบบ</span>
+          </p>
+        </section>
+
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white/70 p-4">
+          <div class="flex items-start gap-3">
+            <i data-lucide="shield-check" class="w-5 h-5 text-slate-700 mt-0.5"></i>
+            <p class="text-xs text-slate-600">
+              ระบบจะบันทึกการเข้าสู่ระบบไว้ในอุปกรณ์นี้ เพื่อความสะดวกในการใช้งานครั้งถัดไป
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-6 text-center text-xs text-slate-500">© FEMI</footer>
+    </div>
   </main>
 
-  <footer class="border-t border-slate-200 bg-white/60 backdrop-blur">
-    <div class="max-w-6xl mx-auto px-4 py-6 text-sm text-slate-600 flex flex-col md:flex-row gap-2 md:items-center md:justify-between">
-      <div>© FEMI</div>
-      <div class="flex items-center gap-4">
-        <a class="hover:text-slate-900" href="/docs.html">เอกสาร</a>
-        <a class="hover:text-slate-900" href="/login.html">เข้าสู่ระบบ</a>
-      </div>
-    </div>
-  </footer>
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { setSession, getToken, getRole, clearSession } from "/js/auth.js";
+    import { toast, setLoading, qs } from "/js/ui.js";
 
-  <script>lucide.createIcons();</script>
+    const tabLogin = qs('#tabLogin');
+    const tabRegister = qs('#tabRegister');
+    const panelLogin = qs('#panelLogin');
+    const panelRegister = qs('#panelRegister');
+
+    const formLogin = qs('#formLogin');
+    const formRegister = qs('#formRegister');
+    const btnLogin = qs('#btnLogin');
+    const btnRegister = qs('#btnRegister');
+
+    function setMode(mode) {
+      const isLogin = mode === 'login';
+      tabLogin.setAttribute('aria-selected', String(isLogin));
+      tabRegister.setAttribute('aria-selected', String(!isLogin));
+
+      // tab styles
+      tabLogin.className = isLogin
+        ? 'rounded-xl px-4 py-2 font-semibold transition shadow-soft bg-gradient-to-r from-rose-600 to-pink-600 text-white'
+        : 'rounded-xl px-4 py-2 font-semibold transition text-slate-700 hover:bg-white';
+
+      tabRegister.className = !isLogin
+        ? 'rounded-xl px-4 py-2 font-semibold transition shadow-soft bg-gradient-to-r from-cyan-600 to-teal-600 text-white'
+        : 'rounded-xl px-4 py-2 font-semibold transition text-slate-700 hover:bg-white';
+
+      panelLogin.classList.toggle('hidden', !isLogin);
+      panelRegister.classList.toggle('hidden', isLogin);
+
+      // title
+      document.title = isLogin ? 'FEMI | เข้าสู่ระบบ' : 'FEMI | สมัครสมาชิก';
+    }
+
+    tabLogin.addEventListener('click', () => {
+      history.replaceState(null, '', '#login');
+      setMode('login');
+    });
+
+    tabRegister.addEventListener('click', () => {
+      history.replaceState(null, '', '#register');
+      setMode('register');
+    });
+
+    // If already logged in, go to appropriate dashboard
+    try {
+      if (getToken()) {
+        const role = getRole();
+        window.location.href = (role === 'admin') ? '/admin/index.html' : '/app/dashboard.html';
+      }
+    } catch { /* ignore */ }
+
+    // Initial mode from hash
+    const initial = (location.hash || '').toLowerCase();
+    setMode(initial.includes('register') ? 'register' : 'login');
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setLoading(btnLogin, true);
+      try {
+        const email = qs('#loginEmail').value.trim();
+        const password = qs('#loginPassword').value;
+        const data = await api.login(email, password);
+        setSession(data);
+        toast('เข้าสู่ระบบสำเร็จ', 'success');
+        window.location.href = (data.role === 'admin') ? '/admin/index.html' : '/app/dashboard.html';
+      } catch (err) {
+        toast(err?.error?.message || 'เข้าสู่ระบบไม่สำเร็จ', 'danger');
+        clearSession();
+      } finally {
+        setLoading(btnLogin, false);
+      }
+    });
+
+    formRegister.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      setLoading(btnRegister, true);
+      try {
+        const p1 = qs('#regPassword').value;
+        const p2 = qs('#regPassword2').value;
+        if (p1 !== p2) {
+          toast('รหัสผ่านไม่ตรงกัน', 'warning');
+          setLoading(btnRegister, false);
+          return;
+        }
+
+        const payload = {
+          email: qs('#regEmail').value.trim(),
+          password: p1,
+          firstName: qs('#regFirstName').value.trim(),
+          lastName: qs('#regLastName').value.trim()
+        };
+
+        const data = await api.register(payload);
+        setSession(data);
+        toast('สมัครสมาชิกสำเร็จ', 'success');
+        window.location.href = '/app/dashboard.html';
+      } catch (err) {
+        toast(err?.error?.message || 'สมัครสมาชิกไม่สำเร็จ', 'danger');
+        clearSession();
+      } finally {
+        setLoading(btnRegister, false);
+      }
+    });
+
+    lucide.createIcons();
+  </script>
 </body>
 </html>

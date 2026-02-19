@@ -4,96 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FEMI | สมัครสมาชิก</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta http-equiv="refresh" content="0; url=/index.html#register" />
 </head>
-<body class="gradient-bg text-slate-900">
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <header class="border-b border-slate-200 bg-white/70 backdrop-blur">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/index.html" class="flex items-center gap-3">
-        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
-      </a>
-      <a href="/login.html" class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50">เข้าสู่ระบบ</a>
-    </div>
-  </header>
-
-  <main class="max-w-md mx-auto px-4 py-12">
-    <div class="card-surface rounded-2xl border border-slate-200 shadow-card p-6">
-      <h1 class="text-2xl font-bold">สมัครสมาชิก</h1>
-      <p class="text-slate-600 mt-1">กรอกข้อมูลพื้นฐานเพื่อสร้างบัญชี</p>
-
-      <form id="form" class="mt-6 space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-sm font-medium">ชื่อ</label>
-            <input id="firstName" required class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200" placeholder="ชื่อ">
-          </div>
-          <div>
-            <label class="text-sm font-medium">นามสกุล</label>
-            <input id="lastName" required class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200" placeholder="นามสกุล">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-sm font-medium">อีเมล</label>
-          <input id="email" type="email" required class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200" placeholder="you@example.com">
-        </div>
-
-        <div>
-          <label class="text-sm font-medium">รหัสผ่าน</label>
-          <input id="password" type="password" required minlength="8" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-accent-200" placeholder="อย่างน้อย 8 ตัวอักษร">
-          <p class="text-xs text-slate-500 mt-1">แนะนำ: ตัวพิมพ์ใหญ่/เล็ก + ตัวเลข เพื่อความปลอดภัย</p>
-        </div>
-
-        <button id="btn" type="submit" class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-soft hover:from-cyan-700 hover:to-teal-700">
-          สร้างบัญชี
-        </button>
-      </form>
-
-      <div class="mt-5 text-sm text-slate-600">
-        มีบัญชีอยู่แล้ว? <a class="text-rose-700 font-semibold hover:underline" href="/login.html">เข้าสู่ระบบ</a>
-      </div>
-    </div>
-  </main>
-
-  <script type="module">
-    import { api } from "/js/api.js";
-    import { setSession } from "/js/auth.js";
-    import { toast, setLoading, qs } from "/js/ui.js";
-
-    const form = qs("#form");
-    const btn = qs("#btn");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setLoading(btn, true);
-      try {
-        const payload = {
-          email: qs("#email").value.trim(),
-          password: qs("#password").value,
-          firstName: qs("#firstName").value.trim(),
-          lastName: qs("#lastName").value.trim()
-        };
-        const data = await api.register(payload);
-        setSession(data);
-        toast("สมัครสมาชิกสำเร็จ", "success");
-        window.location.href = "/app/dashboard.html";
-      } catch (err) {
-        toast(err?.error?.message || "สมัครสมาชิกไม่สำเร็จ", "danger");
-      } finally {
-        setLoading(btn, false);
-      }
-    });
+<body>
+  <script>
+    window.location.replace('/index.html#register');
   </script>
-
-  <script>lucide.createIcons();</script>
 </body>
 </html>
