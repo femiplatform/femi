@@ -1,61 +1,219 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FEMI | preventive</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FEMI • Preventive</title>
+  <link rel="stylesheet" href="../assets/app.css"/>
 </head>
-<body class="gradient-bg text-slate-900">
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/app/dashboard.html" class="flex items-center gap-3">
-        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
-      </a>
-      <div class="flex items-center gap-2 flex-wrap justify-end">
-        <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แดชบอร์ด</a>
-        <a href="/app/preventive.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Preventive</a>
-        <a href="/app/family_planning.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Family Planning</a>
-        <a href="/app/pregnancy.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Pregnancy</a>
-        <a href="/app/knowledge.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">ความรู้</a>
-        <a href="/app/quiz.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แบบทดสอบ</a>
-        <button id="logout" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="./dashboard.html">FEMI</a>
+      <nav class="nav">
+        <a href="./dashboard.html">แดชบอร์ด</a>
+        <a class="active" href="./preventive.html">Preventive</a>
+        <a href="./family_planning.html">Family Planning</a>
+        <a href="./pregnancy.html">Pregnancy</a>
+        <a href="./knowledge.html">คลังความรู้</a>
+        <a href="./quiz.html">แบบทดสอบ</a>
+      </nav>
+      <div class="nav-right">
+        <button id="btnLogout" class="btn btn-ghost">ออกจากระบบ</button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-10">
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-8">
-      <h1 class="text-2xl font-extrabold">กำลังสร้างฟีเจอร์หน้านี้</h1>
-      <p class="text-slate-600 mt-2">หน้านี้เป็นโครงสำหรับ Sprint ถัดไปตาม Roadmap (จะเริ่มทำฟังก์ชันจริงในสปรินต์ต่อไป)</p>
-      <div class="mt-6 text-sm text-slate-500">เส้นทาง: /app/preventive.html</div>
-    </div>
-  </main>
+    <main class="container">
+      <div class="page-head">
+        <h1>Preventive Lifestyle</h1>
+        <p class="muted">รายการดูแลสุขภาพเชิงป้องกันของคุณ</p>
+      </div>
+
+      <section class="stats">
+        <div class="stat-card">
+          <div class="stat-label">งานทั้งหมด</div>
+          <div id="statTotal" class="stat-value">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">ครบกำหนดวันนี้</div>
+          <div id="statToday" class="stat-value">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">เลยกำหนด</div>
+          <div id="statOverdue" class="stat-value">-</div>
+        </div>
+      </section>
+
+      <section class="tabs">
+        <button class="tab active" data-tab="today">วันนี้</button>
+        <button class="tab" data-tab="upcoming">กำลังจะถึง</button>
+        <button class="tab" data-tab="all">ทั้งหมด</button>
+      </section>
+
+      <section id="list" class="list"></section>
+      <div id="empty" class="empty hidden">ยังไม่มีรายการ</div>
+      <div id="loading" class="loading">กำลังโหลด…</div>
+    </main>
+  </div>
 
   <script type="module">
-    import { api } from "/js/api.js";
-    import { clearSession } from "/js/auth.js";
-    import { qs, toast } from "/js/ui.js";
+    import { api } from "../js/api.js";
+    import { requireAuth, logout } from "../js/auth.js";
 
-    // Guard: must be logged in
-    api.me().catch(() => { window.location.href = "/login.html"; });
+    const elList = document.getElementById("list");
+    const elEmpty = document.getElementById("empty");
+    const elLoading = document.getElementById("loading");
+    const statTotal = document.getElementById("statTotal");
+    const statToday = document.getElementById("statToday");
+    const statOverdue = document.getElementById("statOverdue");
 
-    qs("#logout").addEventListener("click", async () => {
-      try { await api.logout(); } catch {}
-      clearSession();
-      window.location.href = "/index.html";
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    let currentTab = "today";
+    let cache = [];
+
+    function fmt(dt) {
+      if (!dt) return "-";
+      const d = new Date(dt);
+      return d.toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+    }
+
+    function render() {
+      const items = cache.filter(it => {
+        if (currentTab === "today") return it.isDueToday || it.isOverdue;
+        if (currentTab === "upcoming") return !it.isDueToday && !it.isOverdue;
+        return true;
+      });
+
+      elList.innerHTML = "";
+      elEmpty.classList.toggle("hidden", items.length !== 0);
+
+      items.forEach(it => {
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.innerHTML = `
+          <div class="item-main">
+            <div class="item-title">${escapeHtml(it.title)}</div>
+            <div class="item-meta">
+              <span class="badge">${escapeHtml(it.category || "ทั่วไป")}</span>
+              <span class="muted">ครบกำหนด: ${fmt(it.nextDueAt)}</span>
+              ${it.isOverdue ? `<span class="badge danger">เลยกำหนด</span>` : it.isDueToday ? `<span class="badge ok">วันนี้</span>` : ``}
+            </div>
+            ${it.description ? `<div class="item-desc muted">${escapeHtml(it.description)}</div>` : ``}
+          </div>
+          <div class="item-actions">
+            <button class="btn btn-ok" data-action="done">ทำแล้ว</button>
+            <button class="btn btn-warn" data-action="skip">ข้าม</button>
+          </div>
+        `;
+
+        card.querySelector('[data-action="done"]').addEventListener("click", async () => {
+          await actDone(it.userItemId);
+        });
+        card.querySelector('[data-action="skip"]').addEventListener("click", async () => {
+          const reason = prompt("เหตุผลที่ข้าม (ไม่บังคับ)");
+          await actSkip(it.userItemId, reason || "");
+        });
+
+        elList.appendChild(card);
+      });
+    }
+
+    async function load() {
+      elLoading.classList.remove("hidden");
+      try {
+        const res = await api.preventiveList();
+        cache = res.items || [];
+        statTotal.textContent = res.counts?.total ?? cache.length;
+        statToday.textContent = res.counts?.dueToday ?? "-";
+        statOverdue.textContent = res.counts?.overdue ?? "-";
+        render();
+      } catch (e) {
+        console.error(e);
+        alert((e && e.error && e.error.message) ? e.error.message : "เกิดข้อผิดพลาด");
+      } finally {
+        elLoading.classList.add("hidden");
+      }
+    }
+
+    async function actDone(userItemId) {
+      try {
+        await api.preventiveMarkDone(userItemId);
+        await load();
+      } catch (e) {
+        console.error(e);
+        alert(e?.error?.message || "ทำรายการไม่สำเร็จ");
+      }
+    }
+
+    async function actSkip(userItemId, reason) {
+      try {
+        await api.preventiveMarkSkipped(userItemId, reason);
+        await load();
+      } catch (e) {
+        console.error(e);
+        alert(e?.error?.message || "ข้ามรายการไม่สำเร็จ");
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    tabs.forEach(btn => btn.addEventListener("click", () => {
+      tabs.forEach(x => x.classList.remove("active"));
+      btn.classList.add("active");
+      currentTab = btn.dataset.tab;
+      render();
+    }));
+
+    document.getElementById("btnLogout").addEventListener("click", async () => {
+      try { await logout(); } catch {}
+      location.href = "../login.html";
     });
+
+    // guard + init
+    await requireAuth();
+    await load();
   </script>
 
-  <script>lucide.createIcons();</script>
+  <style>
+    /* minimal local styles if app.css doesn't have these yet */
+    .container{max-width:1100px;margin:0 auto;padding:24px;}
+    .page-head h1{margin:0 0 4px 0;}
+    .muted{opacity:.7}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0;}
+    .stat-card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:14px}
+    .stat-label{font-size:14px;opacity:.7}
+    .stat-value{font-size:24px;font-weight:700;margin-top:4px}
+    .tabs{display:flex;gap:8px;margin:12px 0 16px}
+    .tab{border:1px solid rgba(0,0,0,.12);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+    .tab.active{border-color:#b91c1c}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .item-card{display:flex;justify-content:space-between;gap:12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:14px}
+    .item-title{font-weight:700}
+    .item-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px}
+    .badge{font-size:12px;border:1px solid rgba(0,0,0,.12);padding:3px 8px;border-radius:999px;background:#f8fafc}
+    .badge.ok{border-color:#16a34a}
+    .badge.danger{border-color:#dc2626}
+    .item-desc{margin-top:8px}
+    .item-actions{display:flex;flex-direction:column;gap:8px;min-width:110px}
+    .btn{border:0;border-radius:12px;padding:10px 12px;cursor:pointer}
+    .btn-ok{background:#16a34a;color:#fff}
+    .btn-warn{background:#f59e0b;color:#111}
+    .btn-ghost{background:transparent;border:1px solid rgba(0,0,0,.12)}
+    .loading{padding:12px;opacity:.7}
+    .empty{padding:18px;border:1px dashed rgba(0,0,0,.18);border-radius:14px;opacity:.7}
+    .hidden{display:none}
+    @media (max-width: 800px){
+      .stats{grid-template-columns:1fr}
+      .item-card{flex-direction:column}
+      .item-actions{flex-direction:row}
+    }
+  </style>
 </body>
 </html>
