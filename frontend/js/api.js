@@ -26,6 +26,7 @@ async function request(action, payload = {}, opts = {}) {
 export const api = {
   request,
   ping: () => request("ping", {}, { withToken: false }),
+  whoami: () => request("debug.whoami", {}),
 
   // Auth
   login: (email, password) => request("auth.login", { email, password }, { withToken: false }),

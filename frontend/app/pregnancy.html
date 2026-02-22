@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FEMI | pregnancy</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="/assets/tailwind-theme.cdn.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/assets/app.css" />
+</head>
+<body class="gradient-bg text-slate-900">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/app/dashboard.html" class="flex items-center gap-3">
+        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
+      </a>
+      <div class="flex items-center gap-2 flex-wrap justify-end">
+        <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แดชบอร์ด</a>
+        <a href="/app/preventive.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Preventive</a>
+        <a href="/app/family_planning.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Family Planning</a>
+        <a href="/app/pregnancy.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Pregnancy</a>
+        <a href="/app/knowledge.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">ความรู้</a>
+        <a href="/app/quiz.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แบบทดสอบ</a>
+        <button id="logout" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-10">
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-8">
+      <h1 class="text-2xl font-extrabold">กำลังสร้างฟีเจอร์หน้านี้</h1>
+      <p class="text-slate-600 mt-2">หน้านี้เป็นโครงสำหรับ Sprint ถัดไปตาม Roadmap (จะเริ่มทำฟังก์ชันจริงในสปรินต์ต่อไป)</p>
+      <div class="mt-6 text-sm text-slate-500">เส้นทาง: /app/pregnancy.html</div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { clearSession } from "/js/auth.js";
+    import { qs, toast } from "/js/ui.js";
+
+    // Guard: must be logged in
+    api.me().catch(() => { window.location.href = "/login.html"; });
+
+    qs("#logout").addEventListener("click", async () => {
+      try { await api.logout(); } catch {}
+      clearSession();
+      window.location.href = "/index.html";
+    });
+  </script>
+
+  <script>lucide.createIcons();</script>
+</body>
+</html>
