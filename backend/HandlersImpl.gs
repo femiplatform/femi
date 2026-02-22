@@ -8,7 +8,7 @@ function femiAuthLogin_(payload, meta) {
 
   var u = femiFindBy_(FEMI_SHEETS.users, FEMI_HEADERS.users, "email", email);
   femiRequire_(u, "AUTH", "User not found");
-  femiRequire_(String(u.status || "Active") === "Active", "AUTH", "User is inactive");
+  femiRequire_(femiIsActiveStatus_(u.status), "AUTH", "User is inactive");
   femiRequire_(femiVerifyPassword_(password, u.password), "AUTH", "Invalid credentials");
 
   // update lastLoginAt

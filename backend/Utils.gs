@@ -73,3 +73,16 @@ function femiBoolStr_(v) {
   if (v === true || v === "TRUE" || v === "true" || v === 1 || v === "1") return "TRUE";
   return "FALSE";
 }
+
+
+// Normalize user status for login access
+function femiIsActiveStatus_(statusValue) {
+  var s = String(statusValue === undefined || statusValue === null ? "" : statusValue).trim();
+  if (s === "") return true;
+  var lower = s.toLowerCase();
+  if (lower === "active" || lower === "ใช้งาน" || lower === "เปิดใช้งาน" || lower === "enable" || lower === "enabled") return true;
+  if (lower === "true" || lower === "1" || lower === "yes") return true;
+  if (lower === "inactive" || lower === "ปิดใช้งาน" || lower === "ไม่ใช้งาน" || lower === "disable" || lower === "disabled") return false;
+  if (lower === "false" || lower === "0" || lower === "no") return false;
+  return true;
+}
