@@ -1,3 +1,4 @@
+// femi/frontend/js/auth.js
 const KEY = "femi.session";
 
 export function setSession(session) {
@@ -24,6 +25,9 @@ export function getRole() {
   return s?.role || "guest";
 }
 
+/**
+ * Sync guard (simple)
+ */
 export function requireAuth(redirect = "/login.html") {
   if (!getToken()) window.location.href = redirect;
 }
@@ -31,4 +35,25 @@ export function requireAuth(redirect = "/login.html") {
 export function requireAdmin(redirect = "/login.html") {
   const role = getRole();
   if (!getToken() || role !== "admin") window.location.href = redirect;
+}
+
+/**
+ * Async guard (optional) - returns boolean
+ */
+export async function requireAuthAsync(redirect = "/login.html") {
+  if (!getToken()) {
+    window.location.href = redirect;
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Local logout (safe for frontend)
+ * - clears local session
+ * - optionally redirect
+ */
+export async function logout(redirect = "/login.html") {
+  clearSession();
+  window.location.href = redirect;
 }
