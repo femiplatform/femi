@@ -3,6 +3,7 @@ import { getToken } from "./auth.js";
 
 async function request(action, payload = {}, opts = {}) {
   const body = { action, payload };
+
   // Attach token automatically when present and not explicitly overridden
   if (opts.withToken !== false) {
     const token = getToken();
@@ -17,7 +18,11 @@ async function request(action, payload = {}, opts = {}) {
 
   const text = await res.text();
   let json;
-  try { json = JSON.parse(text); } catch { json = { success: false, error: { code: "BAD_JSON", message: text } }; }
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = { success: false, error: { code: "BAD_JSON", message: text } };
+  }
 
   if (!json.success) throw json;
   return json.data;
@@ -26,13 +31,15 @@ async function request(action, payload = {}, opts = {}) {
 export const api = {
   request,
   ping: () => request("ping", {}, { withToken: false }),
-  whoami: () => request("debug.whoami", {}),
 
   // Auth
   login: (email, password) => request("auth.login", { email, password }, { withToken: false }),
   register: (payload) => request("auth.register", payload, { withToken: false }),
   me: () => request("auth.me", {}),
   logout: () => request("auth.logout", {}),
+
+  // Debug (Sprint 0)
+  whoami: () => request("debug.whoami", {}),
 
   // Admin Users
   usersList: (q = "") => request("users.list", { q }),
@@ -66,3 +73,8 @@ export const api = {
   settingsGet: () => request("settings.get", {}),
   settingsSet: (configKey, configValue) => request("settings.set", { configKey, configValue })
 };
+
+// Make available in browser console for debugging (Safe)
+if (typeof window !== "undefined") {
+  window.api = api;
+}
