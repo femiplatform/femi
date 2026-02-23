@@ -151,6 +151,27 @@ const DICT = {
     "pv.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
     "pv.doneFailed": "ทำรายการไม่สำเร็จ",
     "pv.skipFailed": "ข้ามรายการไม่สำเร็จ",
+
+    "fp.legend.period": "ประจำเดือน",
+    "fp.legend.fertile": "ช่วงเสี่ยง",
+    "fp.legend.ovulation": "วันไข่ตก",
+    "fp.legend.log": "มีบันทึก",
+
+    "fp.log.title": "บันทึกรายวัน",
+    "fp.log.date": "วันที่",
+    "fp.log.bleeding": "เลือดออก",
+    "fp.log.mood": "อารมณ์",
+    "fp.log.symptoms": "อาการ",
+    "fp.log.symptomsPh": "เช่น ปวดท้อง, ปวดหลัง, สิว",
+    "fp.log.hadSex": "มีเพศสัมพันธ์",
+    "fp.log.pillTaken": "กินยาคุม",
+    "fp.log.sexProtection": "การป้องกัน",
+    "fp.log.notes": "หมายเหตุ",
+    "fp.log.save": "บันทึก",
+
+    "fp.pred.nextPeriod": "คาดว่าประจำเดือนรอบถัดไปจะมา:",
+    "fp.pred.ovulation": "คาดว่าวันไข่ตก:",
+    "fp.pred.fertile": "ช่วงเสี่ยงท้อง (ช่วงไข่ตก):",
   },
 
   en: {

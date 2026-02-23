@@ -75,6 +75,7 @@ export const api = {
   fpDailyUpsert: (payload) => request("fp.daily.upsert", payload),
 
   fpPredictRecompute: (payload = {}) => request("fp.predict.recompute", payload),
+  fpPredLatest: () => request("fp.pred.latest", {}),
 };
 
 // expose for console debugging
