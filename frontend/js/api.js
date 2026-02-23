@@ -103,24 +103,39 @@ export const api = {
   fpPredLatest: () => request("fp.pred.latest", {}),
 
   // =========================================================
-  // ✅ Pregnancy – Sprint 4
+  // ✅ Pregnancy
   // =========================================================
+  // Profile
   pregProfileGet: () => request("preg.profile.get", {}),
   pregProfileUpsert: (payload) => request("preg.profile.upsert", payload),
 
-  pregAncList: (limit = 50) => request("preg.anc.list", { limit }),
+  // Appointments (ANC)
+  pregAncList: (payload = {}) => request("preg.anc.list", payload),
   pregAncUpsert: (payload) => request("preg.anc.upsert", payload),
   pregAncDelete: (ancId) => request("preg.anc.delete", { ancId }),
 
-  pregKicksList: (limit = 20) => request("preg.kicks.list", { limit }),
+  // Backward/alternate names used by some pages
+  pregApptList: (payload = {}) => request("preg.anc.list", payload),
+  pregApptUpsert: (payload) => request("preg.anc.upsert", payload),
+  pregApptDelete: (ancId) => request("preg.anc.delete", { ancId }),
+
+  // Kicks
+  pregKicksList: (payload = {}) => request("preg.kicks.list", payload),
   pregKicksUpsert: (payload) => request("preg.kicks.upsert", payload),
   pregKicksDelete: (kickId) => request("preg.kicks.delete", { kickId }),
 
-  pregVitalsList: (limit = 20) => request("preg.vitals.list", { limit }),
+  // Alternate short names
+  pregKickList: (payload = {}) => request("preg.kicks.list", payload),
+  pregKickUpsert: (payload) => request("preg.kicks.upsert", payload),
+  pregKickDelete: (kickId) => request("preg.kicks.delete", { kickId }),
+
+  // Vitals (weight / BP / edema)
+  pregVitalsList: (payload = {}) => request("preg.vitals.list", payload),
   pregVitalsUpsert: (payload) => request("preg.vitals.upsert", payload),
   pregVitalsDelete: (vitalId) => request("preg.vitals.delete", { vitalId }),
 
-  pregSummaryToday: () => request("preg.summary.today", {}),
+  pregSummaryToday: (payload = {}) => request("preg.summary.today", payload),
+
 };
 
 // expose for console debugging
