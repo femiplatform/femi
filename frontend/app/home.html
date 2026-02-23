@@ -1,273 +1,106 @@
-// femi/frontend/js/shell.js
-import { requireAuth, logout as authLogout } from "./auth.js";
-import { api } from "./api.js";
-import { t, applyI18n } from "./i18n.js";
-import { Icons } from "./icons.js";
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FEMI • Home</title>
+  <link rel="stylesheet" href="./assets/app.css"/>
+</head>
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title" data-i18n="page.home">หน้าแรก</h1>
+      <p class="page-sub muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
 
-export async function initUserShell({ active = "home", title = "" } = {}) {
-  requireAuth("../login.html");
+      <div class="card" style="padding:14px">
+        <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
 
-  const root = document.getElementById("app") || document.body;
-  const existingMain = root.querySelector("main") || root;
+        <div class="tiles">
+          <a class="tile pv" href="./preventive.html">
+            <div class="left">
+              <div class="iconWrap" id="icPv"></div>
+              <div style="min-width:0">
+                <div class="title">ดูแลสุขภาพ</div>
+                <div class="sub">Preventive</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
 
-  if (!document.querySelector("[data-femi-shell='1']")) {
-    const shell = document.createElement("div");
-    shell.setAttribute("data-femi-shell", "1");
-    shell.innerHTML = renderShell_(title || t("app.name"), active);
-    document.body.prepend(shell);
+          <a class="tile fp" href="./family_planning.html">
+            <div class="left">
+              <div class="iconWrap" id="icFp"></div>
+              <div style="min-width:0">
+                <div class="title">วางแผนครอบครัว</div>
+                <div class="sub">Family Planning</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
 
-    const slot = document.querySelector("[data-shell-slot='main']");
-    if (slot && existingMain && existingMain !== slot) {
-      if (existingMain !== document.body) slot.appendChild(existingMain);
-    }
-    bindShellEvents_();
-  } else {
-    const tEl = document.getElementById("shellTitle");
-    if (tEl) tEl.textContent = title || t("app.name");
-    setActiveBottomNav_(active);
-  }
+          <a class="tile kb" href="./knowledge.html">
+            <div class="left">
+              <div class="iconWrap" id="icKb"></div>
+              <div style="min-width:0">
+                <div class="title">คลังความรู้</div>
+                <div class="sub">Knowledge</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
 
-  applyI18n(document);
-  await refreshNotificationBadge_();
-  startBadgePolling_();
-}
+          <a class="tile qz" href="./quiz.html">
+            <div class="left">
+              <div class="iconWrap" id="icQz"></div>
+              <div style="min-width:0">
+                <div class="title">แบบทดสอบ</div>
+                <div class="sub">Quiz</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
 
-function renderShell_(title, active) {
-  return `
-  <div class="femi-shell">
-    <header class="femi-appbar">
-      <div class="femi-left">
-        <a class="femi-brand" href="./home.html" aria-label="${escapeHtml_(t("app.name"))}">
-          <img class="femi-logo" src="../assets/logo_femi_2.svg" alt="FEMI"/>
-        </a>
-        <div id="shellTitle" class="femi-title">${escapeHtml_(title)}</div>
-      </div>
+          <a class="tile noti" href="./notifications.html">
+            <div class="left">
+              <div class="iconWrap" id="icNt"></div>
+              <div style="min-width:0">
+                <div class="title">การแจ้งเตือน</div>
+                <div class="sub">Notifications</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
 
-      <div class="femi-right">
-        <button class="icon-btn" id="btnBell" aria-label="${escapeHtml_(t("nav.notifications"))}" title="${escapeHtml_(t("nav.notifications"))}">
-          ${Icons.bell()}
-          <span id="bellBadge" class="badge hidden">0</span>
-        </button>
-
-        <button class="icon-btn" id="btnMenu" aria-label="${escapeHtml_(t("nav.menu"))}" title="${escapeHtml_(t("nav.menu"))}">
-          ${Icons.menu()}
-        </button>
-      </div>
-    </header>
-
-    <aside id="drawer" class="femi-drawer hidden" aria-hidden="true">
-      <div class="drawer-backdrop" id="drawerBackdrop" aria-label="close"></div>
-
-      <div class="drawer-panel" role="dialog" aria-modal="true">
-        <div class="drawer-head">
-          <div class="drawer-title" data-i18n="nav.menu">${t("nav.menu")}</div>
-          <button class="icon-btn" id="btnDrawerClose" aria-label="${escapeHtml_(t("common.close"))}">
-            ${Icons.close()}
-          </button>
+          <a class="tile" href="./dashboard.html">
+            <div class="left">
+              <div class="iconWrap" id="icDb"></div>
+              <div style="min-width:0">
+                <div class="title">แดชบอร์ด</div>
+                <div class="sub">Dashboard</div>
+              </div>
+            </div>
+            <span class="badge-soft">›</span>
+          </a>
         </div>
-
-        <nav class="drawer-nav">
-          <a href="./home.html" data-i18n="nav.home">${t("nav.home")}</a>
-          <a href="./tools.html" data-i18n="nav.tools">${t("nav.tools")}</a>
-          <a href="./preventive.html" data-i18n="nav.preventive">${t("nav.preventive")}</a>
-          <a href="./family_planning.html" data-i18n="nav.familyPlanning">${t("nav.familyPlanning")}</a>
-          <a href="./pregnancy.html" data-i18n="nav.pregnancy">${t("nav.pregnancy")}</a>
-          <a href="./knowledge.html" data-i18n="nav.knowledge">${t("nav.knowledge")}</a>
-          <a href="./quiz.html" data-i18n="nav.quiz">${t("nav.quiz")}</a>
-          <a href="./notifications.html" data-i18n="nav.notifications">${t("nav.notifications")}</a>
-          <a href="./profile.html" data-i18n="nav.profile">${t("nav.profile")}</a>
-        </nav>
-
-        <div class="drawer-foot">
-          <button class="btn btn-primary" id="btnLogout" data-i18n="nav.logout">${t("nav.logout")}</button>
-        </div>
       </div>
-    </aside>
-
-    <div class="femi-content" data-shell-slot="main"></div>
-
-    <nav class="femi-bottomnav" aria-label="เมนูด้านล่าง">
-      <a class="bn-item ${active === "home" ? "active" : ""}" href="./home.html" data-bn="home">
-        ${Icons.home()}
-        <span class="bn-label" data-i18n="nav.home">${t("nav.home")}</span>
-      </a>
-      <a class="bn-item ${active === "tools" ? "active" : ""}" href="./tools.html" data-bn="tools">
-        ${Icons.tools()}
-        <span class="bn-label" data-i18n="nav.tools">${t("nav.tools")}</span>
-      </a>
-      <a class="bn-item ${active === "dashboard" ? "active" : ""}" href="./dashboard.html" data-bn="dashboard">
-        ${Icons.dashboard()}
-        <span class="bn-label" data-i18n="nav.dashboard">${t("nav.dashboard")}</span>
-      </a>
-      <a class="bn-item ${active === "profile" ? "active" : ""}" href="./profile.html" data-bn="profile">
-        ${Icons.user()}
-        <span class="bn-label" data-i18n="nav.profile">${t("nav.profile")}</span>
-      </a>
-    </nav>
+    </main>
   </div>
 
-  <style>
-    .femi-appbar{
-      position:sticky;top:0;z-index:50;
-      display:flex;align-items:center;justify-content:space-between;
-      padding:10px 12px;
-      backdrop-filter: blur(10px);
-      background: rgba(255,255,255,.68);
-      border-bottom: 1px solid rgba(17,24,39,.08);
-    }
-    .femi-left{display:flex;align-items:center;gap:10px;min-width:0}
-    .femi-brand{display:flex;align-items:center;justify-content:center;text-decoration:none}
-    .femi-logo{height:24px;width:auto;display:block}
-    .femi-title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:55vw}
-    .femi-right{display:flex;align-items:center;gap:8px}
+  <script type="module">
+    import { initUserShell } from "./js/shell.js";
+    import { t, applyI18n } from "./js/i18n.js";
+    import { Icons } from "./js/icons.js";
 
-    .icon-btn{
-      position:relative;
-      border:1px solid rgba(17,24,39,.10);
-      background: rgba(255,255,255,.88);
-      border-radius:14px;
-      padding:8px 10px;cursor:pointer;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .icon-btn .svg-ic{width:20px;height:20px}
-    .badge{
-      position:absolute;top:-6px;right:-6px;
-      min-width:20px;height:20px;border-radius:999px;
-      background:#dc2626;color:#fff;
-      font-size:12px;font-weight:900;
-      display:flex;align-items:center;justify-content:center;
-      padding:0 6px;
-      box-shadow: 0 10px 18px rgba(0,0,0,.16);
-    }
-    .hidden{display:none !important}
-    .femi-content{padding-bottom:76px;}
+    await initUserShell({ active: "home", title: t("page.home") });
+    applyI18n(document);
 
-    /* Drawer */
-    .femi-drawer{ position:fixed; inset:0; z-index:60; }
-    .drawer-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.25); z-index:0; }
-    .drawer-panel{
-      position:absolute; top:0; right:0; height:100%;
-      width:min(340px, 88vw);
-      background:#fff;
-      box-shadow:-16px 0 40px rgba(0,0,0,.16);
-      display:flex; flex-direction:column;
-      z-index:1;
-    }
-    .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid rgba(0,0,0,.06)}
-    .drawer-title{font-weight:900}
-    .drawer-nav{display:flex;flex-direction:column;padding:8px 14px;gap:2px;overflow:auto}
-    .drawer-nav a{padding:10px 8px;border-radius:12px;text-decoration:none;color:#111}
-    .drawer-nav a:hover{background:rgba(0,0,0,.04)}
-    .drawer-foot{padding:14px;border-top:1px solid rgba(0,0,0,.06)}
-
-    .femi-bottomnav{
-      position:fixed;left:0;right:0;bottom:0;z-index:55;
-      display:grid;grid-template-columns:repeat(4,1fr);
-      background: rgba(255,255,255,.92);
-      border-top:1px solid rgba(17,24,39,.10);
-      padding:10px 10px calc(10px + env(safe-area-inset-bottom));
-      backdrop-filter: blur(12px);
-    }
-    .bn-item{
-      text-decoration:none;color:rgba(17,24,39,.72);
-      display:flex;flex-direction:column;align-items:center;gap:4px;
-      padding:8px 6px;border-radius:16px;
-      font-size:12px;font-weight:900;
-    }
-    .bn-item .svg-ic{width:20px;height:20px}
-    .bn-item.active{background:rgba(185,28,28,.10);color:#b91c1c}
-  </style>
-  `;
-}
-
-function bindShellEvents_() {
-  const btnMenu = document.getElementById("btnMenu");
-  const drawer = document.getElementById("drawer");
-  const btnClose = document.getElementById("btnDrawerClose");
-  const backdrop = document.getElementById("drawerBackdrop");
-  const btnLogout = document.getElementById("btnLogout");
-  const btnBell = document.getElementById("btnBell");
-
-  const lockScroll = () => {
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-  };
-  const unlockScroll = () => {
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-  };
-
-  const open = () => {
-    drawer.classList.remove("hidden");
-    drawer.setAttribute("aria-hidden", "false");
-    lockScroll();
-  };
-  const close = () => {
-    drawer.classList.add("hidden");
-    drawer.setAttribute("aria-hidden", "true");
-    unlockScroll();
-  };
-
-  btnMenu?.addEventListener("click", open);
-  btnClose?.addEventListener("click", close);
-  backdrop?.addEventListener("click", close);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") close();
-  });
-
-  drawer?.querySelectorAll("a").forEach(a => a.addEventListener("click", close));
-
-  btnLogout?.addEventListener("click", async () => {
-    try { await authLogout("../login.html"); } catch { location.href = "../login.html"; }
-  });
-
-  btnBell?.addEventListener("click", () => {
-    location.href = "./notifications.html";
-  });
-}
-
-function setActiveBottomNav_(active) {
-  document.querySelectorAll(".bn-item").forEach(a => a.classList.remove("active"));
-  const el = document.querySelector(`.bn-item[data-bn="${active}"]`);
-  if (el) el.classList.add("active");
-}
-
-/* ---------------- Badge logic ---------------- */
-let badgeTimer = null;
-
-function normalizeUnread_(res) {
-  if (typeof res?.unread === "number") return res.unread;
-  if (typeof res?.data?.unread === "number") return res.data.unread;
-  if (typeof res?.data?.data?.unread === "number") return res.data.data.unread;
-  return 0;
-}
-
-async function refreshNotificationBadge_() {
-  const badge = document.getElementById("bellBadge");
-  if (!badge) return;
-
-  try {
-    const res = await api.userNotificationsUnreadCount();
-    const unread = normalizeUnread_(res);
-    badge.textContent = String(unread);
-    if (unread > 0) badge.classList.remove("hidden");
-    else badge.classList.add("hidden");
-  } catch {
-    badge.classList.add("hidden");
-  }
-}
-
-function startBadgePolling_() {
-  if (badgeTimer) return;
-  badgeTimer = setInterval(refreshNotificationBadge_, 30000);
-}
-
-function escapeHtml_(s) {
-  return String(s ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
+    // icons
+    document.getElementById("icPv").innerHTML = Icons.heartShield();
+    document.getElementById("icFp").innerHTML = Icons.calendar();
+    document.getElementById("icKb").innerHTML = Icons.book();
+    document.getElementById("icQz").innerHTML = Icons.quiz();
+    document.getElementById("icNt").innerHTML = Icons.noti();
+    document.getElementById("icDb").innerHTML = Icons.dashboard();
+  </script>
+</body>
+</html>
