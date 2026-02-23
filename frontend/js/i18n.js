@@ -13,6 +13,8 @@ const DICT = {
     "common.none": "-",
     "common.loadFailed": "โหลดไม่สำเร็จ",
     "common.saveFailed": "บันทึกไม่สำเร็จ",
+    "common.saved": "บันทึกสำเร็จ",
+    "common.deleted": "ลบสำเร็จ",
     "common.computeDone": "คำนวณคาดการณ์ให้แล้ว",
     "common.ok": "ตกลง",
     "common.close": "ปิด",

@@ -15,26 +15,32 @@ function femiSheet_(name) {
 
 function femiEnsureSheet_(name, headers) {
   var sh = femiSheet_(name);
-  var first = sh.getRange(1,1,1,Math.max(1, sh.getLastColumn())).getValues()[0];
   var need = headers || [];
-  // If sheet empty
-  if (sh.getLastRow() === 0 || (first.length === 1 && String(first[0]||"").trim() === "")) {
+  if (!need.length) return;
+
+  // If sheet empty: initialize header
+  if (sh.getLastRow() === 0) {
     sh.clear();
-    sh.getRange(1,1,1,need.length).setValues([need]);
+    sh.getRange(1, 1, 1, need.length).setValues([need]);
     sh.setFrozenRows(1);
     return;
   }
-  // If header mismatch, rewrite header only if it's blank-ish
-  var current = sh.getRange(1,1,1,need.length).getValues()[0];
-  var mismatch = false;
+
+  var hi = femiHeaderInfo_(sh);
+  var cur = hi.headers.map(function(h){ return String(h||"").trim(); });
+  var curSet = {};
+  cur.forEach(function(h){ if(h) curSet[h]=true; });
+
+  var nextCol = hi.lastCol + 1;
   for (var i=0; i<need.length; i++) {
-    if (String(current[i]||"").trim() !== need[i]) { mismatch = true; break; }
+    var h = need[i];
+    if (!curSet[h]) {
+      sh.getRange(1, nextCol).setValue(h);
+      nextCol++;
+      curSet[h] = true;
+    }
   }
-  if (mismatch) {
-    // Keep existing data, just enforce header row width
-    sh.getRange(1,1,1,need.length).setValues([need]);
-    sh.setFrozenRows(1);
-  }
+  sh.setFrozenRows(1);
 }
 
 function femiHeaderInfo_(sh) {

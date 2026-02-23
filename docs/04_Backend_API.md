@@ -31,3 +31,21 @@ Action สำคัญ
 - `admin.stats`
 - `notifications.*` (admin)
 - `settings.get`, `settings.set` (admin)
+
+### fp.cycles.update
+อัปเดตรอบเดือน (แก้ไขข้อมูลเดิม)
+
+Payload:
+- `token` (string)
+- `cycleId` (string)
+- `patch` (object) ฟิลด์ที่ต้องการแก้ไข (เช่น `periodStartDate`, `periodEndDate`, `cycleLengthDays`, `notes`)
+
+Response:
+- `{ items }` รายการรอบเดือนล่าสุดของผู้ใช้ (หรือผลสำเร็จ)
+
+### fp.cycles.delete
+ลบรอบเดือน (และลบ prediction ที่ผูกกับ cycle นั้นแบบ best-effort)
+
+Payload:
+- `token` (string)
+- `cycleId` (string)

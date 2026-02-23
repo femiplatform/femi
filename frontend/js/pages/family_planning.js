@@ -1,6 +1,7 @@
 import { initUserShell } from "../shell.js";
 import { api } from "../api.js";
 import { t, applyI18n } from "../i18n.js";
+import { toast, setLoading } from "../ui.js";
 
 await initUserShell({ active: "tools", title: t("fp.title") });
 applyI18n(document);
@@ -139,11 +140,24 @@ btnSaveCycle.addEventListener("click", async ()=>{
   const cycleId = cycleModal.dataset.cycleId;
 
   const start = String(cycleStart.value||"").trim();
-  if(!start){ alert(t("fp.error.badDate")); return; }
+  const end = String(cycleEnd.value||"").trim();
+  if(!start){ toast(t("fp.error.badDate"), "danger"); return; }
+  if(end){
+    const sd = new Date(start);
+    const ed = new Date(end);
+    if(isNaN(sd.getTime()) || isNaN(ed.getTime()) || ed < sd){
+      toast(t("fp.error.badEndDate"), "danger");
+      return;
+    }
+  }
+  if(cycleLen.value){
+    const n = Number(cycleLen.value);
+    if(!Number.isFinite(n) || n <= 0){ toast(t("fp.error.badCycleLen"), "danger"); return; }
+  }
 
   const payload = {
     periodStartDate: start,
-    periodEndDate: String(cycleEnd.value||"").trim(),
+    periodEndDate: end,
     cycleLengthDays: cycleLen.value ? Number(cycleLen.value) : "",
     flowLevel: cycleFlow.value,
     painLevel: cyclePain.value,
@@ -151,6 +165,7 @@ btnSaveCycle.addEventListener("click", async ()=>{
     status: "Active"
   };
 
+  setLoading(btnSaveCycle, true);
   try{
     if(cycleId){
       await api.fpCyclesUpdate({ cycleId, patch: payload });
@@ -158,10 +173,13 @@ btnSaveCycle.addEventListener("click", async ()=>{
       await api.fpCyclesCreate(payload);
     }
     closeCycleModal();
+    toast(t("common.saved"), "success");
     await load();
   }catch(e){
     console.error(e);
-    alert(e?.error?.message || t("common.saveFailed"));
+    toast(e?.error?.message || t("common.saveFailed"), "danger");
+  } finally {
+    setLoading(btnSaveLog, false);
   }
 });
 
@@ -170,13 +188,17 @@ btnDeleteCycle.addEventListener("click", async ()=>{
   if(!cycleId) return;
   if(!confirm(t("fp.cycle.confirmDelete"))) return;
 
+  setLoading(btnDeleteCycle, true);
   try{
     await api.fpCyclesDelete(cycleId);
     closeCycleModal();
+    toast(t("common.saved"), "success");
     await load();
   }catch(e){
     console.error(e);
-    alert(e?.error?.message || t("common.saveFailed"));
+    toast(e?.error?.message || t("common.saveFailed"), "danger");
+  } finally {
+    setLoading(btnSaveLog, false);
   }
 });
 
@@ -189,6 +211,7 @@ btnSaveLog.addEventListener("click", async ()=>{
   const iso = logModal.dataset.iso;
   if(!iso) return;
 
+  setLoading(btnSaveLog, true);
   try{
     await api.fpDailyUpsert({
       logDate: iso,
@@ -201,10 +224,13 @@ btnSaveLog.addEventListener("click", async ()=>{
       notes: notes.value
     });
     closeLogModal();
+    toast(t("common.saved"), "success");
     await load();
   }catch(e){
     console.error(e);
-    alert(e?.error?.message || t("common.saveFailed"));
+    toast(e?.error?.message || t("common.saveFailed"), "danger");
+  } finally {
+    setLoading(btnSaveLog, false);
   }
 });
 

@@ -10,11 +10,26 @@ async function request(action, payload = {}, opts = {}) {
     if (token && !body.payload.token) body.payload.token = token;
   }
 
-  const res = await fetch(FEMI.API_BASE, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const timeoutMs = Number(opts.timeoutMs || 15000);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res;
+  try {
+    res = await fetch(FEMI.API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    if (err && (err.name === "AbortError" || err.code === 20)) {
+      throw { success: false, error: { code: "TIMEOUT", message: "Request timeout" } };
+    }
+    throw { success: false, error: { code: "NETWORK_ERROR", message: String(err?.message || err) } };
+  } finally {
+    clearTimeout(timer);
+  }
 
   const text = await res.text();
   let json;
