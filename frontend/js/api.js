@@ -2,6 +2,10 @@
 import { FEMI } from "./config.js";
 import { getToken } from "./auth.js";
 
+function makeError(code, message = "", details = null) {
+  return { success: false, error: { code, message, details } };
+}
+
 async function request(action, payload = {}, opts = {}) {
   const body = { action, payload: payload || {} };
 
@@ -10,9 +14,9 @@ async function request(action, payload = {}, opts = {}) {
     if (token && !body.payload.token) body.payload.token = token;
   }
 
-  const timeoutMs = Number(opts.timeoutMs || 15000);
-  const ac = new AbortController();
-  const tmr = setTimeout(()=> ac.abort(), timeoutMs);
+  const timeoutMs = Number.isFinite(opts.timeoutMs) ? opts.timeoutMs : 15000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   let res;
   try {
@@ -20,15 +24,14 @@ async function request(action, payload = {}, opts = {}) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal: ac.signal,
+      signal: controller.signal,
     });
-  } catch (e) {
-    if (e && e.name === "AbortError") {
-      throw { success: false, error: { code: "TIMEOUT", message: "Request timed out" } };
-    }
-    throw { success: false, error: { code: "NETWORK_ERROR", message: (e && e.message) ? e.message : String(e) } };
+  } catch (err) {
+    clearTimeout(timer);
+    if (err?.name === "AbortError") throw makeError("TIMEOUT", "Request timeout");
+    throw makeError("NETWORK_ERROR", err?.message || "Network error");
   } finally {
-    clearTimeout(tmr);
+    clearTimeout(timer);
   }
 
   const text = await res.text();
@@ -36,10 +39,17 @@ async function request(action, payload = {}, opts = {}) {
   try {
     json = JSON.parse(text);
   } catch {
-    throw { success: false, error: { code: "BAD_JSON", message: text } };
+    throw makeError("BAD_JSON", text);
   }
 
-  if (!json?.success) throw json;
+  // If backend returns error codes like ERR_*, just pass through
+  if (!json?.success) {
+    const code = json?.error?.code || (res.status === 401 ? "ERR_AUTH" : "ERR_SERVER");
+    const message = json?.error?.message || "";
+    const details = json?.error?.details || null;
+    throw makeError(code, message, details);
+  }
+
   return json.data;
 }
 

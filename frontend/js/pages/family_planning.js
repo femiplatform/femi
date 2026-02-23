@@ -1,37 +1,39 @@
 import { initUserShell } from "../shell.js";
 import { api } from "../api.js";
 import { t, applyI18n } from "../i18n.js";
-import { toast, setLoading } from "../ui.js";
+import { toast } from "../ui.js";
 
 await initUserShell({ active: "tools", title: t("fp.title") });
 applyI18n(document);
+
+function showApiError(e, fallbackKey = "common.loadFailed") {
+  const code = e?.error?.code || "";
+  // Client-side
+  if (code === "TIMEOUT") return toast(t("common.errorTimeout"), "danger");
+  if (code === "NETWORK_ERROR") return toast(t("common.errorNetwork"), "danger");
+
+  // Backend ERR_* normalization
+  if (code === "ERR_AUTH") return toast(t("common.errorUnauthorized"), "danger");
+  if (code === "ERR_FORBIDDEN") return toast(t("common.errorForbidden"), "danger");
+  if (code === "ERR_NOT_FOUND") return toast(t("common.errorNotFound"), "danger");
+  if (code === "ERR_VALIDATION") return toast(e?.error?.message || t("common.errorValidation"), "danger");
+  if (code === "ERR_SERVER") return toast(t("common.errorServer"), "danger");
+
+  // Fallback to server message if present
+  return toast(e?.error?.message || t(fallbackKey), "danger");
+}
+
 
 const elLoading = document.getElementById("loading");
 const calTitle = document.getElementById("calTitle");
 const calGrid = document.getElementById("calGrid");
 const predText = document.getElementById("predText");
 const predDetail = document.getElementById("predDetail");
-const calHint = document.getElementById("calHint");
 
 const btnPrev = document.getElementById("btnPrev");
 const btnNext = document.getElementById("btnNext");
 const btnAddCycle = document.getElementById("btnAddCycle");
 const btnRecompute = document.getElementById("btnRecompute");
-
-
-function errMsg(e, fallbackKey="common.loadFailed"){
-  const code = e?.error?.code || "";
-  if(code === "TIMEOUT") return t("common.timeout");
-  if(code === "NETWORK_ERROR") return t("common.networkError");
-  if(code === "UNAUTHORIZED") return t("common.unauthorized");
-  return e?.error?.message || t(fallbackKey);
-}
-
-function isIsoDate(s){
-  return typeof s==="string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
-}
-
-function isoCmp(a,b){ return String(a).localeCompare(String(b)); }
 
 // modal
 const logModal = document.getElementById("logModal");
@@ -116,7 +118,6 @@ btnSaveLog.addEventListener("click", async ()=>{
   const iso = logModal.dataset.iso;
   if(!iso) return;
 
-  setLoading(btnSaveLog, true);
   try{
     await api.fpDailyUpsert({
       logDate: iso,
@@ -129,13 +130,10 @@ btnSaveLog.addEventListener("click", async ()=>{
       notes: notes.value
     });
     closeLogModal();
-    toast(t("common.saveSuccess"), "success");
     await load();
   }catch(e){
     console.error(e);
-    toast(errMsg(e, "common.saveFailed"), "danger");
-  }finally{
-    setLoading(btnSaveLog, false);
+    showApiError(e, "common.saveFailed");
   }
 });
 
@@ -149,16 +147,13 @@ btnNext.addEventListener("click", async ()=>{
 });
 
 btnRecompute.addEventListener("click", async ()=>{
-  setLoading(btnRecompute, true);
   try{
     await api.fpPredictRecompute({});
     await load();
     toast(t("common.computeDone"), "success");
   }catch(e){
     console.error(e);
-    toast(errMsg(e, "common.loadFailed"), "danger");
-  }finally{
-    setLoading(btnRecompute, false);
+    showApiError(e, "common.loadFailed");
   }
 });
 
@@ -177,47 +172,29 @@ btnAddCycle.addEventListener("click", async ()=>{
   const rawStart = prompt(t("fp.prompt.start"));
   if(!rawStart) return;
   const sIso = parseDateInputDDMMYYYY_(rawStart);
-  if(!sIso){ toast(t("fp.error.badDate"), "danger"); return; }
+  if(!sIso){ toast(t("fp.error.badDate"), "warning"); return; }
 
   const rawEnd = prompt(t("fp.prompt.end")) || "";
   let eIso = "";
   if(rawEnd.trim()){
     const p = parseDateInputDDMMYYYY_(rawEnd);
-    if(!p){ toast(t("fp.error.badDate"), "danger"); return; }
+    if(!p){ toast(t("fp.error.badDate"), "warning"); return; }
     eIso = p;
   }
 
-  if(eIso && isoCmp(eIso, sIso) < 0){
-    toast(t("fp.error.endBeforeStart"), "danger");
-    return;
-  }
+  const len = prompt(t("fp.prompt.cycleLen")) || "";
 
-  const lenRaw = (prompt(t("fp.prompt.cycleLen")) || "").trim();
-  let len = "";
-  if(lenRaw){
-    const n = Number(lenRaw);
-    if(!Number.isFinite(n) || n < 15 || n > 60){
-      toast(t("fp.error.badCycleLen"), "danger");
-      return;
-    }
-    len = n;
-  }
-
-  setLoading(btnAddCycle, true);
   try{
     await api.fpCyclesCreate({
       periodStartDate: sIso,
       periodEndDate: eIso,
-      cycleLengthDays: len,
+      cycleLengthDays: len ? Number(len) : "",
       status:"Active"
     });
-    toast(t("common.saveSuccess"), "success");
     await load();
   }catch(e){
     console.error(e);
-    toast(errMsg(e, "common.saveFailed"), "danger");
-  }finally{
-    setLoading(btnAddCycle, false);
+    showApiError(e, "common.saveFailed");
   }
 });
 
@@ -245,14 +222,6 @@ function inRange(iso, a, b){
 function renderCalendar(){
   calTitle.textContent = monthTitle(view);
   calGrid.innerHTML = "";
-
-  if(calHint){
-    if(!cacheCycles || cacheCycles.length===0){
-      calHint.textContent = t("fp.hint.noCycles");
-    }else{
-      calHint.textContent = "";
-    }
-  }
 
   const startDay = new Date(view.getFullYear(), view.getMonth(), 1);
   const endDay = new Date(view.getFullYear(), view.getMonth()+1, 0);
@@ -344,7 +313,7 @@ async function load(){
     renderCalendar();
   }catch(e){
     console.error(e);
-    toast(errMsg(e, "common.loadFailed"), "danger");
+    showApiError(e, "common.loadFailed");
   }finally{
     elLoading.style.display = "none";
   }
