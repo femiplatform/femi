@@ -22,6 +22,7 @@
 ## Family Planning
 
 > ระบบนี้ใช้ 3 ชีต: `period_cycles`, `ovulation_predictions`, `period_daily_logs`
+> หมายเหตุ: ระบบจะ auto-create ชีตและ **เติมหัวตารางที่ขาดโดยการ append ต่อท้าย** (ไม่เขียนทับหัวคอลัมน์เดิม)
 
 ### period_cycles
 Key: `cycleId`
