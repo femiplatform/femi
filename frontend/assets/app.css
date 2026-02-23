@@ -197,3 +197,77 @@ button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgb
 .btn-warn { background:#f59e0b; color:#111; }
 
 .hidden { display:none !important; }
+
+/* ===== Pastel Clean Tiles + SVG icon sizing (ADD-ON) ===== */
+:root{
+  /* pastel accents for tiles */
+  --pv-a:#e0f2fe; --pv-b:#eff6ff;
+  --fp-a:#ede9fe; --fp-b:#f5f3ff;
+  --kb-a:#dcfce7; --kb-b:#f0fdf4;
+  --qz-a:#ffedd5; --qz-b:#fff7ed;
+  --noti-a:#ffe4e6; --noti-b:#fff1f2;
+}
+
+/* modern svg icon sizing */
+.svg-ic{ width:20px; height:20px; display:block; color: currentColor; }
+
+/* quick tiles */
+.tiles{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+@media (max-width: 760px){
+  .tiles{ grid-template-columns: 1fr; }
+}
+.tile{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  text-decoration:none;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 22px rgba(2,6,23,.08);
+}
+.tile .left{ display:flex; align-items:center; gap: 12px; min-width:0; }
+.tile .title{ font-weight: 900; line-height: 1.2; }
+.tile .sub{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  max-width: 60vw;
+}
+.tile .iconWrap{
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  display:flex; align-items:center; justify-content:center;
+  border: 1px solid rgba(2,6,23,.08);
+  background: rgba(255,255,255,.6);
+}
+
+/* pastel variants */
+.tile.pv{ background: linear-gradient(135deg, var(--pv-a) 0%, var(--pv-b) 100%); }
+.tile.fp{ background: linear-gradient(135deg, var(--fp-a) 0%, var(--fp-b) 100%); }
+.tile.kb{ background: linear-gradient(135deg, var(--kb-a) 0%, var(--kb-b) 100%); }
+.tile.qz{ background: linear-gradient(135deg, var(--qz-a) 0%, var(--qz-b) 100%); }
+.tile.noti{ background: linear-gradient(135deg, var(--noti-a) 0%, var(--noti-b) 100%); }
+
+/* soft badge */
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.75);
+  font-size: 12px;
+  font-weight: 900;
+}
