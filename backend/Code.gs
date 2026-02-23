@@ -23,38 +23,20 @@ function doPost(e) {
     return femiRespond_(femiJsonErr_("SERVER_ERROR", (err && err.message) ? err.message : String(err)));
   }
 }
-// ---------- Logging helpers (ENV=dev|prod) ----------
-function femiEnv_() {
+
+function femiEnv_(){
+  return String(PropertiesService.getScriptProperties().getProperty("ENV") || "prod").toLowerCase();
+}
+
+function femiLog_(level, msg, data){
+  var env = femiEnv_();
+  var lv = String(level||"info").toLowerCase();
+  if(env === "prod" && ["warn","error"].indexOf(lv) === -1) return;
   try {
-    var v = PropertiesService.getScriptProperties().getProperty("ENV");
-    return (v || "prod").toLowerCase();
+    var line = "[FEMI][" + lv.toUpperCase() + "] " + String(msg||"");
+    if (data !== undefined) line += " " + JSON.stringify(data);
+    console.log(line);
   } catch (e) {
-    return "prod";
+    console.log("[FEMI][" + lv.toUpperCase() + "] " + String(msg||""));
   }
 }
-
-function femiLog_(level, message, data) {
-  level = String(level || "INFO").toUpperCase();
-  var env = femiEnv_();
-  var payload = {
-    t: femiNowIso_ ? femiNowIso_() : new Date().toISOString(),
-    level: level,
-    msg: String(message || ""),
-    data: (typeof data === "undefined") ? null : data
-  };
-
-  // In prod, keep logs minimal (WARN/ERROR). In dev, log everything.
-  if (env === "prod" && level === "INFO") return;
-
-  try {
-    // console is more visible in Apps Script executions
-    if (typeof console !== "undefined" && console.log) console.log(JSON.stringify(payload));
-  } catch (e) {}
-  try {
-    Logger.log(JSON.stringify(payload));
-  } catch (e2) {}
-}
-
-function femiInfo_(msg, data) { femiLog_("INFO", msg, data); }
-function femiWarn_(msg, data) { femiLog_("WARN", msg, data); }
-function femiError_(msg, data) { femiLog_("ERROR", msg, data); }

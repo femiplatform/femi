@@ -11,8 +11,8 @@ async function request(action, payload = {}, opts = {}) {
   }
 
   const timeoutMs = Number(opts.timeoutMs || 15000);
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const ac = new AbortController();
+  const tmr = setTimeout(()=> ac.abort(), timeoutMs);
 
   let res;
   try {
@@ -20,15 +20,15 @@ async function request(action, payload = {}, opts = {}) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      signal: controller.signal,
+      signal: ac.signal,
     });
-  } catch (err) {
-    if (err && (err.name === "AbortError" || err.code === 20)) {
-      throw { success: false, error: { code: "TIMEOUT", message: "Request timeout" } };
+  } catch (e) {
+    if (e && e.name === "AbortError") {
+      throw { success: false, error: { code: "TIMEOUT", message: "Request timed out" } };
     }
-    throw { success: false, error: { code: "NETWORK_ERROR", message: String(err?.message || err) } };
+    throw { success: false, error: { code: "NETWORK_ERROR", message: (e && e.message) ? e.message : String(e) } };
   } finally {
-    clearTimeout(timer);
+    clearTimeout(tmr);
   }
 
   const text = await res.text();

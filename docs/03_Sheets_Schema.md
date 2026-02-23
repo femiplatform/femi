@@ -18,60 +18,56 @@
 
 หัวคอลัมน์จะถูกกำหนดตามไฟล์ `starter/backend/Config.gs`
 
+
 ## Family Planning
 
-ระบบ Family Planning ใช้ 3 ชีตหลักดังนี้ (ชื่อชีตต้องตรงตามนี้)
+> ระบบนี้ใช้ 3 ชีต: `period_cycles`, `ovulation_predictions`, `period_daily_logs`
 
 ### period_cycles
-**Primary key:** `cycleId`  
-**Index:** `userId`, `periodStartDate`
+Key: `cycleId`
 
-คอลัมน์:
-- `cycleId` (string) รหัสรอบเดือน
-- `userId` (string) เจ้าของข้อมูล
-- `periodStartDate` (YYYY-MM-DD) วันที่เริ่มมีประจำเดือน
-- `periodEndDate` (YYYY-MM-DD|blank) วันที่สิ้นสุด (ถ้ายังไม่จบให้ว่าง)
-- `cycleLengthDays` (number|blank) ความยาวรอบเดือน (ถ้ามี)
-- `periodLengthDays` (number|blank) ความยาววันมีประจำเดือน
-- `flowLevel` (string|blank) ระดับเลือด
-- `painLevel` (string|blank) ระดับปวด
-- `notes` (string|blank) หมายเหตุ
-- `status` (string) `Active|Inactive`
-- `createdAt` (ISO) เวลาสร้าง
-- `updatedAt` (ISO) เวลาอัปเดต
+Columns:
+- cycleId (string)
+- userId (string)
+- periodStartDate (YYYY-MM-DD)
+- periodEndDate (YYYY-MM-DD or empty)
+- cycleLengthDays (number or empty)
+- periodLengthDays (number or empty)
+- flowLevel (string)
+- painLevel (string)
+- notes (string)
+- status (string)
+- createdAt (ISO datetime)
+- updatedAt (ISO datetime)
 
 ### ovulation_predictions
-**Primary key:** `predId`  
-**Index:** `userId`, `cycleId`
+Key: `predId`
 
-คอลัมน์:
-- `predId` (string) รหัสผลคาดการณ์
-- `userId` (string)
-- `cycleId` (string)
-- `fertileStartDate` (YYYY-MM-DD)
-- `fertileEndDate` (YYYY-MM-DD)
-- `ovulationDate` (YYYY-MM-DD)
-- `nextPeriodExpectedDate` (YYYY-MM-DD)
-- `method` (string) วิธีคำนวณ
-- `confidence` (number|blank) ความมั่นใจ
-- `createdAt` (ISO)
+Columns:
+- predId
+- userId
+- cycleId
+- fertileStartDate
+- fertileEndDate
+- ovulationDate
+- nextPeriodExpectedDate
+- method
+- confidence
+- createdAt
 
 ### period_daily_logs
-**Primary key:** `logId`  
-**Unique (recommended):** `userId + logDate`
+Key: `logId` (unique) / logical key: (userId, logDate)
 
-คอลัมน์:
-- `logId` (string) รหัสบันทึกประจำวัน
-- `userId` (string)
-- `logDate` (YYYY-MM-DD)
-- `bleeding` (string|blank)
-- `symptoms` (string|blank)
-- `mood` (string|blank)
-- `dischargeType` (string|blank)
-- `hadSex` (boolean|string) true/false
-- `sexProtection` (string|blank)
-- `pillTaken` (boolean|string) true/false
-- `notes` (string|blank)
-- `createdAt` (ISO)
-
-> หมายเหตุ: ระบบมี **migration guard** ผ่าน `fpEnsureSheets_()` ที่จะสร้างชีต + เติมหัวตารางที่ขาดให้อัตโนมัติเมื่อมีการเรียกใช้งาน API
+Columns:
+- logId
+- userId
+- logDate
+- bleeding
+- symptoms
+- mood
+- dischargeType
+- hadSex
+- sexProtection
+- pillTaken
+- notes
+- createdAt
