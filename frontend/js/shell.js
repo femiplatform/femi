@@ -1,44 +1,41 @@
 // femi/frontend/js/shell.js
 import { requireAuth, logout as authLogout } from "./auth.js";
 import { api } from "./api.js";
+import { t, applyI18n } from "./i18n.js";
 
 /**
  * initUserShell({ active, title })
- * - active: "home" | "tools" | "dashboard" | "profile" (เพื่อ highlight bottom nav)
- * - title: ชื่อหน้าใน header
+ * active: home | tools | dashboard | profile
+ * title: ชื่อหน้าที่จะแสดงใน header (ถ้าไม่ส่ง จะใช้จาก i18n ของแต่ละหน้า)
  */
-export async function initUserShell({ active = "home", title = "FEMI" } = {}) {
+export async function initUserShell({ active = "home", title = "" } = {}) {
   requireAuth("../login.html");
 
-  // Inject shell HTML (header + drawer + bottom nav)
   const root = document.getElementById("app") || document.body;
-
-  // Wrap existing content (main) if not already
   const existingMain = root.querySelector("main") || root;
 
-  // Create shell container only once
   if (!document.querySelector("[data-femi-shell='1']")) {
     const shell = document.createElement("div");
     shell.setAttribute("data-femi-shell", "1");
-    shell.innerHTML = renderShell_(title, active);
+    shell.innerHTML = renderShell_(title || t("app.name"), active);
     document.body.prepend(shell);
 
-    // move existing main into shell main slot if main exists in page
     const slot = document.querySelector("[data-shell-slot='main']");
     if (slot && existingMain && existingMain !== slot) {
-      // If root is body and existingMain is body, skip moving
       if (existingMain !== document.body) slot.appendChild(existingMain);
     }
 
     bindShellEvents_();
   } else {
-    // Update title + active state if shell already exists
-    const t = document.getElementById("shellTitle");
-    if (t) t.textContent = title;
+    const tEl = document.getElementById("shellTitle");
+    if (tEl) tEl.textContent = title || t("app.name");
     setActiveBottomNav_(active);
   }
 
-  // Update badge now + schedule refresh
+  // Apply i18n to shell DOM
+  applyI18n(document);
+
+  // badge
   await refreshNotificationBadge_();
   startBadgePolling_();
 }
@@ -50,17 +47,17 @@ function renderShell_(title, active) {
   <div class="femi-shell">
     <header class="femi-appbar">
       <div class="femi-left">
-        <a class="femi-brand" href="./home.html">FEMI</a>
+        <a class="femi-brand" href="./home.html">${escapeHtml_(t("app.name"))}</a>
         <div id="shellTitle" class="femi-title">${escapeHtml_(title)}</div>
       </div>
 
       <div class="femi-right">
-        <button class="icon-btn" id="btnBell" title="การแจ้งเตือน" aria-label="การแจ้งเตือน">
+        <button class="icon-btn" id="btnBell" aria-label="${escapeHtml_(t("nav.notifications"))}" title="${escapeHtml_(t("nav.notifications"))}">
           <span class="icon">🔔</span>
           <span id="bellBadge" class="badge hidden">0</span>
         </button>
 
-        <button class="icon-btn" id="btnMenu" title="เมนู" aria-label="เมนู">
+        <button class="icon-btn" id="btnMenu" aria-label="${escapeHtml_(t("nav.menu"))}" title="${escapeHtml_(t("nav.menu"))}">
           <span class="icon">☰</span>
         </button>
       </div>
@@ -69,24 +66,24 @@ function renderShell_(title, active) {
     <aside id="drawer" class="femi-drawer hidden" aria-hidden="true">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div class="drawer-title">เมนู</div>
-          <button class="icon-btn" id="btnDrawerClose" aria-label="ปิดเมนู">✕</button>
+          <div class="drawer-title" data-i18n="nav.menu">${t("nav.menu")}</div>
+          <button class="icon-btn" id="btnDrawerClose" aria-label="${escapeHtml_(t("common.close"))}">✕</button>
         </div>
 
         <nav class="drawer-nav">
-          <a href="./home.html">หน้าแรก</a>
-          <a href="./tools.html">เครื่องมือ</a>
-          <a href="./preventive.html">Preventive</a>
-          <a href="./family_planning.html">Family Planning</a>
-          <a href="./pregnancy.html">Pregnancy</a>
-          <a href="./knowledge.html">คลังความรู้</a>
-          <a href="./quiz.html">แบบทดสอบ</a>
-          <a href="./notifications.html">การแจ้งเตือน</a>
-          <a href="./profile.html">โปรไฟล์</a>
+          <a href="./home.html" data-i18n="nav.home">${t("nav.home")}</a>
+          <a href="./tools.html" data-i18n="nav.tools">${t("nav.tools")}</a>
+          <a href="./preventive.html" data-i18n="nav.preventive">${t("nav.preventive")}</a>
+          <a href="./family_planning.html" data-i18n="nav.familyPlanning">${t("nav.familyPlanning")}</a>
+          <a href="./pregnancy.html" data-i18n="nav.pregnancy">${t("nav.pregnancy")}</a>
+          <a href="./knowledge.html" data-i18n="nav.knowledge">${t("nav.knowledge")}</a>
+          <a href="./quiz.html" data-i18n="nav.quiz">${t("nav.quiz")}</a>
+          <a href="./notifications.html" data-i18n="nav.notifications">${t("nav.notifications")}</a>
+          <a href="./profile.html" data-i18n="nav.profile">${t("nav.profile")}</a>
         </nav>
 
         <div class="drawer-foot">
-          <button class="btn btn-danger" id="btnLogout">ออกจากระบบ</button>
+          <button class="btn btn-danger" id="btnLogout" data-i18n="nav.logout">${t("nav.logout")}</button>
         </div>
       </div>
       <div class="drawer-backdrop" id="drawerBackdrop"></div>
@@ -97,26 +94,25 @@ function renderShell_(title, active) {
     <nav class="femi-bottomnav" aria-label="เมนูด้านล่าง">
       <a class="bn-item ${active === "home" ? "active" : ""}" href="./home.html" data-bn="home">
         <span class="bn-icon">🏠</span>
-        <span class="bn-label">หน้าแรก</span>
+        <span class="bn-label" data-i18n="nav.home">${t("nav.home")}</span>
       </a>
       <a class="bn-item ${active === "tools" ? "active" : ""}" href="./tools.html" data-bn="tools">
         <span class="bn-icon">🧰</span>
-        <span class="bn-label">เครื่องมือ</span>
+        <span class="bn-label" data-i18n="nav.tools">${t("nav.tools")}</span>
       </a>
       <a class="bn-item ${active === "dashboard" ? "active" : ""}" href="./dashboard.html" data-bn="dashboard">
         <span class="bn-icon">📊</span>
-        <span class="bn-label">แดชบอร์ด</span>
+        <span class="bn-label" data-i18n="nav.dashboard">${t("nav.dashboard")}</span>
       </a>
       <a class="bn-item ${active === "profile" ? "active" : ""}" href="./profile.html" data-bn="profile">
         <span class="bn-icon">👤</span>
-        <span class="bn-label">โปรไฟล์</span>
+        <span class="bn-label" data-i18n="nav.profile">${t("nav.profile")}</span>
       </a>
     </nav>
   </div>
 
   <style>
-    /* Shell base (mobile-first) */
-    .femi-shell{min-height:100vh;background:transparent}
+    .femi-shell{min-height:100vh}
     .femi-appbar{
       position:sticky;top:0;z-index:50;
       display:flex;align-items:center;justify-content:space-between;
@@ -147,10 +143,8 @@ function renderShell_(title, active) {
       box-shadow: 0 6px 14px rgba(0,0,0,.12);
     }
     .hidden{display:none !important}
+    .femi-content{padding-bottom:72px;}
 
-    .femi-content{padding-bottom:72px;} /* reserve for bottom nav */
-
-    /* Drawer */
     .femi-drawer{position:fixed;inset:0;z-index:60}
     .drawer-panel{
       position:absolute;top:0;right:0;height:100%;width:min(340px, 88vw);
@@ -167,7 +161,6 @@ function renderShell_(title, active) {
     .btn{border:0;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer}
     .btn-danger{background:#dc2626;color:#fff;width:100%}
 
-    /* Bottom nav */
     .femi-bottomnav{
       position:fixed;left:0;right:0;bottom:0;z-index:55;
       display:grid;grid-template-columns:repeat(4,1fr);
@@ -227,7 +220,6 @@ function setActiveBottomNav_(active) {
 let badgeTimer = null;
 
 function normalizeUnread_(res) {
-  // รองรับหลายรูปแบบ: {unread}, {data:{unread}}, {success:true,data:{unread}}
   if (typeof res?.unread === "number") return res.unread;
   if (typeof res?.data?.unread === "number") return res.data.unread;
   if (typeof res?.data?.data?.unread === "number") return res.data.data.unread;
@@ -241,22 +233,17 @@ async function refreshNotificationBadge_() {
   try {
     const res = await api.userNotificationsUnreadCount();
     const unread = normalizeUnread_(res);
-
-    // อัปเดตค่า
     badge.textContent = String(unread);
-
-    // ซ่อนถ้าเป็น 0
     if (unread > 0) badge.classList.remove("hidden");
     else badge.classList.add("hidden");
-  } catch (e) {
-    // ถ้า error ไม่ให้พังหน้า + ซ่อน badge
+  } catch {
     badge.classList.add("hidden");
   }
 }
 
 function startBadgePolling_() {
   if (badgeTimer) return;
-  badgeTimer = setInterval(refreshNotificationBadge_, 30000); // 30s
+  badgeTimer = setInterval(refreshNotificationBadge_, 30000);
 }
 
 /* ---------------- utils ---------------- */

@@ -1,7 +1,9 @@
 import { initUserShell } from "../shell.js";
 import { api } from "../api.js";
+import { t, applyI18n } from "../i18n.js";
 
-await initUserShell({ active: "tools", title: "วางแผนครอบครัว" });
+await initUserShell({ active: "tools", title: t("fp.title") });
+applyI18n(document);
 
 const elLoading = document.getElementById("loading");
 const elList = document.getElementById("list");
@@ -12,30 +14,21 @@ const btnAddLog = document.getElementById("btnAddLog");
 const btnRecompute = document.getElementById("btnRecompute");
 
 function fmtDateThai(iso) {
-  if (!iso) return "-";
+  if (!iso) return t("common.none");
   return new Date(iso).toLocaleDateString("th-TH", { dateStyle: "long" });
 }
-
 function safeNum(v) {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
-function thaiBleedingHint() {
-  return `เลือดออก (Bleeding): None=ไม่มี, Spotting=กะปริบกะปรอย, Light=น้อย, Medium=ปานกลาง, Heavy=มาก`;
-}
-
-function thaiMoodHint() {
-  return `อารมณ์ (Mood): Good=ดี, Neutral=ปกติ, Bad=แย่`;
-}
-
 btnAddCycle.addEventListener("click", async () => {
-  const start = prompt("วันเริ่มประจำเดือน (รูปแบบ YYYY-MM-DD เช่น 2026-02-01)");
+  const start = prompt(t("fp.prompt.start"));
   if (!start) return;
 
-  const end = prompt("วันสิ้นสุดประจำเดือน (YYYY-MM-DD) — เว้นว่างได้") || "";
-  const len = prompt("ความยาวรอบเดือน (Cycle length) กี่วัน? — เว้นว่างได้ เช่น 28") || "";
+  const end = prompt(t("fp.prompt.end")) || "";
+  const len = prompt(t("fp.prompt.cycleLen")) || "";
 
   try {
     await api.fpCyclesCreate({
@@ -47,39 +40,39 @@ btnAddCycle.addEventListener("click", async () => {
     await load();
   } catch (e) {
     console.error(e);
-    alert(e?.error?.message || "บันทึกไม่สำเร็จ");
+    alert(e?.error?.message || t("common.saveFailed"));
   }
 });
 
 btnAddLog.addEventListener("click", async () => {
-  const logDate = prompt("วันที่ต้องการบันทึก (YYYY-MM-DD เช่น 2026-02-03)");
+  const logDate = prompt(t("fp.prompt.logDate"));
   if (!logDate) return;
 
-  alert(thaiBleedingHint());
-  const bleeding = prompt("เลือดออกวันนี้เป็นระดับไหน? (None/Spotting/Light/Medium/Heavy)", "None") || "None";
+  alert(t("fp.hint.bleeding"));
+  const bleeding = prompt(t("fp.prompt.bleeding"), "None") || "None";
 
-  alert(thaiMoodHint());
-  const mood = prompt("วันนี้รู้สึกอย่างไร? (Good/Neutral/Bad)", "Neutral") || "Neutral";
+  alert(t("fp.hint.mood"));
+  const mood = prompt(t("fp.prompt.mood"), "Neutral") || "Neutral";
 
-  const symptoms = prompt("อาการที่รู้สึก (คั่นด้วย ,) เช่น ปวดท้อง, ปวดหลัง, สิว", "") || "";
+  const symptoms = prompt(t("fp.prompt.symptoms"), "") || "";
 
   try {
     await api.fpDailyUpsert({ logDate, bleeding, mood, symptoms });
     await load();
   } catch (e) {
     console.error(e);
-    alert(e?.error?.message || "บันทึกไม่สำเร็จ");
+    alert(e?.error?.message || t("common.saveFailed"));
   }
 });
 
 btnRecompute.addEventListener("click", async () => {
   try {
     await api.fpPredictRecompute({});
-    alert("คำนวณคาดการณ์ให้แล้ว");
+    alert(t("common.computeDone"));
     await load();
   } catch (e) {
     console.error(e);
-    alert(e?.error?.message || "คำนวณไม่สำเร็จ");
+    alert(e?.error?.message || t("common.loadFailed"));
   }
 });
 
@@ -91,28 +84,22 @@ async function load() {
     const cyclesRes = await api.fpCyclesList();
     const cycles = cyclesRes.items || [];
 
-    // คำนวณคาดการณ์ล่าสุด (บันทึกลงชีท ovulation_predictions)
     await api.fpPredictRecompute({});
 
-    if (cycles.length) {
-      predText.textContent =
-        `พบข้อมูลรอบเดือนของคุณ ${cycles.length} รอบ และได้คำนวณ “ช่วงไข่ตก/ช่วงเสี่ยงท้อง” ให้แล้ว ` +
-        `(ระบบบันทึกลงชีท ovulation_predictions)`;
-    } else {
-      predText.textContent =
-        "ยังไม่มีข้อมูลรอบเดือน — กรุณากด “เพิ่มรอบเดือน” ก่อน เพื่อให้ระบบคำนวณช่วงไข่ตกและรอบถัดไป";
-    }
+    predText.textContent = cycles.length
+      ? t("fp.predSummary", { count: cycles.length })
+      : t("fp.predNoData");
 
     cycles.slice(0, 20).forEach(c => {
       const cycleLen = safeNum(c.cycleLengthDays);
       const periodLen = safeNum(c.periodLengthDays);
 
       const start = fmtDateThai(c.periodStartDate);
-      const end = c.periodEndDate ? fmtDateThai(c.periodEndDate) : "ยังไม่ระบุวันสิ้นสุด";
+      const end = c.periodEndDate ? fmtDateThai(c.periodEndDate) : t("fp.value.noEnd");
 
       const line2 =
-        `ความยาวรอบเดือน (Cycle length): ${cycleLen !== null ? cycleLen + " วัน" : "ยังไม่ระบุ"} ` +
-        `• ระยะเวลามีประจำเดือน (Period length): ${periodLen !== null ? periodLen + " วัน" : "ยังไม่ระบุ"}`;
+        `${t("fp.label.cycleLen")}: ${cycleLen !== null ? t("fp.value.days", { n: cycleLen }) : t("fp.value.unknown")} • ` +
+        `${t("fp.label.periodLen")}: ${periodLen !== null ? t("fp.value.days", { n: periodLen }) : t("fp.value.unknown")}`;
 
       const div = document.createElement("div");
       div.className = "row";
@@ -126,13 +113,12 @@ async function load() {
     if (!cycles.length) {
       const div = document.createElement("div");
       div.className = "row";
-      div.innerHTML = `<div class="muted">ยังไม่มีข้อมูล</div>`;
+      div.innerHTML = `<div class="muted">${t("fp.cardNoData")}</div>`;
       elList.appendChild(div);
     }
-
   } catch (e) {
     console.error(e);
-    alert(e?.error?.message || "โหลดไม่สำเร็จ");
+    alert(e?.error?.message || t("common.loadFailed"));
   } finally {
     elLoading.style.display = "none";
   }

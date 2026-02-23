@@ -9,21 +9,21 @@
 <body>
   <div id="app">
     <main class="container">
-      <h1>Family Planning</h1>
-      <p class="muted">MVP: เพิ่มรอบเดือน + บันทึกรายวัน + คาดการณ์วันไข่ตก (AvgCycle)</p>
+      <h1 data-i18n="fp.title">วางแผนครอบครัว</h1>
+      <p class="muted" data-i18n="fp.subtitle"></p>
 
       <div class="card" style="padding:14px">
-        <div style="font-weight:900" id="predTitle">คาดการณ์ (ล่าสุด)</div>
+        <div style="font-weight:900" data-i18n="fp.predTitle">คาดการณ์ (ล่าสุด)</div>
         <div class="muted" id="predText" style="margin-top:6px">-</div>
       </div>
 
       <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-primary" id="btnAddCycle">+ เพิ่มรอบเดือน</button>
-        <button class="btn btn-ghost" id="btnAddLog">+ บันทึกรายวัน</button>
-        <button class="btn btn-ghost" id="btnRecompute">คำนวณใหม่</button>
+        <button class="btn btn-primary" id="btnAddCycle" data-i18n="fp.btnAddCycle"></button>
+        <button class="btn btn-ghost" id="btnAddLog" data-i18n="fp.btnAddLog"></button>
+        <button class="btn btn-ghost" id="btnRecompute" data-i18n="fp.btnRecompute"></button>
       </div>
 
-      <div id="loading" class="muted" style="margin-top:12px">กำลังโหลด…</div>
+      <div id="loading" class="muted" style="margin-top:12px" data-i18n="common.loading">กำลังโหลด…</div>
       <div id="list" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
     </main>
   </div>

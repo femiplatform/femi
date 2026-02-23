@@ -9,11 +9,11 @@
 <body>
   <div id="app">
     <main class="container">
-      <h1 class="page-title">การแจ้งเตือน</h1>
-      <p class="page-sub muted">ข้อความแจ้งเตือนภายในแอป</p>
+      <h1 class="page-title" data-i18n="noti.title">การแจ้งเตือน</h1>
+      <p class="page-sub muted" data-i18n="noti.subtitle">ข้อความแจ้งเตือนภายในแอป</p>
 
-      <div id="loading" class="muted">กำลังโหลด…</div>
-      <div id="empty" class="card hidden" style="padding:14px">ยังไม่มีการแจ้งเตือน</div>
+      <div id="loading" class="muted" data-i18n="common.loading">กำลังโหลด…</div>
+      <div id="empty" class="card hidden" style="padding:14px" data-i18n="noti.empty">ยังไม่มีการแจ้งเตือน</div>
       <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
     </main>
   </div>
@@ -21,8 +21,10 @@
   <script type="module">
     import { initUserShell } from "../js/shell.js";
     import { api } from "../js/api.js";
+    import { t, applyI18n } from "../js/i18n.js";
 
-    await initUserShell({ active: "tools", title: "การแจ้งเตือน" });
+    await initUserShell({ active: "tools", title: t("noti.title") });
+    applyI18n(document);
 
     const elLoading = document.getElementById('loading');
     const elEmpty = document.getElementById('empty');
@@ -36,7 +38,6 @@
     }
 
     function normalizeItems(res){
-      // รองรับทุกแบบ: array / {items:[...]} / {data:{items:[...]}} / null/undefined
       if (Array.isArray(res)) return res;
       if (Array.isArray(res?.items)) return res.items;
       if (Array.isArray(res?.data?.items)) return res.data.items;
@@ -68,15 +69,15 @@
           card.innerHTML = `
             <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
               <div>
-                <div style="font-weight:900">${esc(n.title || 'แจ้งเตือน')}</div>
+                <div style="font-weight:900">${esc(n.title || t("noti.title"))}</div>
                 <div class="muted" style="margin-top:4px">${esc(n.message || n.summary || '')}</div>
                 <div class="muted" style="font-size:12px;margin-top:8px">
                   ${created ? new Date(created).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}) : ''}
                 </div>
               </div>
               ${isRead
-                ? `<span class="pill">อ่านแล้ว</span>`
-                : (id ? `<button class="btn btn-ghost" data-id="${esc(id)}">ทำเครื่องหมายว่าอ่านแล้ว</button>` : ``)
+                ? `<span class="pill">${t("noti.read")}</span>`
+                : (id ? `<button class="btn btn-ghost" data-id="${esc(id)}">${t("noti.markRead")}</button>` : ``)
               }
             </div>
           `;
@@ -89,7 +90,7 @@
                 await load();
               } catch(e){
                 console.error(e);
-                alert(e?.error?.message || 'ทำรายการไม่สำเร็จ');
+                alert(e?.error?.message || t("noti.actionFailed"));
               }
             });
           }
@@ -99,7 +100,7 @@
 
       } catch(e){
         console.error(e);
-        alert(e?.error?.message || 'โหลดการแจ้งเตือนไม่สำเร็จ');
+        alert(e?.error?.message || t("noti.loadFailed"));
       } finally {
         elLoading.classList.add('hidden');
       }
@@ -107,5 +108,15 @@
 
     await load();
   </script>
+
+  <style>
+    .container{max-width:900px;margin:0 auto;padding:18px}
+    .muted{opacity:.7}
+    .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+    .btn{border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .btn-ghost{background:#fff;border:1px solid rgba(0,0,0,.12)}
+    .pill{font-size:12px;border:1px solid rgba(0,0,0,.12);padding:4px 8px;border-radius:999px;background:#f8fafc}
+    .hidden{display:none}
+  </style>
 </body>
 </html>
