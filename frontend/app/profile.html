@@ -34,7 +34,31 @@
   document.getElementById("name").textContent = `${me.firstName||""} ${me.lastName||""}`.trim() || "-";
   document.getElementById("email").textContent = me.email || "-";
   document.getElementById("phone").textContent = me.phoneNumber || me.phone || "-";
-  document.getElementById("birth").textContent = me.birthDate ? new Date(me.birthDate).toLocaleDateString("th-TH",{dateStyle:"long"}) : "-";
+
+  // Birthdate bugfix:
+  // Some records are stored as Buddhist Era (e.g. 2540-02-19). If we pass that into Date(),
+  // JS treats it as AD 2540, and th-TH formatting adds +543 again -> 3083.
+  // We normalize: if year looks like BE (>2400), convert to Gregorian by subtracting 543,
+  // then format in th-TH (which will display BE correctly).
+  function parseThaiBirthDate(value) {
+    if (!value) return null;
+    const s = String(value);
+    const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!m) {
+      const d = new Date(value);
+      return isNaN(d.getTime()) ? null : d;
+    }
+    let y = Number(m[1]);
+    const mo = Number(m[2]);
+    const da = Number(m[3]);
+    if (y > 2400) y -= 543; // BE -> Gregorian
+    return new Date(Date.UTC(y, mo - 1, da));
+  }
+
+  const bd = parseThaiBirthDate(me.birthDate);
+  document.getElementById("birth").textContent = bd
+    ? bd.toLocaleDateString("th-TH", { dateStyle: "long", timeZone: "UTC" })
+    : "-";
 </script>
 
 <style>
