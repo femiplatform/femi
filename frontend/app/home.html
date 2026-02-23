@@ -12,7 +12,60 @@
       <h1 class="page-title" data-i18n="page.home">หน้าแรก</h1>
       <p class="page-sub muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
 
+      <!-- Summary card (กลับมาแล้ว) -->
       <div class="card" style="padding:14px">
+        <div style="font-weight:900" data-i18n="home.summaryTitle">สรุปวันนี้</div>
+
+        <div class="grid2" style="margin-top:10px">
+          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+            <div style="font-weight:900" data-i18n="home.fpCardTitle">รอบเดือนและช่วงเสี่ยง</div>
+            <div class="muted" id="fpSummary" style="margin-top:6px">-</div>
+            <div class="muted" id="fpDetail" style="margin-top:6px;line-height:1.5"></div>
+            <div style="margin-top:10px">
+              <a class="pill" href="./family_planning.html">ไปที่วางแผนครอบครัว</a>
+            </div>
+          </div>
+
+          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+            <div style="font-weight:900" data-i18n="home.pvCardTitle">งานดูแลสุขภาพ</div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px">
+              <span class="muted" data-i18n="home.pvDueToday">ครบกำหนดวันนี้</span>
+              <b id="pvDue">-</b>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px">
+              <span class="muted" data-i18n="home.pvOverdue">เลยกำหนด</span>
+              <b id="pvOver">-</b>
+            </div>
+            <div style="margin-top:10px">
+              <a class="pill" href="./preventive.html">ไปที่ Preventive</a>
+            </div>
+          </div>
+
+          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+            <div style="font-weight:900" data-i18n="home.notiCardTitle">การแจ้งเตือน</div>
+            <div style="display:flex;justify-content:space-between;margin-top:10px">
+              <span class="muted" data-i18n="home.notiUnread">ยังไม่อ่าน</span>
+              <b id="notiUnread">-</b>
+            </div>
+            <div style="margin-top:10px">
+              <a class="pill" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
+            </div>
+          </div>
+
+          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+            <div style="font-weight:900">แบบทดสอบ</div>
+            <div class="muted" style="margin-top:6px">คะแนนล่าสุด</div>
+            <div style="font-size:26px;font-weight:1000;margin-top:2px" id="quizLast">-</div>
+            <div class="muted" style="font-size:12px" id="quizHint">-</div>
+            <div style="margin-top:10px">
+              <a class="pill" href="./quiz.html">ไปที่แบบทดสอบ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick tiles (สวยพาสเทลเหมือนเดิม) -->
+      <div class="card" style="padding:14px;margin-top:12px">
         <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
 
         <div class="tiles">
@@ -88,18 +141,82 @@
 
   <script type="module">
     import { initUserShell } from "../js/shell.js";
+    import { api } from "../js/api.js";
     import { t, applyI18n } from "../js/i18n.js";
     import { Icons } from "../js/icons.js";
 
     await initUserShell({ active: "home", title: t("page.home") });
     applyI18n(document);
 
+    // icons (tiles)
     document.getElementById("icPv").innerHTML = Icons.heartShield();
     document.getElementById("icFp").innerHTML = Icons.calendar();
     document.getElementById("icKb").innerHTML = Icons.book();
     document.getElementById("icQz").innerHTML = Icons.quiz();
     document.getElementById("icNt").innerHTML = Icons.noti();
     document.getElementById("icDb").innerHTML = Icons.dashboard();
+
+    // summary data
+    const fpSummary = document.getElementById("fpSummary");
+    const fpDetail = document.getElementById("fpDetail");
+    const pvDue = document.getElementById("pvDue");
+    const pvOver = document.getElementById("pvOver");
+    const notiUnread = document.getElementById("notiUnread");
+    const quizLast = document.getElementById("quizLast");
+    const quizHint = document.getElementById("quizHint");
+
+    const fmtThai = (iso) => iso ? new Date(iso).toLocaleDateString("th-TH",{dateStyle:"long"}) : "-";
+
+    // FP latest prediction
+    try{
+      const pred = await api.fpPredLatest();
+      const item = pred?.item || null;
+      if(!item){
+        fpSummary.textContent = t("home.fpNoData");
+        fpDetail.textContent = "";
+      } else {
+        fpSummary.textContent = "✅ " + t("home.fpCardTitle");
+        fpDetail.innerHTML =
+          `${t("home.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b><br/>` +
+          `${t("home.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b><br/>` +
+          `${t("home.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b>`;
+      }
+    }catch{
+      fpSummary.textContent = t("home.fpNoData");
+      fpDetail.textContent = "";
+    }
+
+    // Preventive counts
+    try{
+      const pv = await api.preventiveList();
+      pvDue.textContent = pv?.counts?.dueToday ?? "-";
+      pvOver.textContent = pv?.counts?.overdue ?? "-";
+    }catch{
+      pvDue.textContent = "-";
+      pvOver.textContent = "-";
+    }
+
+    // Notifications unread
+    try{
+      const u = await api.userNotificationsUnreadCount();
+      notiUnread.textContent = (u?.unread ?? 0);
+    }catch{
+      notiUnread.textContent = "-";
+    }
+
+    // Quiz last score
+    try{
+      const res = await api.quizMyResults();
+      const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
+      const last = arr[0] || null;
+      quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
+      quizHint.textContent = last
+        ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "")
+        : "ยังไม่มีผลแบบทดสอบ";
+    }catch{
+      quizLast.textContent = "-";
+      quizHint.textContent = "ยังไม่มีผลแบบทดสอบ";
+    }
   </script>
 </body>
 </html>
