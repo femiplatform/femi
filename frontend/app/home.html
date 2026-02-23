@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>FEMI • Home</title>
-  <link rel="stylesheet" href="./assets/app.css"/>
+  <link rel="stylesheet" href="../assets/app.css"/>
 </head>
 <body>
   <div id="app">
@@ -87,14 +87,13 @@
   </div>
 
   <script type="module">
-    import { initUserShell } from "./js/shell.js";
-    import { t, applyI18n } from "./js/i18n.js";
-    import { Icons } from "./js/icons.js";
+    import { initUserShell } from "../js/shell.js";
+    import { t, applyI18n } from "../js/i18n.js";
+    import { Icons } from "../js/icons.js";
 
     await initUserShell({ active: "home", title: t("page.home") });
     applyI18n(document);
 
-    // icons
     document.getElementById("icPv").innerHTML = Icons.heartShield();
     document.getElementById("icFp").innerHTML = Icons.calendar();
     document.getElementById("icKb").innerHTML = Icons.book();
