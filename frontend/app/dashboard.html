@@ -1,90 +1,80 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FEMI | แดชบอร์ด</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • แดชบอร์ด</title>
+  <link rel="stylesheet" href="../assets/app.css" />
 </head>
-<body class="gradient-bg text-slate-900">
-  <div id="userHeader"></div>
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แดชบอร์ด</h1>
+      <p class="page-sub muted">สรุปการใช้งานและสถิติของคุณ</p>
 
-  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
+      <section class="grid-3">
+        <div class="card stat">
+          <div class="k">Preventive วันนี้</div>
+          <div class="v" id="dPrev">-</div>
+          <div class="muted" id="dPrevHint">-</div>
+        </div>
+        <div class="card stat">
+          <div class="k">คะแนนแบบทดสอบล่าสุด</div>
+          <div class="v" id="dQuiz">-</div>
+          <div class="muted" id="dQuizHint">-</div>
+        </div>
+        <div class="card stat">
+          <div class="k">การแจ้งเตือนที่ยังไม่อ่าน</div>
+          <div class="v" id="dNotif">-</div>
+          <div class="muted">แตะไอคอนกระดิ่งเพื่อดูรายละเอียด</div>
+        </div>
+      </section>
 
-<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
-  <h1 class="text-2xl font-extrabold tracking-tight">แดชบอร์ด</h1>
-  <p id="hello" class="text-slate-600 mt-1">กำลังโหลด…</p>
-</section>
-
-<section class="mt-5 grid gap-3">
-  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-    <div class="font-bold">แบบทดสอบล่าสุด</div>
-    <div id="latestQuiz" class="text-sm text-slate-600 mt-2">กำลังโหลด…</div>
-    <a href="/app/quiz.html" class="inline-flex mt-3 text-rose-700 font-semibold">ไปทำแบบทดสอบ →</a>
+      <section style="margin-top:14px">
+        <div class="card" style="padding:14px">
+          <div style="font-weight:800;margin-bottom:10px">สรุปล่าสุด</div>
+          <div id="summary" class="muted">กำลังโหลด…</div>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-    <div class="font-bold">เนื้อหาความรู้ล่าสุด</div>
-    <div id="latestKnowledge" class="text-sm text-slate-600 mt-2">กำลังโหลด…</div>
-    <a href="/app/knowledge.html" class="inline-flex mt-3 text-cyan-700 font-semibold">อ่านเพิ่มเติม →</a>
-  </div>
-
-  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-    <div class="flex items-center justify-between">
-      <div class="font-bold">ข่าว/ประกาศล่าสุด</div>
-      <a href="/app/knowledge.html" class="text-sm text-slate-600 hover:text-slate-900">ดูทั้งหมด</a>
-    </div>
-    <div id="newsList" class="mt-3 space-y-3"></div>
-  </div>
-</section>
-
-  </main>
-
-  <div id="userBottomNav"></div>
-  <div id="userDrawer"></div>
 
   <script type="module">
-    import { requireAuth } from "/js/auth.js";
-    import { mountUserShell } from "/js/user_shell.js";
-    requireAuth("/login.html");
-    await mountUserShell({ activeKey: "dashboard", pageTitle: "แดชบอร์ด" });
-    
-import { api } from "/js/api.js";
+    import { initUserShell } from "../js/shell.js";
+    import { api } from "../js/api.js";
 
-const me = await api.me();
-document.getElementById("hello").textContent = `สวัสดี ${me.firstName || ""} ${me.lastName || ""}`.trim();
+    await initUserShell({ active: "dashboard", title: "แดชบอร์ด" });
 
-try {
-  const kb = await api.knowledgeList();
-  document.getElementById("latestKnowledge").textContent = kb?.[0]?.title ? kb[0].title : "ยังไม่มีเนื้อหา";
-} catch { document.getElementById("latestKnowledge").textContent = "โหลดไม่สำเร็จ"; }
+    const s = (id) => document.getElementById(id);
 
-try {
-  const results = await api.quizMyResults();
-  const r0 = results?.[0];
-  document.getElementById("latestQuiz").textContent = r0 ? `คะแนน ${r0.score}/${r0.total} • ${new Date(r0.takenAt).toLocaleString("th-TH")}` : "ยังไม่มีประวัติ";
-} catch { document.getElementById("latestQuiz").textContent = "โหลดไม่สำเร็จ"; }
+    // Preventive
+    try {
+      const p = await api.preventiveList();
+      s('dPrev').textContent = p.counts?.dueToday ?? 0;
+      s('dPrevHint').textContent = p.counts?.overdue ? `เลยกำหนด ${p.counts.overdue}` : 'พร้อมทำ';
+    } catch(e){ console.error(e); }
 
-try {
-  const news = await api.newsList();
-  const box = document.getElementById("newsList");
-  const items = (news || []).slice(0, 5);
-  box.innerHTML = items.length ? items.map(n => `
-    <a href="/app/knowledge.html#news:${n.newsId}" class="block rounded-2xl border border-slate-200 p-4 hover:shadow-soft transition">
-      <div class="text-xs text-slate-500">${n.category || "ประกาศ"}</div>
-      <div class="font-semibold mt-1">${n.title || "-"}</div>
-      <div class="text-sm text-slate-600 mt-2 line-clamp-2">${n.summary || ""}</div>
-    </a>
-  `).join("") : `<div class="text-sm text-slate-600">ยังไม่มีข่าว</div>`;
-} catch {}
+    // Quiz
+    try {
+      const r = await api.quizMyResults();
+      const last = Array.isArray(r) ? r[0] : null;
+      s('dQuiz').textContent = last ? `${last.score}/${last.total}` : '-';
+      s('dQuizHint').textContent = last ? (last.category ? `หมวด ${last.category}` : 'ผลล่าสุด') : 'ยังไม่มีผล';
+    } catch(e){ console.error(e); }
 
+    // Notifications
+    try {
+      const n = await api.userNotificationsUnreadCount();
+      s('dNotif').textContent = n.unreadCount ?? 0;
+    } catch(e){ s('dNotif').textContent = 0; }
+
+    // Summary
+    try {
+      const me = await api.me();
+      s('summary').textContent = `สวัสดี ${me.firstName||''} ${me.lastName||''}`.trim();
+    } catch {
+      s('summary').textContent = 'ยินดีต้อนรับ';
+    }
   </script>
 </body>
 </html>

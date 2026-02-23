@@ -1,62 +1,49 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FEMI | เครื่องมือ</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • เครื่องมือ</title>
+  <link rel="stylesheet" href="../assets/app.css" />
 </head>
-<body class="gradient-bg text-slate-900">
-  <div id="userHeader"></div>
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">เครื่องมือ</h1>
+      <p class="page-sub muted">เข้าถึงฟังก์ชันทั้งหมดได้รวดเร็ว</p>
 
-  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
-
-<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
-  <h1 class="text-2xl font-extrabold tracking-tight">เครื่องมือ</h1>
-  <p class="text-slate-600 mt-1">ทางลัดไปยังฟังก์ชันทั้งหมด</p>
-</section>
-
-<section class="mt-5 grid gap-3">
-  <a href="/app/preventive.html" class="rounded-3xl border border-slate-200 bg-white p-5 hover:shadow-soft transition">
-    <div class="font-bold">Preventive Lifestyle</div>
-    <div class="text-sm text-slate-600 mt-1">เช็กลิสต์ดูแลสุขภาพ • ทำแล้ว/ข้าม • แจ้งเตือน</div>
-  </a>
-  <a href="/app/family_planning.html" class="rounded-3xl border border-slate-200 bg-white p-5 hover:shadow-soft transition">
-    <div class="font-bold">Smart Family Planning</div>
-    <div class="text-sm text-slate-600 mt-1">รอบเดือน • บันทึกรายวัน • วันเสี่ยง</div>
-  </a>
-  <a href="/app/pregnancy.html" class="rounded-3xl border border-slate-200 bg-white p-5 hover:shadow-soft transition">
-    <div class="font-bold">Active Pregnancy Journey</div>
-    <div class="text-sm text-slate-600 mt-1">นัดหมาย • ลูกดิ้น • น้ำหนัก/ความดัน</div>
-  </a>
-  <a href="/app/knowledge.html" class="rounded-3xl border border-slate-200 bg-white p-5 hover:shadow-soft transition">
-    <div class="font-bold">คลังความรู้</div>
-    <div class="text-sm text-slate-600 mt-1">บทความสุขภาพ • ข่าว • คำแนะนำ</div>
-  </a>
-  <a href="/app/quiz.html" class="rounded-3xl border border-slate-200 bg-white p-5 hover:shadow-soft transition">
-    <div class="font-bold">แบบทดสอบ</div>
-    <div class="text-sm text-slate-600 mt-1">ทำแบบทดสอบ • ดูคะแนนและประวัติ</div>
-  </a>
-</section>
-
-  </main>
-
-  <div id="userBottomNav"></div>
-  <div id="userDrawer"></div>
+      <div class="grid-2">
+        <a class="card" href="./preventive.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">Preventive Lifestyle</div>
+          <div class="muted">เช็คลิสต์ดูแลสุขภาพเชิงป้องกัน</div>
+        </a>
+        <a class="card" href="./family_planning.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">Smart Family Planning</div>
+          <div class="muted">รอบเดือน/วันเสี่ยง/คุมกำเนิด</div>
+        </a>
+        <a class="card" href="./pregnancy.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">Active Pregnancy Journey</div>
+          <div class="muted">ติดตามครรภ์/นัดหมาย/ลูกดิ้น</div>
+        </a>
+        <a class="card" href="./knowledge.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">คลังความรู้</div>
+          <div class="muted">บทความ/คำแนะนำสุขภาพ</div>
+        </a>
+        <a class="card" href="./quiz.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">แบบทดสอบ</div>
+          <div class="muted">ประเมินความรู้และรับคะแนน</div>
+        </a>
+        <a class="card" href="./notifications.html" style="padding:14px;border:1px solid var(--stroke)">
+          <div style="font-weight:800">การแจ้งเตือน</div>
+          <div class="muted">ดูข้อความแจ้งเตือนทั้งหมด</div>
+        </a>
+      </div>
+    </main>
+  </div>
 
   <script type="module">
-    import { requireAuth } from "/js/auth.js";
-    import { mountUserShell } from "/js/user_shell.js";
-    requireAuth("/login.html");
-    await mountUserShell({ activeKey: "tools", pageTitle: "เครื่องมือ" });
-    
+    import { initUserShell } from "../js/shell.js";
+    await initUserShell({ active: "tools", title: "เครื่องมือ" });
   </script>
 </body>
 </html>

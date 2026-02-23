@@ -1,3 +1,4 @@
+// femi/frontend/js/auth.js
 const KEY = "femi.session";
 
 export function setSession(session) {
@@ -33,16 +34,6 @@ export function requireAdmin(redirect = "/login.html") {
   if (!getToken() || role !== "admin") window.location.href = redirect;
 }
 
-/** optional async guard */
-export async function requireAuthAsync(redirect = "/login.html") {
-  if (!getToken()) {
-    window.location.href = redirect;
-    return false;
-  }
-  return true;
-}
-
-/** local logout (safe) */
 export async function logout(redirect = "/login.html") {
   clearSession();
   window.location.href = redirect;

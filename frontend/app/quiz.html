@@ -1,103 +1,82 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FEMI | แบบทดสอบ</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • แบบทดสอบ</title>
+  <link rel="stylesheet" href="../assets/app.css" />
 </head>
-<body class="gradient-bg text-slate-900">
-  <div id="userHeader"></div>
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แบบทดสอบ</h1>
+      <p class="page-sub muted">ดูคะแนน/ประวัติการทำแบบทดสอบ</p>
 
-  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
+      <div class="card" style="padding:14px">
+        <div style="font-weight:800">คะแนนล่าสุด</div>
+        <div style="font-size:28px;font-weight:900;margin-top:6px" id="lastScore">-</div>
+        <div class="muted" id="lastHint">-</div>
+      </div>
 
-<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
-  <h1 class="text-2xl font-extrabold tracking-tight">แบบทดสอบ</h1>
-  <p class="text-slate-600 mt-1">ทำแบบทดสอบและดูผลคะแนน</p>
-</section>
+      <div style="margin-top:12px" class="card">
+        <div style="padding:14px 14px 0;font-weight:800">ประวัติ</div>
+        <div id="loading" class="muted" style="padding:14px">กำลังโหลด…</div>
+        <div id="empty" class="muted hidden" style="padding:14px">ยังไม่มีประวัติ</div>
+        <div id="list" style="display:flex;flex-direction:column;gap:10px;padding:14px"></div>
+      </div>
 
-<section class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-  <div class="font-bold">ประวัติคะแนนของฉัน</div>
-  <div id="myResults" class="mt-3 space-y-2 text-sm text-slate-700">กำลังโหลด…</div>
-</section>
-
-<section class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-  <div class="font-bold">เริ่มทำแบบทดสอบ</div>
-  <p class="text-sm text-slate-600 mt-1">ใน MVP นี้ จะเลือกข้อคำถามจากหมวดที่มีอยู่ในระบบ</p>
-  <div class="mt-3 flex gap-2">
-    <input id="category" class="flex-1 px-4 py-3 rounded-2xl border border-slate-200" placeholder="หมวด (เว้นว่างได้)" />
-    <button id="btnStart" class="px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold">เริ่ม</button>
+      <div class="card" style="padding:14px;margin-top:12px">
+        <div style="font-weight:800;margin-bottom:6px">หมายเหตุ</div>
+        <div class="muted">หน้า "ทำแบบทดสอบ" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว</div>
+      </div>
+    </main>
   </div>
-  <div id="qBox" class="mt-4"></div>
-</section>
-
-  </main>
-
-  <div id="userBottomNav"></div>
-  <div id="userDrawer"></div>
 
   <script type="module">
-    import { requireAuth } from "/js/auth.js";
-    import { mountUserShell } from "/js/user_shell.js";
-    requireAuth("/login.html");
-    await mountUserShell({ activeKey: "tools", pageTitle: "แบบทดสอบ" });
-    
-import { api } from "/js/api.js";
+    import { initUserShell } from "../js/shell.js";
+    import { api } from "../js/api.js";
 
-const myResults = document.getElementById("myResults");
-const qBox = document.getElementById("qBox");
+    await initUserShell({ active: "tools", title: "แบบทดสอบ" });
 
-async function loadResults(){
-  try{
-    const res = await api.quizMyResults();
-    if (!res?.length){
-      myResults.innerHTML = '<div class="text-slate-600">ยังไม่มีประวัติ</div>';
-      return;
+    const elLoading = document.getElementById('loading');
+    const elEmpty = document.getElementById('empty');
+    const elList = document.getElementById('list');
+
+    function fmt(dt){
+      return dt ? new Date(dt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : '';
     }
-    myResults.innerHTML = res.slice(0,10).map(r=>`
-      <div class="flex justify-between border-b border-slate-100 py-2">
-        <div>${r.category || "ทั่วไป"}</div>
-        <div class="font-semibold">${r.score}/${r.total}</div>
-      </div>
-    `).join("");
-  }catch(e){
-    console.error(e);
-    myResults.innerHTML = '<div class="text-rose-700">โหลดไม่สำเร็จ</div>';
-  }
-}
 
-document.getElementById("btnStart").addEventListener("click", async ()=>{
-  qBox.innerHTML = "กำลังโหลดคำถาม…";
-  const category = document.getElementById("category").value.trim();
-  try{
-    const qs = await api.quizQuestionsList(category);
-    const q = (qs||[])[0];
-    if (!q){
-      qBox.innerHTML = '<div class="text-slate-600">ยังไม่มีคำถามในหมวดนี้</div>';
-      return;
+    try {
+      const results = await api.quizMyResults();
+      const last = Array.isArray(results) ? results[0] : null;
+      document.getElementById('lastScore').textContent = last ? `${last.score}/${last.total}` : '-';
+      document.getElementById('lastHint').textContent = last ? `ทำเมื่อ ${fmt(last.takenAt)}` : 'ยังไม่มีผล';
+
+      elLoading.classList.add('hidden');
+      if (!results || !results.length){
+        elEmpty.classList.remove('hidden');
+        return;
+      }
+
+      results.slice(0, 20).forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.padding = '12px';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:10px">
+            <div>
+              <div style="font-weight:900">${r.score}/${r.total}</div>
+              <div class="muted" style="font-size:12px">${fmt(r.takenAt)}</div>
+            </div>
+            <span class="pill">${r.category || 'general'}</span>
+          </div>
+        `;
+        elList.appendChild(card);
+      });
+    } catch(e){
+      console.error(e);
+      elLoading.textContent = e?.error?.message || 'โหลดข้อมูลไม่สำเร็จ';
     }
-    // Simple single question UI (MVP)
-    qBox.innerHTML = `
-      <div class="rounded-2xl border border-slate-200 p-4">
-        <div class="font-semibold">${q.questionText}</div>
-        <div class="text-sm text-slate-600 mt-2">*หน้าทำข้อสอบเต็มรูปแบบจะพัฒนาต่อใน Sprint ถัดไป</div>
-      </div>
-    `;
-  }catch(e){
-    console.error(e);
-    qBox.innerHTML = '<div class="text-rose-700">โหลดไม่สำเร็จ</div>';
-  }
-});
-
-await loadResults();
-
   </script>
 </body>
 </html>

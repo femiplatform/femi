@@ -1,3 +1,4 @@
+// femi/frontend/js/api.js
 import { FEMI } from "./config.js";
 import { getToken } from "./auth.js";
 
@@ -23,15 +24,17 @@ async function request(action, payload = {}, opts = {}) {
     throw { success: false, error: { code: "BAD_JSON", message: "Invalid JSON response", details: text } };
   }
 
-  if (!json || json.success !== true) {
-    const err = json?.error || { code: "UNKNOWN", message: "Unknown error" };
-    throw { success: false, error: err };
+  if (!json?.success) {
+    throw { success: false, error: json?.error || { code: "UNKNOWN", message: "Unknown error" } };
   }
+
   return json.data;
 }
 
 export const api = {
   request,
+
+  // System
   ping: () => request("ping", {}, { withToken: false }),
 
   // Auth
@@ -39,47 +42,30 @@ export const api = {
   register: (payload) => request("auth.register", payload, { withToken: false }),
   me: () => request("auth.me", {}),
   logout: () => request("auth.logout", {}),
-
-  // Debug (optional)
   whoami: () => request("debug.whoami", {}),
 
-  // Admin Users
-  usersList: (q = "") => request("users.list", { q }),
-  usersGet: (userId) => request("users.get", { userId }),
-  usersCreate: (user) => request("users.create", user),
-  usersUpdate: (userId, patch) => request("users.update", { userId, patch }),
-  usersDelete: (userId) => request("users.delete", { userId }),
-
-  // Content
+  // Content (Public)
   newsList: () => request("news.list", {}, { withToken: false }),
   newsGet: (newsId) => request("news.get", { newsId }, { withToken: false }),
-  newsCreate: (item) => request("news.create", item),
-  newsUpdate: (newsId, patch) => request("news.update", { newsId, patch }),
-  newsDelete: (newsId) => request("news.delete", { newsId }),
-
   knowledgeList: () => request("knowledge.list", {}, { withToken: false }),
   knowledgeGet: (kbId) => request("knowledge.get", { kbId }, { withToken: false }),
-  knowledgeCreate: (item) => request("knowledge.create", item),
-  knowledgeUpdate: (kbId, patch) => request("knowledge.update", { kbId, patch }),
-  knowledgeDelete: (kbId) => request("knowledge.delete", { kbId }),
 
   // Quiz
   quizQuestionsList: (category = "") => request("quiz.questions.list", { category }, { withToken: false }),
   quizSubmit: (payload) => request("quiz.submit", payload),
   quizMyResults: () => request("quiz.results.my", {}),
 
-  // Notifications & Settings
-  notificationsList: () => request("notifications.list", {}),
-  notificationsCreate: (item) => request("notifications.create", item),
-  notificationsSend: (notificationId) => request("notifications.send", { notificationId }),
-  settingsGet: () => request("settings.get", {}),
-  settingsSet: (configKey, configValue) => request("settings.set", { configKey, configValue }),
-
   // Preventive (User)
   preventiveList: () => request("preventive.list", {}),
   preventiveMarkDone: (userItemId) => request("preventive.markDone", { userItemId }),
   preventiveMarkSkipped: (userItemId, reason = "") => request("preventive.markSkipped", { userItemId, reason }),
-  preventiveSetReminderTime: (userItemId, remindTime) => request("preventive.setReminderTime", { userItemId, remindTime })
+  preventiveSetReminderTime: (userItemId, remindTime) => request("preventive.setReminderTime", { userItemId, remindTime }),
+
+  // User notifications (INAPP MVP)
+  userNotificationsList: (limit = 30) => request("user.notifications.list", { limit }),
+  userNotificationsMarkRead: (notificationId) => request("user.notifications.markRead", { notificationId }),
+  userNotificationsUnreadCount: () => request("user.notifications.unreadCount", {})
 };
 
+// expose for debugging
 if (typeof window !== "undefined") window.api = api;

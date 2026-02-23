@@ -1,64 +1,85 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>FEMI | การแจ้งเตือน</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <script src="/assets/tailwind-theme.cdn.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/assets/app.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • การแจ้งเตือน</title>
+  <link rel="stylesheet" href="../assets/app.css" />
 </head>
-<body class="gradient-bg text-slate-900">
-  <div id="userHeader"></div>
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">การแจ้งเตือน</h1>
+      <p class="page-sub muted">ข้อความแจ้งเตือนภายในแอป</p>
 
-  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
-
-<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
-  <h1 class="text-2xl font-extrabold tracking-tight">การแจ้งเตือน</h1>
-  <p class="text-slate-600 mt-1">รายการแจ้งเตือนภายในระบบ</p>
-</section>
-
-<section class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
-  <div id="notifList" class="space-y-3">กำลังโหลด…</div>
-</section>
-
-  </main>
-
-  <div id="userBottomNav"></div>
-  <div id="userDrawer"></div>
+      <div id="loading" class="muted">กำลังโหลด…</div>
+      <div id="empty" class="card hidden" style="padding:14px">ยังไม่มีการแจ้งเตือน</div>
+      <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </main>
+  </div>
 
   <script type="module">
-    import { requireAuth } from "/js/auth.js";
-    import { mountUserShell } from "/js/user_shell.js";
-    requireAuth("/login.html");
-    await mountUserShell({ activeKey: "home", pageTitle: "การแจ้งเตือน" });
-    
-import { api } from "/js/api.js";
-const box = document.getElementById("notifList");
-try {
-  const list = await api.notificationsList();
-  const items = Array.isArray(list) ? list : (list?.items || []);
-  if (!items.length) {
-    box.innerHTML = '<div class="text-sm text-slate-600">ยังไม่มีการแจ้งเตือน</div>';
-  } else {
-    box.innerHTML = items.slice(0,50).map(n=>`
-      <div class="rounded-2xl border border-slate-200 p-4">
-        <div class="font-semibold">${n.title || "-"}</div>
-        <div class="text-sm text-slate-600 mt-1">${n.message || ""}</div>
-        <div class="text-xs text-slate-500 mt-2">${n.scheduleAt ? new Date(n.scheduleAt).toLocaleString("th-TH") : ""}</div>
-      </div>
-    `).join("");
-  }
-} catch(e){
-  console.error(e);
-  box.innerHTML = '<div class="text-sm text-rose-700">โหลดการแจ้งเตือนไม่สำเร็จ (จะปรับ backend ให้เป็นกล่องข้อความของผู้ใช้ใน Sprint ถัดไป)</div>';
-}
+    import { initUserShell } from "../js/shell.js";
+    import { api } from "../js/api.js";
 
+    await initUserShell({ active: "tools", title: "การแจ้งเตือน" });
+
+    const elLoading = document.getElementById('loading');
+    const elEmpty = document.getElementById('empty');
+    const elList = document.getElementById('list');
+
+    function esc(s){
+      return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    async function load(){
+      elLoading.classList.remove('hidden');
+      elEmpty.classList.add('hidden');
+      elList.innerHTML = '';
+      try {
+        const res = await api.userNotificationsList(50);
+        const items = res.items || [];
+        if (!items.length) {
+          elEmpty.classList.remove('hidden');
+          return;
+        }
+        items.forEach(n => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.style.padding = '14px';
+          card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+              <div>
+                <div style="font-weight:900">${esc(n.title || 'แจ้งเตือน')}</div>
+                <div class="muted" style="margin-top:4px">${esc(n.message || '')}</div>
+                <div class="muted" style="font-size:12px;margin-top:8px">${n.createdAt ? new Date(n.createdAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}) : ''}</div>
+              </div>
+              ${n.isRead ? `<span class="pill">อ่านแล้ว</span>` : `<button class="btn btn-ghost" data-id="${esc(n.notificationId)}">ทำเครื่องหมายว่าอ่านแล้ว</button>`}
+            </div>
+          `;
+          const btn = card.querySelector('button');
+          if (btn){
+            btn.addEventListener('click', async () => {
+              try {
+                await api.userNotificationsMarkRead(btn.dataset.id);
+                await load();
+              } catch(e){
+                console.error(e);
+                alert(e?.error?.message || 'ทำรายการไม่สำเร็จ');
+              }
+            });
+          }
+          elList.appendChild(card);
+        });
+      } catch(e){
+        console.error(e);
+        alert(e?.error?.message || 'โหลดการแจ้งเตือนไม่สำเร็จ');
+      } finally {
+        elLoading.classList.add('hidden');
+      }
+    }
+
+    await load();
   </script>
 </body>
 </html>
