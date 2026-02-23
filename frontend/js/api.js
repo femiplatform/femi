@@ -45,7 +45,7 @@ async function request(action, payload = {}, opts = {}) {
   // If backend returns error codes like ERR_*, just pass through
   if (!json?.success) {
     const code = json?.error?.code || (res.status === 401 ? "ERR_AUTH" : "ERR_SERVER");
-    const message = json?.error?.message || "";
+    const message = (json?.error?.message || (typeof json?.error === "string" ? json.error : "") || json?.message || "");
     const details = json?.error?.details || null;
     throw makeError(code, message, details);
   }

@@ -154,6 +154,11 @@ btnRecompute.addEventListener("click", async ()=>{
   }catch(e){
     console.error(e);
     showApiError(e, "common.loadFailed");
+    // Keep UI usable even if API fails: show empty prediction + calendar shell
+    cacheCycles = [];
+    cachePred = null;
+    cacheLogsByDate = new Map();
+    try{ renderPrediction(); renderCalendar(); }catch(_){ /* ignore */ }
   }
 });
 
@@ -314,6 +319,11 @@ async function load(){
   }catch(e){
     console.error(e);
     showApiError(e, "common.loadFailed");
+    // Keep UI usable even if API fails: show empty prediction + calendar shell
+    cacheCycles = [];
+    cachePred = null;
+    cacheLogsByDate = new Map();
+    try{ renderPrediction(); renderCalendar(); }catch(_){ /* ignore */ }
   }finally{
     elLoading.style.display = "none";
   }
