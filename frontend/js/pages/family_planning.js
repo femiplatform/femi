@@ -11,11 +11,27 @@ const calTitle = document.getElementById("calTitle");
 const calGrid = document.getElementById("calGrid");
 const predText = document.getElementById("predText");
 const predDetail = document.getElementById("predDetail");
+const calHint = document.getElementById("calHint");
 
 const btnPrev = document.getElementById("btnPrev");
 const btnNext = document.getElementById("btnNext");
 const btnAddCycle = document.getElementById("btnAddCycle");
 const btnRecompute = document.getElementById("btnRecompute");
+
+
+function errMsg(e, fallbackKey="common.loadFailed"){
+  const code = e?.error?.code || "";
+  if(code === "TIMEOUT") return t("common.timeout");
+  if(code === "NETWORK_ERROR") return t("common.networkError");
+  if(code === "UNAUTHORIZED") return t("common.unauthorized");
+  return e?.error?.message || t(fallbackKey);
+}
+
+function isIsoDate(s){
+  return typeof s==="string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+}
+
+function isoCmp(a,b){ return String(a).localeCompare(String(b)); }
 
 // modal
 const logModal = document.getElementById("logModal");
@@ -100,6 +116,7 @@ btnSaveLog.addEventListener("click", async ()=>{
   const iso = logModal.dataset.iso;
   if(!iso) return;
 
+  setLoading(btnSaveLog, true);
   try{
     await api.fpDailyUpsert({
       logDate: iso,
@@ -112,10 +129,13 @@ btnSaveLog.addEventListener("click", async ()=>{
       notes: notes.value
     });
     closeLogModal();
+    toast(t("common.saveSuccess"), "success");
     await load();
   }catch(e){
     console.error(e);
-    toast(e?.error?.message || t("common.saveFailed"), "danger");
+    toast(errMsg(e, "common.saveFailed"), "danger");
+  }finally{
+    setLoading(btnSaveLog, false);
   }
 });
 
@@ -129,13 +149,16 @@ btnNext.addEventListener("click", async ()=>{
 });
 
 btnRecompute.addEventListener("click", async ()=>{
+  setLoading(btnRecompute, true);
   try{
     await api.fpPredictRecompute({});
     await load();
-    toast(t("common.computeDone"), "danger");
+    toast(t("common.computeDone"), "success");
   }catch(e){
     console.error(e);
-    toast(e?.error?.message || t("common.loadFailed"), "danger");
+    toast(errMsg(e, "common.loadFailed"), "danger");
+  }finally{
+    setLoading(btnRecompute, false);
   }
 });
 
@@ -164,19 +187,37 @@ btnAddCycle.addEventListener("click", async ()=>{
     eIso = p;
   }
 
-  const len = prompt(t("fp.prompt.cycleLen")) || "";
+  if(eIso && isoCmp(eIso, sIso) < 0){
+    toast(t("fp.error.endBeforeStart"), "danger");
+    return;
+  }
 
+  const lenRaw = (prompt(t("fp.prompt.cycleLen")) || "").trim();
+  let len = "";
+  if(lenRaw){
+    const n = Number(lenRaw);
+    if(!Number.isFinite(n) || n < 15 || n > 60){
+      toast(t("fp.error.badCycleLen"), "danger");
+      return;
+    }
+    len = n;
+  }
+
+  setLoading(btnAddCycle, true);
   try{
     await api.fpCyclesCreate({
       periodStartDate: sIso,
       periodEndDate: eIso,
-      cycleLengthDays: len ? Number(len) : "",
+      cycleLengthDays: len,
       status:"Active"
     });
+    toast(t("common.saveSuccess"), "success");
     await load();
   }catch(e){
     console.error(e);
-    toast(e?.error?.message || t("common.saveFailed"), "danger");
+    toast(errMsg(e, "common.saveFailed"), "danger");
+  }finally{
+    setLoading(btnAddCycle, false);
   }
 });
 
@@ -204,6 +245,14 @@ function inRange(iso, a, b){
 function renderCalendar(){
   calTitle.textContent = monthTitle(view);
   calGrid.innerHTML = "";
+
+  if(calHint){
+    if(!cacheCycles || cacheCycles.length===0){
+      calHint.textContent = t("fp.hint.noCycles");
+    }else{
+      calHint.textContent = "";
+    }
+  }
 
   const startDay = new Date(view.getFullYear(), view.getMonth(), 1);
   const endDay = new Date(view.getFullYear(), view.getMonth()+1, 0);
@@ -295,7 +344,7 @@ async function load(){
     renderCalendar();
   }catch(e){
     console.error(e);
-    toast(e?.error?.message || t("common.loadFailed"), "danger");
+    toast(errMsg(e, "common.loadFailed"), "danger");
   }finally{
     elLoading.style.display = "none";
   }

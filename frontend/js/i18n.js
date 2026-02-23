@@ -13,6 +13,10 @@ const DICT = {
     "common.none": "-",
     "common.loadFailed": "โหลดไม่สำเร็จ",
     "common.saveFailed": "บันทึกไม่สำเร็จ",
+    "common.saveSuccess": "บันทึกสำเร็จ",
+    "common.timeout": "เชื่อมต่อใช้เวลานานเกินไป กรุณาลองใหม่อีกครั้ง",
+    "common.networkError": "เกิดปัญหาการเชื่อมต่ออินเทอร์เน็ต กรุณาลองใหม่",
+    "common.unauthorized": "เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่",
     "common.computeDone": "คำนวณคาดการณ์ให้แล้ว",
     "common.ok": "ตกลง",
     "common.close": "ปิด",
@@ -89,6 +93,7 @@ const DICT = {
     "fp.btnAddLog": "+ บันทึกรายวัน",
     "fp.btnRecompute": "คำนวณใหม่",
     "fp.cardNoData": "ยังไม่มีข้อมูล",
+    "fp.hint.noCycles": "ยังไม่มีข้อมูลรอบเดือน — กด “เพิ่มรอบเดือน” เพื่อเริ่มใช้งานและให้ระบบแสดงช่วงไข่ตกในปฏิทิน",
 
     // ✅ ปรับเป็น DD-MM-YYYY
     "fp.prompt.start": "วันเริ่มประจำเดือน (รูปแบบ DD-MM-YYYY เช่น 01-02-2026)",
@@ -110,6 +115,8 @@ const DICT = {
 
     // ✅ เพิ่มข้อความแจ้งรูปแบบวันที่ผิด
     "fp.error.badDate": "รูปแบบวันที่ไม่ถูกต้อง กรุณากรอกเป็น DD-MM-YYYY เช่น 03-02-2026",
+    "fp.error.endBeforeStart": "วันสิ้นสุดต้องไม่ก่อนวันเริ่ม",
+    "fp.error.badCycleLen": "รอบเดือนต้องเป็นตัวเลขระหว่าง 15–60 วัน",
 
     // Preventive
     "pv.title": "ดูแลสุขภาพเชิงป้องกัน",
