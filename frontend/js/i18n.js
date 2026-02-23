@@ -90,10 +90,12 @@ const DICT = {
     "fp.btnRecompute": "คำนวณใหม่",
     "fp.cardNoData": "ยังไม่มีข้อมูล",
 
-    "fp.prompt.start": "วันเริ่มประจำเดือน (รูปแบบ YYYY-MM-DD เช่น 2026-02-01)",
-    "fp.prompt.end": "วันสิ้นสุดประจำเดือน (YYYY-MM-DD) — เว้นว่างได้",
+    // ✅ ปรับเป็น DD-MM-YYYY
+    "fp.prompt.start": "วันเริ่มประจำเดือน (รูปแบบ DD-MM-YYYY เช่น 01-02-2026)",
+    "fp.prompt.end": "วันสิ้นสุดประจำเดือน (DD-MM-YYYY) — เว้นว่างได้",
     "fp.prompt.cycleLen": "ความยาวรอบเดือน (Cycle length) กี่วัน? — เว้นว่างได้ เช่น 28",
-    "fp.prompt.logDate": "วันที่ต้องการบันทึก (YYYY-MM-DD เช่น 2026-02-03)",
+    "fp.prompt.logDate": "วันที่ต้องการบันทึก (รูปแบบ DD-MM-YYYY เช่น 03-02-2026)",
+
     "fp.hint.bleeding": "เลือดออก (Bleeding): None=ไม่มี, Spotting=กะปริบกะปรอย, Light=น้อย, Medium=ปานกลาง, Heavy=มาก",
     "fp.hint.mood": "อารมณ์ (Mood): Good=ดี, Neutral=ปกติ, Bad=แย่",
     "fp.prompt.bleeding": "เลือดออกวันนี้เป็นระดับไหน? (None/Spotting/Light/Medium/Heavy)",
@@ -106,6 +108,9 @@ const DICT = {
     "fp.value.unknown": "ยังไม่ระบุ",
     "fp.value.noEnd": "ยังไม่ระบุวันสิ้นสุด",
 
+    // ✅ เพิ่มข้อความแจ้งรูปแบบวันที่ผิด
+    "fp.error.badDate": "รูปแบบวันที่ไม่ถูกต้อง กรุณากรอกเป็น DD-MM-YYYY เช่น 03-02-2026",
+
     // Preventive
     "pv.title": "ดูแลสุขภาพเชิงป้องกัน",
     "pv.subtitle": "รายการดูแลสุขภาพเชิงป้องกันของคุณ",
@@ -117,6 +122,7 @@ const DICT = {
     "pv.tabAll": "ทั้งหมด",
     "pv.done": "ทำแล้ว",
     "pv.skip": "ข้าม",
+
     // Knowledge page
     "kp.subtitle": "บทความและข่าวสาร",
     "kp.tab.kb": "ความรู้",

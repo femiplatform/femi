@@ -17,23 +17,62 @@ function fmtDateThai(iso) {
   if (!iso) return t("common.none");
   return new Date(iso).toLocaleDateString("th-TH", { dateStyle: "long" });
 }
+
 function safeNum(v) {
   if (v === null || v === undefined || v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
 }
 
-btnAddCycle.addEventListener("click", async () => {
-  const start = prompt(t("fp.prompt.start"));
-  if (!start) return;
+/**
+ * Parse DD-MM-YYYY or DD/MM/YYYY -> YYYY-MM-DD (ISO date-only)
+ */
+function parseDateInputDDMMYYYY_(input) {
+  const s = String(input || "").trim();
+  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (!m) return null;
 
-  const end = prompt(t("fp.prompt.end")) || "";
+  const dd = Number(m[1]);
+  const mm = Number(m[2]);
+  const yyyy = Number(m[3]);
+
+  if (yyyy < 1900 || yyyy > 2100) return null;
+  if (mm < 1 || mm > 12) return null;
+  if (dd < 1 || dd > 31) return null;
+
+  const d = new Date(yyyy, mm - 1, dd);
+  if (d.getFullYear() !== yyyy || d.getMonth() !== (mm - 1) || d.getDate() !== dd) return null;
+
+  return `${yyyy}-${String(mm).padStart(2, "0")}-${String(dd).padStart(2, "0")}`;
+}
+
+btnAddCycle.addEventListener("click", async () => {
+  const rawStart = prompt(t("fp.prompt.start")); // DD-MM-YYYY
+  if (!rawStart) return;
+
+  const startIso = parseDateInputDDMMYYYY_(rawStart);
+  if (!startIso) {
+    alert(t("fp.error.badDate"));
+    return;
+  }
+
+  const rawEnd = prompt(t("fp.prompt.end")) || ""; // DD-MM-YYYY (optional)
+  let endIso = "";
+  if (rawEnd.trim()) {
+    const parsed = parseDateInputDDMMYYYY_(rawEnd);
+    if (!parsed) {
+      alert(t("fp.error.badDate"));
+      return;
+    }
+    endIso = parsed;
+  }
+
   const len = prompt(t("fp.prompt.cycleLen")) || "";
 
   try {
     await api.fpCyclesCreate({
-      periodStartDate: start,
-      periodEndDate: end,
+      periodStartDate: startIso,
+      periodEndDate: endIso,
       cycleLengthDays: len ? Number(len) : "",
       status: "Active"
     });
@@ -45,8 +84,14 @@ btnAddCycle.addEventListener("click", async () => {
 });
 
 btnAddLog.addEventListener("click", async () => {
-  const logDate = prompt(t("fp.prompt.logDate"));
-  if (!logDate) return;
+  const raw = prompt(t("fp.prompt.logDate")); // DD-MM-YYYY
+  if (!raw) return;
+
+  const logDate = parseDateInputDDMMYYYY_(raw);
+  if (!logDate) {
+    alert(t("fp.error.badDate"));
+    return;
+  }
 
   alert(t("fp.hint.bleeding"));
   const bleeding = prompt(t("fp.prompt.bleeding"), "None") || "None";
