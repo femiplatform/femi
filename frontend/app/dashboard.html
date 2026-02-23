@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FEMI | แดชบอร์ด</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,132 +14,77 @@
   <link rel="stylesheet" href="/assets/app.css" />
 </head>
 <body class="gradient-bg text-slate-900">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <div id="userHeader"></div>
 
-  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/app/dashboard.html" class="flex items-center gap-3">
-        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
-      </a>
-      <div class="flex items-center gap-2 flex-wrap justify-end">
-        <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แดชบอร์ด</a>
-        <a href="/app/preventive.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Preventive</a>
-        <a href="/app/family_planning.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Family Planning</a>
-        <a href="/app/pregnancy.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Pregnancy</a>
-        <a href="/app/knowledge.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">ความรู้</a>
-        <a href="/app/quiz.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แบบทดสอบ</a>
-        <button id="logout" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
-      </div>
+  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
+
+<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
+  <h1 class="text-2xl font-extrabold tracking-tight">แดชบอร์ด</h1>
+  <p id="hello" class="text-slate-600 mt-1">กำลังโหลด…</p>
+</section>
+
+<section class="mt-5 grid gap-3">
+  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+    <div class="font-bold">แบบทดสอบล่าสุด</div>
+    <div id="latestQuiz" class="text-sm text-slate-600 mt-2">กำลังโหลด…</div>
+    <a href="/app/quiz.html" class="inline-flex mt-3 text-rose-700 font-semibold">ไปทำแบบทดสอบ →</a>
+  </div>
+
+  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+    <div class="font-bold">เนื้อหาความรู้ล่าสุด</div>
+    <div id="latestKnowledge" class="text-sm text-slate-600 mt-2">กำลังโหลด…</div>
+    <a href="/app/knowledge.html" class="inline-flex mt-3 text-cyan-700 font-semibold">อ่านเพิ่มเติม →</a>
+  </div>
+
+  <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+    <div class="flex items-center justify-between">
+      <div class="font-bold">ข่าว/ประกาศล่าสุด</div>
+      <a href="/app/knowledge.html" class="text-sm text-slate-600 hover:text-slate-900">ดูทั้งหมด</a>
     </div>
-  </header>
+    <div id="newsList" class="mt-3 space-y-3"></div>
+  </div>
+</section>
 
-  <main class="max-w-6xl mx-auto px-4 py-10">
-    <div class="flex items-start justify-between gap-4 flex-wrap">
-      <div>
-        <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-slate-800 to-rose-700 bg-clip-text text-transparent">แดชบอร์ด</h1>
-        <p id="hello" class="text-slate-600 mt-1">กำลังโหลด...</p>
-      </div>
-      <a href="/admin/index.html" id="adminLink" class="hidden px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-soft hover:from-rose-700 hover:to-pink-700">
-        ไปหน้าแอดมิน
-      </a>
-    </div>
-
-    <section class="mt-8 grid md:grid-cols-3 gap-4">
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
-        <div class="flex items-center gap-2 font-semibold">
-          <i data-lucide="clipboard-check" class="w-5 h-5 text-rose-700"></i>
-          แบบทดสอบล่าสุด
-        </div>
-        <div class="mt-3">
-          <div id="latestQuiz" class="text-slate-600 text-sm">ยังไม่มีข้อมูล</div>
-        </div>
-        <a href="/app/quiz.html" class="inline-flex items-center gap-2 mt-4 text-rose-700 font-semibold hover:underline">
-          ทำแบบทดสอบ <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
-        <div class="flex items-center gap-2 font-semibold">
-          <i data-lucide="book-open" class="w-5 h-5 text-cyan-700"></i>
-          เนื้อหาความรู้
-        </div>
-        <div class="mt-3">
-          <div id="latestKnowledge" class="text-slate-600 text-sm">กำลังโหลด...</div>
-        </div>
-        <a href="/app/knowledge.html" class="inline-flex items-center gap-2 mt-4 text-cyan-700 font-semibold hover:underline">
-          อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-5">
-        <div class="flex items-center gap-2 font-semibold">
-          <i data-lucide="bell" class="w-5 h-5 text-slate-700"></i>
-          การแจ้งเตือน
-        </div>
-        <div class="mt-3 text-slate-600 text-sm">
-          ระบบนี้สามารถขยายต่อเพื่อส่งแจ้งเตือนตามกลุ่มเป้าหมายได้
-        </div>
-        <div class="mt-4 text-xs text-slate-500">
-          (เวอร์ชั่นเริ่มต้น: บันทึกและดูประวัติการส่งในระบบ)
-        </div>
-      </div>
-    </section>
-
-    <section class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="text-xl font-bold">ข่าว/ประกาศล่าสุด</h2>
-        <a href="/app/knowledge.html" class="text-sm text-slate-600 hover:text-slate-900">ดูทั้งหมด</a>
-      </div>
-      <div id="newsList" class="mt-4 grid md:grid-cols-3 gap-4"></div>
-    </section>
   </main>
 
+  <div id="userBottomNav"></div>
+  <div id="userDrawer"></div>
+
   <script type="module">
-    import { api } from "/js/api.js";
-    import { clearSession, getSession } from "/js/auth.js";
-    import { qs, toast, formatDate } from "/js/ui.js";
+    import { requireAuth } from "/js/auth.js";
+    import { mountUserShell } from "/js/user_shell.js";
+    requireAuth("/login.html");
+    await mountUserShell({ activeKey: "dashboard", pageTitle: "แดชบอร์ด" });
+    
+import { api } from "/js/api.js";
 
-    async function init() {
-      try {
-        const me = await api.me();
-        qs("#hello").textContent = `สวัสดี ${me.firstName || ""} ${me.lastName || ""}`.trim();
-        if (me.role === "admin") qs("#adminLink").classList.remove("hidden");
+const me = await api.me();
+document.getElementById("hello").textContent = `สวัสดี ${me.firstName || ""} ${me.lastName || ""}`.trim();
 
-        // Latest knowledge
-        const kb = await api.knowledgeList();
-        qs("#latestKnowledge").textContent = kb?.[0]?.title ? kb[0].title : "ยังไม่มีเนื้อหา";
+try {
+  const kb = await api.knowledgeList();
+  document.getElementById("latestKnowledge").textContent = kb?.[0]?.title ? kb[0].title : "ยังไม่มีเนื้อหา";
+} catch { document.getElementById("latestKnowledge").textContent = "โหลดไม่สำเร็จ"; }
 
-        // Latest quiz result
-        const results = await api.quizMyResults();
-        const r0 = results?.[0];
-        qs("#latestQuiz").textContent = r0 ? `คะแนน ${r0.score}/${r0.total} • ${formatDate(r0.takenAt)}` : "ยังไม่มีประวัติ";
+try {
+  const results = await api.quizMyResults();
+  const r0 = results?.[0];
+  document.getElementById("latestQuiz").textContent = r0 ? `คะแนน ${r0.score}/${r0.total} • ${new Date(r0.takenAt).toLocaleString("th-TH")}` : "ยังไม่มีประวัติ";
+} catch { document.getElementById("latestQuiz").textContent = "โหลดไม่สำเร็จ"; }
 
-        // News cards
-        const news = await api.newsList();
-        const box = qs("#newsList");
-        box.innerHTML = (news || []).slice(0, 6).map(n => `
-          <a href="/app/knowledge.html#news:${n.newsId}" class="block rounded-2xl border border-slate-200 p-4 hover:shadow-soft transition">
-            <div class="text-sm text-slate-500">${n.category || "ประกาศ"}</div>
-            <div class="font-semibold mt-1">${n.title || "-"}</div>
-            <div class="text-sm text-slate-600 mt-2 line-clamp-3">${n.summary || ""}</div>
-          </a>
-        `).join("") || `<div class="text-slate-600 text-sm">ยังไม่มีข่าว/ประกาศ</div>`;
+try {
+  const news = await api.newsList();
+  const box = document.getElementById("newsList");
+  const items = (news || []).slice(0, 5);
+  box.innerHTML = items.length ? items.map(n => `
+    <a href="/app/knowledge.html#news:${n.newsId}" class="block rounded-2xl border border-slate-200 p-4 hover:shadow-soft transition">
+      <div class="text-xs text-slate-500">${n.category || "ประกาศ"}</div>
+      <div class="font-semibold mt-1">${n.title || "-"}</div>
+      <div class="text-sm text-slate-600 mt-2 line-clamp-2">${n.summary || ""}</div>
+    </a>
+  `).join("") : `<div class="text-sm text-slate-600">ยังไม่มีข่าว</div>`;
+} catch {}
 
-      } catch (err) {
-        toast(err?.error?.message || "ไม่สามารถโหลดข้อมูลได้", "danger");
-        window.location.href = "/login.html";
-      }
-    }
-
-    qs("#logout").addEventListener("click", async () => {
-      try { await api.logout(); } catch {}
-      clearSession();
-      window.location.href = "/index.html";
-    });
-
-    init();
   </script>
-
-  <script>lucide.createIcons();</script>
 </body>
 </html>

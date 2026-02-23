@@ -15,3 +15,8 @@ body { font-family: Prompt, Inter, system-ui, sans-serif; }
 button, a { transition: background-color .15s ease, color .15s ease, box-shadow .15s ease, transform .05s ease; }
 button:active, a:active { transform: translateY(0.5px); }
 button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(244,63,94,0.25); }
+
+
+/* FEMI user mobile helpers */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+body { padding-bottom: env(safe-area-inset-bottom); }

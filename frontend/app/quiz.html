@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>FEMI | แบบทดสอบ</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,178 +14,90 @@
   <link rel="stylesheet" href="/assets/app.css" />
 </head>
 <body class="gradient-bg text-slate-900">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <div id="userHeader"></div>
 
-  <header class="sticky top-0 z-40 bg-white/70 backdrop-blur border-b border-slate-200">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/app/dashboard.html" class="flex items-center gap-3">
-        <img src="/assets/logo.svg" class="h-8" alt="FEMI" />
-      </a>
-      <div class="flex items-center gap-2 flex-wrap justify-end">
-        <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แดชบอร์ด</a>
-        <a href="/app/preventive.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Preventive</a>
-        <a href="/app/family_planning.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Family Planning</a>
-        <a href="/app/pregnancy.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">Pregnancy</a>
-        <a href="/app/knowledge.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">ความรู้</a>
-        <a href="/app/quiz.html" class="px-4 py-2 rounded-2xl hover:bg-slate-100">แบบทดสอบ</a>
-        <button id="logout" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
-      </div>
-    </div>
-  </header>
+  <main class="mx-auto max-w-xl px-4 pt-6 pb-24">
 
-  <main class="max-w-4xl mx-auto px-4 py-10">
-    <div class="flex items-end justify-between gap-4 flex-wrap">
-      <div>
-        <h1 class="text-3xl font-bold">แบบทดสอบ</h1>
-        <p class="text-slate-600 mt-1">ตอบคำถามสั้น ๆ แล้วบันทึกผลไว้ในประวัติ</p>
-      </div>
-      <a href="/app/dashboard.html" class="px-4 py-2 rounded-2xl bg-white border border-slate-200 hover:bg-slate-50">กลับแดชบอร์ด</a>
-    </div>
+<section class="rounded-3xl border border-slate-200 bg-white/80 backdrop-blur p-5 shadow-soft">
+  <h1 class="text-2xl font-extrabold tracking-tight">แบบทดสอบ</h1>
+  <p class="text-slate-600 mt-1">ทำแบบทดสอบและดูผลคะแนน</p>
+</section>
 
-    <section class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-2 font-semibold">
-          <i data-lucide="clipboard-check" class="w-5 h-5 text-rose-700"></i>
-          คำถาม
-        </div>
-        <select id="category" class="px-4 py-2 rounded-2xl border border-slate-200 bg-white">
-          <option value="">ทุกหมวด</option>
-          <option value="health">สุขภาพทั่วไป</option>
-          <option value="pregnancy">ตั้งครรภ์</option>
-          <option value="nutrition">โภชนาการ</option>
-        </select>
-      </div>
+<section class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+  <div class="font-bold">ประวัติคะแนนของฉัน</div>
+  <div id="myResults" class="mt-3 space-y-2 text-sm text-slate-700">กำลังโหลด…</div>
+</section>
 
-      <form id="quizForm" class="mt-6 space-y-6">
-        <div id="questions" class="space-y-5"></div>
+<section class="mt-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft">
+  <div class="font-bold">เริ่มทำแบบทดสอบ</div>
+  <p class="text-sm text-slate-600 mt-1">ใน MVP นี้ จะเลือกข้อคำถามจากหมวดที่มีอยู่ในระบบ</p>
+  <div class="mt-3 flex gap-2">
+    <input id="category" class="flex-1 px-4 py-3 rounded-2xl border border-slate-200" placeholder="หมวด (เว้นว่างได้)" />
+    <button id="btnStart" class="px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold">เริ่ม</button>
+  </div>
+  <div id="qBox" class="mt-4"></div>
+</section>
 
-        <button id="submitBtn" type="submit" class="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-soft hover:from-rose-700 hover:to-pink-700">
-          ส่งคำตอบและบันทึกผล
-        </button>
-      </form>
-
-      <div id="resultBox" class="hidden mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-5"></div>
-    </section>
-
-    <section class="mt-8 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
-      <h2 class="text-xl font-bold">ประวัติของฉัน</h2>
-      <div id="myResults" class="mt-4 space-y-3"></div>
-    </section>
   </main>
 
+  <div id="userBottomNav"></div>
+  <div id="userDrawer"></div>
+
   <script type="module">
-    import { api } from "/js/api.js";
-    import { clearSession } from "/js/auth.js";
-    import { qs, toast, setLoading, formatDate } from "/js/ui.js";
+    import { requireAuth } from "/js/auth.js";
+    import { mountUserShell } from "/js/user_shell.js";
+    requireAuth("/login.html");
+    await mountUserShell({ activeKey: "tools", pageTitle: "แบบทดสอบ" });
+    
+import { api } from "/js/api.js";
 
-    let currentQuestions = [];
+const myResults = document.getElementById("myResults");
+const qBox = document.getElementById("qBox");
 
-    function renderQuestions(list) {
-      const box = qs("#questions");
-      currentQuestions = list || [];
-      if (!currentQuestions.length) {
-        box.innerHTML = `<div class="text-slate-600">ยังไม่มีคำถามในหมวดนี้</div>`;
-        return;
-      }
-      box.innerHTML = currentQuestions.map((q, idx) => {
-        const choices = (q.choices || []).map(c => `
-          <label class="flex items-start gap-3 p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer">
-            <input type="radio" name="q_${q.questionId}" value="${c.choiceId}" class="mt-1">
-            <div>
-              <div class="text-slate-800">${c.choiceText}</div>
-            </div>
-          </label>
-        `).join("");
-        return `
-          <div class="rounded-2xl border border-slate-200 p-5">
-            <div class="text-sm text-slate-500">ข้อ ${idx+1}</div>
-            <div class="font-semibold mt-1">${q.questionText}</div>
-            <div class="mt-4 space-y-2">${choices || `<div class="text-sm text-slate-600">ยังไม่มีตัวเลือก</div>`}</div>
-          </div>
-        `;
-      }).join("");
+async function loadResults(){
+  try{
+    const res = await api.quizMyResults();
+    if (!res?.length){
+      myResults.innerHTML = '<div class="text-slate-600">ยังไม่มีประวัติ</div>';
+      return;
     }
+    myResults.innerHTML = res.slice(0,10).map(r=>`
+      <div class="flex justify-between border-b border-slate-100 py-2">
+        <div>${r.category || "ทั่วไป"}</div>
+        <div class="font-semibold">${r.score}/${r.total}</div>
+      </div>
+    `).join("");
+  }catch(e){
+    console.error(e);
+    myResults.innerHTML = '<div class="text-rose-700">โหลดไม่สำเร็จ</div>';
+  }
+}
 
-    async function loadQuestions() {
-      try {
-        const category = qs("#category").value;
-        const list = await api.quizQuestionsList(category);
-        renderQuestions(list);
-      } catch (err) {
-        toast(err?.error?.message || "โหลดคำถามไม่สำเร็จ", "danger");
-      }
+document.getElementById("btnStart").addEventListener("click", async ()=>{
+  qBox.innerHTML = "กำลังโหลดคำถาม…";
+  const category = document.getElementById("category").value.trim();
+  try{
+    const qs = await api.quizQuestionsList(category);
+    const q = (qs||[])[0];
+    if (!q){
+      qBox.innerHTML = '<div class="text-slate-600">ยังไม่มีคำถามในหมวดนี้</div>';
+      return;
     }
+    // Simple single question UI (MVP)
+    qBox.innerHTML = `
+      <div class="rounded-2xl border border-slate-200 p-4">
+        <div class="font-semibold">${q.questionText}</div>
+        <div class="text-sm text-slate-600 mt-2">*หน้าทำข้อสอบเต็มรูปแบบจะพัฒนาต่อใน Sprint ถัดไป</div>
+      </div>
+    `;
+  }catch(e){
+    console.error(e);
+    qBox.innerHTML = '<div class="text-rose-700">โหลดไม่สำเร็จ</div>';
+  }
+});
 
-    async function loadMyResults() {
-      try {
-        const results = await api.quizMyResults();
-        const box = qs("#myResults");
-        box.innerHTML = (results || []).slice(0, 10).map(r => `
-          <div class="rounded-2xl border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div class="font-semibold">คะแนน ${r.score}/${r.total}</div>
-              <div class="text-sm text-slate-500">${formatDate(r.takenAt)}</div>
-            </div>
-            <div class="text-sm text-slate-600 mt-1">หมวด: ${r.category || "-"}</div>
-          </div>
-        `).join("") || `<div class="text-slate-600 text-sm">ยังไม่มีประวัติ</div>`;
-      } catch (err) {
-        // ignore
-      }
-    }
+await loadResults();
 
-    qs("#category").addEventListener("change", loadQuestions);
-
-    qs("#quizForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = qs("#submitBtn");
-      setLoading(btn, true);
-
-      try {
-        const category = qs("#category").value || "general";
-        const answers = currentQuestions.map(q => {
-          const sel = document.querySelector(`input[name="q_${q.questionId}"]:checked`);
-          return { questionId: q.questionId, choiceId: sel ? sel.value : "" };
-        });
-        const missing = answers.filter(a => !a.choiceId).length;
-        if (missing) {
-          toast("กรุณาตอบให้ครบทุกข้อ", "warning");
-          setLoading(btn, false);
-          return;
-        }
-
-        const result = await api.quizSubmit({ category, answers });
-        const box = qs("#resultBox");
-        box.classList.remove("hidden");
-        box.innerHTML = `
-          <div class="flex items-center gap-2 font-semibold">
-            <i data-lucide="badge-check" class="w-5 h-5 text-emerald-600"></i>
-            บันทึกผลสำเร็จ
-          </div>
-          <div class="mt-2 text-slate-700">คะแนนของคุณ: <span class="font-bold">${result.score}/${result.total}</span></div>
-          <div class="text-sm text-slate-500 mt-1">${formatDate(result.takenAt)}</div>
-        `;
-        lucide.createIcons();
-        toast("บันทึกผลเรียบร้อย", "success");
-        await loadMyResults();
-
-      } catch (err) {
-        toast(err?.error?.message || "ส่งคำตอบไม่สำเร็จ", "danger");
-      } finally {
-        setLoading(btn, false);
-      }
-    });
-
-    qs("#logout").addEventListener("click", async () => {
-      try { await api.logout(); } catch {}
-      clearSession();
-      window.location.href = "/index.html";
-    });
-
-    loadQuestions();
-    loadMyResults();
   </script>
-
-  <script>lucide.createIcons();</script>
 </body>
 </html>
