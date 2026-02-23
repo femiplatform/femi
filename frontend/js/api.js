@@ -13,7 +13,7 @@ async function request(action, payload = {}, opts = {}) {
   const res = await fetch(FEMI.API_BASE, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
 
   const text = await res.text();
@@ -21,52 +21,51 @@ async function request(action, payload = {}, opts = {}) {
   try {
     json = JSON.parse(text);
   } catch {
-    throw { success: false, error: { code: "BAD_JSON", message: "Invalid JSON response", details: text } };
+    throw { success: false, error: { code: "BAD_JSON", message: text } };
   }
 
-  if (!json?.success) {
-    throw { success: false, error: json?.error || { code: "UNKNOWN", message: "Unknown error" } };
-  }
-
+  if (!json?.success) throw json;
   return json.data;
 }
 
 export const api = {
   request,
 
-  // System
+  // --- system ---
   ping: () => request("ping", {}, { withToken: false }),
 
-  // Auth
+  // --- auth ---
   login: (email, password) => request("auth.login", { email, password }, { withToken: false }),
   register: (payload) => request("auth.register", payload, { withToken: false }),
   me: () => request("auth.me", {}),
   logout: () => request("auth.logout", {}),
   whoami: () => request("debug.whoami", {}),
 
-  // Content (Public)
+  // --- content ---
   newsList: () => request("news.list", {}, { withToken: false }),
   newsGet: (newsId) => request("news.get", { newsId }, { withToken: false }),
   knowledgeList: () => request("knowledge.list", {}, { withToken: false }),
   knowledgeGet: (kbId) => request("knowledge.get", { kbId }, { withToken: false }),
 
-  // Quiz
+  // --- quiz ---
   quizQuestionsList: (category = "") => request("quiz.questions.list", { category }, { withToken: false }),
   quizSubmit: (payload) => request("quiz.submit", payload),
   quizMyResults: () => request("quiz.results.my", {}),
 
-  // Preventive (User)
+  // --- notifications (user) ---
+  userNotificationsList: (limit = 50) => request("user.notifications.list", { limit }),
+  userNotificationsMarkRead: (notificationId) => request("user.notifications.markRead", { notificationId }),
+  userNotificationsUnreadCount: () => request("user.notifications.unreadCount", {}),
+
+  // --- Preventive (Sprint 1) ---
   preventiveList: () => request("preventive.list", {}),
   preventiveMarkDone: (userItemId) => request("preventive.markDone", { userItemId }),
   preventiveMarkSkipped: (userItemId, reason = "") => request("preventive.markSkipped", { userItemId, reason }),
   preventiveSetReminderTime: (userItemId, remindTime) => request("preventive.setReminderTime", { userItemId, remindTime }),
 
-  // User notifications (INAPP MVP)
-  userNotificationsList: (limit = 30) => request("user.notifications.list", { limit }),
-  userNotificationsMarkRead: (notificationId) => request("user.notifications.markRead", { notificationId }),
-  userNotificationsUnreadCount: () => request("user.notifications.unreadCount", {})
-
-  // Smart Family Planning – Sprint 2
+  // =========================================================
+  // ✅ Smart Family Planning – Sprint 2
+  // =========================================================
   fpCyclesList: () => request("fp.cycles.list", {}),
   fpCyclesCreate: (payload) => request("fp.cycles.create", payload),
   fpCyclesUpdate: (payload) => request("fp.cycles.update", payload),
@@ -78,5 +77,7 @@ export const api = {
   fpPredictRecompute: (payload = {}) => request("fp.predict.recompute", payload),
 };
 
-// expose for debugging
-if (typeof window !== "undefined") window.api = api;
+// expose for console debugging
+if (typeof window !== "undefined") {
+  window.api = api;
+}
