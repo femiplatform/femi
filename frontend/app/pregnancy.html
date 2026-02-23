@@ -4,7 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FEMI • Pregnancy</title>
-  <link rel="stylesheet" href="./assets/app.css" />
+
+  <!-- Use absolute paths so it works whether page is served at /pregnancy.html or /app/pregnancy.html -->
+  <link rel="stylesheet" href="/assets/app.css" />
+  <!-- Fallback for environments that keep pages under /app/ -->
+  <link rel="stylesheet" href="../assets/app.css" />
 </head>
 <body>
   <div id="app">
@@ -19,7 +23,7 @@
             <div style="font-weight:800" data-i18n="preg.summary.title">สรุปวันนี้</div>
             <div class="muted" style="margin-top:4px" id="pregSummarySubtitle" data-i18n="common.loading">กำลังโหลด…</div>
           </div>
-          <div class="pill" id="pregWeekPill" style="min-width:88px; text-align:center">-</div>
+          <div class="pill" id="pregWeekPill" style="min-width:96px; text-align:center">-</div>
         </div>
 
         <div class="grid-2" style="margin-top:12px">
@@ -67,18 +71,13 @@
             <div style="font-weight:800" id="profileEdd">-</div>
           </div>
           <div>
-            <div class="muted" data-i18n="preg.profile.gravida">ครรภ์ที่ (G)</div>
-            <div style="font-weight:800" id="profileGravida">-</div>
+            <div class="muted" data-i18n="preg.profile.week">อายุครรภ์ (สัปดาห์)</div>
+            <div style="font-weight:800" id="profileWeeks">-</div>
           </div>
           <div>
-            <div class="muted" data-i18n="preg.profile.para">คลอดแล้ว (P)</div>
-            <div style="font-weight:800" id="profilePara">-</div>
+            <div class="muted" data-i18n="preg.profile.notes">หมายเหตุ</div>
+            <div id="profileNotes" style="margin-top:4px">-</div>
           </div>
-        </div>
-
-        <div style="margin-top:10px">
-          <div class="muted" data-i18n="preg.profile.notes">หมายเหตุ</div>
-          <div id="profileNotes" style="margin-top:4px">-</div>
         </div>
       </section>
 
@@ -135,7 +134,7 @@
         <div id="vitalsList" style="margin-top:10px"></div>
       </section>
 
-      <!-- Modal -->
+      <!-- Simple modal -->
       <div id="modal" class="modal" style="display:none">
         <div class="modal-backdrop"></div>
         <div class="modal-sheet">
@@ -156,12 +155,24 @@
   </div>
 
   <script type="module">
-    import { initUserShell } from "./js/shell.js";
-    import { applyI18n } from "./js/i18n.js";
-    import { initPregnancyPage } from "./js/pages/pregnancy.js";
-    await initUserShell({ active: "tools", title: "Pregnancy" });
-    applyI18n(document);
-    initPregnancyPage();
+    // Use absolute paths first; if your deployment serves /app/* then relative imports still work.
+    import { initUserShell } from "/js/shell.js";
+    import { applyI18n } from "/js/i18n.js";
+    import { initPregnancyPage } from "/js/pages/pregnancy.js";
+
+    (async () => {
+      try {
+        await initUserShell({ active: "tools", title: "Pregnancy" });
+      } catch (e) {
+        // Fallback: try relative paths when served under /app/
+        try {
+          const mod = await import("../js/shell.js");
+          await mod.initUserShell({ active: "tools", title: "Pregnancy" });
+        } catch (_) {}
+      }
+      try { applyI18n(document); } catch(_) {}
+      initPregnancyPage();
+    })();
   </script>
 </body>
 </html>
