@@ -26,6 +26,22 @@
       </div>
     </div>
 
+    <!-- FP prediction summary -->
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.fpPredTitle">คาดการณ์ล่าสุด</div>
+      <div class="muted" id="fpPredText" style="margin-top:6px">-</div>
+      <div id="fpPredDetail" class="pred-detail"></div>
+    </div>
+
+    <!-- 7-day streak -->
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.streakTitle">ความสม่ำเสมอการบันทึก</div>
+      <div class="row">
+        <span class="muted" data-i18n="dash.streak7">7 วันล่าสุด บันทึกแล้ว</span>
+        <b id="streak7">-</b>
+      </div>
+    </div>
+
     <div class="card" style="padding:14px;margin-top:12px">
       <div style="font-weight:900" data-i18n="dash.pvTitle">Preventive</div>
       <div class="grid2" style="margin-top:10px">
@@ -67,6 +83,9 @@
   const pvOver = document.getElementById("pvOver");
   const quizLast = document.getElementById("quizLast");
   const quizHint = document.getElementById("quizHint");
+  const fpPredText = document.getElementById("fpPredText");
+  const fpPredDetail = document.getElementById("fpPredDetail");
+  const streak7 = document.getElementById("streak7");
 
   function iso(d){
     const y=d.getFullYear();
@@ -74,12 +93,18 @@
     const dd=String(d.getDate()).padStart(2,"0");
     return `${y}-${m}-${dd}`;
   }
+  function fmtThai(isoStr){
+    if(!isoStr) return "-";
+    return new Date(isoStr).toLocaleDateString("th-TH",{dateStyle:"long"});
+  }
 
   // FP cycles count
+  let cyclesLen = 0;
   try{
     const c = await api.fpCyclesList();
     const cycles = c?.items || [];
-    fpCycles.textContent = cycles.length;
+    cyclesLen = cycles.length;
+    fpCycles.textContent = cyclesLen;
   }catch{ fpCycles.textContent = "-"; }
 
   // FP daily logs count this month
@@ -90,6 +115,38 @@
     const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
     fpLogs.textContent = (r?.items || []).length;
   }catch{ fpLogs.textContent = "-"; }
+
+  // FP latest prediction
+  try{
+    const p = await api.fpPredLatest();
+    const item = p?.item || null;
+    if(!item){
+      fpPredText.textContent = t("dash.fpNoPred");
+      fpPredDetail.innerHTML = "";
+    } else {
+      fpPredText.textContent = "✅ " + t("dash.fpPredTitle");
+      fpPredDetail.innerHTML =
+        `<div class="pred-line">${t("dash.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b></div>`;
+    }
+  }catch{
+    fpPredText.textContent = t("dash.fpNoPred");
+    fpPredDetail.innerHTML = "";
+  }
+
+  // 7-day streak (count distinct logDate in last 7 days)
+  try{
+    const now = new Date();
+    const to = iso(now);
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
+    const items = r?.items || [];
+    const set = new Set(items.map(x => x.logDate));
+    streak7.textContent = t("dash.days", { n: set.size });
+  }catch{
+    streak7.textContent = "-";
+  }
 
   // Preventive counts
   try{
@@ -107,7 +164,9 @@
     const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
     const last = arr[0] || null;
     quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
-    quizHint.textContent = last ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "") : t("dash.quizNoData");
+    quizHint.textContent = last
+      ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "")
+      : t("dash.quizNoData");
   }catch{
     quizLast.textContent = "-";
     quizHint.textContent = t("dash.quizNoData");
@@ -121,6 +180,9 @@
   .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .stat{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px}
   .value{font-size:28px;font-weight:900;margin-top:6px}
+  .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .pred-line{font-size:13px;opacity:.9}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
   @media (max-width:700px){.grid2{grid-template-columns:1fr}}
 </style>
 </body>

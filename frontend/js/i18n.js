@@ -196,6 +196,17 @@ const DICT = {
     "dash.quizTitle": "แบบทดสอบ",
     "dash.quizLastScore": "คะแนนล่าสุด",
     "dash.quizNoData": "ยังไม่มีผลแบบทดสอบ",
+
+    // Dashboard - extra FP summary + streak
+    "dash.fpPredTitle": "คาดการณ์ล่าสุด",
+    "dash.fpNextPeriod": "รอบถัดไปคาดว่า:",
+    "dash.fpOvulation": "วันไข่ตกคาดว่า:",
+    "dash.fpFertile": "ช่วงเสี่ยงท้อง:",
+    "dash.fpNoPred": "ยังไม่มีข้อมูลคาดการณ์ — เพิ่มรอบเดือนก่อน",
+
+    "dash.streakTitle": "ความสม่ำเสมอการบันทึก",
+    "dash.streak7": "7 วันล่าสุด บันทึกแล้ว",
+    "dash.days": "{n} วัน",
   },
 
   en: {

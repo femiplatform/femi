@@ -13,21 +13,77 @@
     <p class="muted" data-i18n="tools.subtitle">รวมเครื่องมือเพื่อสุขภาพและการดูแลตนเอง</p>
 
     <div class="grid">
-      <a class="tile" href="./preventive.html" data-i18n="tools.preventive">ดูแลสุขภาพ (Preventive)</a>
-      <a class="tile" href="./family_planning.html" data-i18n="tools.familyPlanning">วางแผนครอบครัว</a>
-      <a class="tile" href="./pregnancy.html" data-i18n="tools.pregnancy">การตั้งครรภ์</a>
-      <a class="tile" href="./knowledge.html" data-i18n="tools.knowledge">ความรู้</a>
-      <a class="tile" href="./quiz.html" data-i18n="tools.quiz">แบบทดสอบ</a>
-      <a class="tile" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
+      <a class="tile" href="./preventive.html">
+        <span data-i18n="tools.preventive">ดูแลสุขภาพ (Preventive)</span>
+        <span class="badge" id="bdPv">-</span>
+      </a>
+
+      <a class="tile" href="./family_planning.html">
+        <span data-i18n="tools.familyPlanning">วางแผนครอบครัว</span>
+        <span class="badge" id="bdFp">-</span>
+      </a>
+
+      <a class="tile" href="./pregnancy.html">
+        <span data-i18n="tools.pregnancy">การตั้งครรภ์</span>
+        <span class="badge ghost">เร็วๆ นี้</span>
+      </a>
+
+      <a class="tile" href="./knowledge.html">
+        <span data-i18n="tools.knowledge">ความรู้</span>
+        <span class="badge ghost">อ่านได้เลย</span>
+      </a>
+
+      <a class="tile" href="./quiz.html">
+        <span data-i18n="tools.quiz">แบบทดสอบ</span>
+        <span class="badge ghost">ทำได้</span>
+      </a>
+
+      <a class="tile" href="./notifications.html">
+        <span data-i18n="nav.notifications">การแจ้งเตือน</span>
+        <span class="badge" id="bdNoti">-</span>
+      </a>
     </div>
   </main>
 </div>
 
 <script type="module">
   import { initUserShell } from "../js/shell.js";
+  import { api } from "../js/api.js";
   import { t, applyI18n } from "../js/i18n.js";
+
   await initUserShell({ active: "tools", title: t("page.tools") });
   applyI18n(document);
+
+  const bdPv = document.getElementById("bdPv");
+  const bdFp = document.getElementById("bdFp");
+  const bdNoti = document.getElementById("bdNoti");
+
+  try{
+    const pv = await api.preventiveList();
+    const due = pv?.counts?.dueToday ?? 0;
+    bdPv.textContent = due > 0 ? `วันนี้ ${due}` : "พร้อมใช้งาน";
+    bdPv.classList.toggle("warn", due > 0);
+  }catch{
+    bdPv.textContent = "-";
+  }
+
+  try{
+    const c = await api.fpCyclesList();
+    const n = (c?.items || []).length;
+    bdFp.textContent = n > 0 ? `มีข้อมูล ${n}` : "ยังไม่มีข้อมูล";
+    bdFp.classList.toggle("warn", n === 0);
+  }catch{
+    bdFp.textContent = "-";
+  }
+
+  try{
+    const u = await api.userNotificationsUnreadCount();
+    const n = u?.unread ?? 0;
+    bdNoti.textContent = n > 0 ? `ยังไม่อ่าน ${n}` : "0";
+    bdNoti.classList.toggle("warn", n > 0);
+  }catch{
+    bdNoti.textContent = "-";
+  }
 </script>
 
 <style>
@@ -35,12 +91,21 @@
   .muted{opacity:.7}
   .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
   .tile{
-    display:flex;align-items:center;justify-content:center;text-align:center;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding:14px;border-radius:14px;
     border:1px solid rgba(0,0,0,.10);
     text-decoration:none;color:#111;background:#fff;font-weight:900;
     min-height:64px;
   }
+  .badge{
+    font-size:12px;font-weight:900;
+    border:1px solid rgba(0,0,0,.12);
+    padding:6px 10px;border-radius:999px;
+    background:#f8fafc;
+    white-space:nowrap;
+  }
+  .badge.warn{border-color:#f59e0b}
+  .badge.ghost{opacity:.65}
   @media (max-width:700px){.grid{grid-template-columns:1fr}}
 </style>
 </body>
