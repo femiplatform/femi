@@ -1,49 +1,47 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • เครื่องมือ</title>
-  <link rel="stylesheet" href="../assets/app.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FEMI • Tools</title>
+  <link rel="stylesheet" href="../assets/app.css"/>
 </head>
 <body>
-  <div id="app">
-    <main class="container">
-      <h1 class="page-title">เครื่องมือ</h1>
-      <p class="page-sub muted">เข้าถึงฟังก์ชันทั้งหมดได้รวดเร็ว</p>
+<div id="app">
+  <main class="container">
+    <h1 data-i18n="page.tools">เครื่องมือ</h1>
+    <p class="muted" data-i18n="tools.subtitle">รวมเครื่องมือเพื่อสุขภาพและการดูแลตนเอง</p>
 
-      <div class="grid-2">
-        <a class="card" href="./preventive.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">Preventive Lifestyle</div>
-          <div class="muted">เช็คลิสต์ดูแลสุขภาพเชิงป้องกัน</div>
-        </a>
-        <a class="card" href="./family_planning.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">Smart Family Planning</div>
-          <div class="muted">รอบเดือน/วันเสี่ยง/คุมกำเนิด</div>
-        </a>
-        <a class="card" href="./pregnancy.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">Active Pregnancy Journey</div>
-          <div class="muted">ติดตามครรภ์/นัดหมาย/ลูกดิ้น</div>
-        </a>
-        <a class="card" href="./knowledge.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">คลังความรู้</div>
-          <div class="muted">บทความ/คำแนะนำสุขภาพ</div>
-        </a>
-        <a class="card" href="./quiz.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">แบบทดสอบ</div>
-          <div class="muted">ประเมินความรู้และรับคะแนน</div>
-        </a>
-        <a class="card" href="./notifications.html" style="padding:14px;border:1px solid var(--stroke)">
-          <div style="font-weight:800">การแจ้งเตือน</div>
-          <div class="muted">ดูข้อความแจ้งเตือนทั้งหมด</div>
-        </a>
-      </div>
-    </main>
-  </div>
+    <div class="grid">
+      <a class="tile" href="./preventive.html" data-i18n="tools.preventive">ดูแลสุขภาพ (Preventive)</a>
+      <a class="tile" href="./family_planning.html" data-i18n="tools.familyPlanning">วางแผนครอบครัว</a>
+      <a class="tile" href="./pregnancy.html" data-i18n="tools.pregnancy">การตั้งครรภ์</a>
+      <a class="tile" href="./knowledge.html" data-i18n="tools.knowledge">ความรู้</a>
+      <a class="tile" href="./quiz.html" data-i18n="tools.quiz">แบบทดสอบ</a>
+      <a class="tile" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
+    </div>
+  </main>
+</div>
 
-  <script type="module">
-    import { initUserShell } from "../js/shell.js";
-    await initUserShell({ active: "tools", title: "เครื่องมือ" });
-  </script>
+<script type="module">
+  import { initUserShell } from "../js/shell.js";
+  import { t, applyI18n } from "../js/i18n.js";
+  await initUserShell({ active: "tools", title: t("page.tools") });
+  applyI18n(document);
+</script>
+
+<style>
+  .container{max-width:900px;margin:0 auto;padding:18px}
+  .muted{opacity:.7}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .tile{
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:14px;border-radius:14px;
+    border:1px solid rgba(0,0,0,.10);
+    text-decoration:none;color:#111;background:#fff;font-weight:900;
+    min-height:64px;
+  }
+  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
 </body>
 </html>

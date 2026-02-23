@@ -1,80 +1,66 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • แดชบอร์ด</title>
-  <link rel="stylesheet" href="../assets/app.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FEMI • Dashboard</title>
+  <link rel="stylesheet" href="../assets/app.css"/>
 </head>
 <body>
-  <div id="app">
-    <main class="container">
-      <h1 class="page-title">แดชบอร์ด</h1>
-      <p class="page-sub muted">สรุปการใช้งานและสถิติของคุณ</p>
+<div id="app">
+  <main class="container">
+    <h1 data-i18n="page.dashboard">แดชบอร์ด</h1>
+    <p class="muted" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
 
-      <section class="grid-3">
-        <div class="card stat">
-          <div class="k">Preventive วันนี้</div>
-          <div class="v" id="dPrev">-</div>
-          <div class="muted" id="dPrevHint">-</div>
-        </div>
-        <div class="card stat">
-          <div class="k">คะแนนแบบทดสอบล่าสุด</div>
-          <div class="v" id="dQuiz">-</div>
-          <div class="muted" id="dQuizHint">-</div>
-        </div>
-        <div class="card stat">
-          <div class="k">การแจ้งเตือนที่ยังไม่อ่าน</div>
-          <div class="v" id="dNotif">-</div>
-          <div class="muted">แตะไอคอนกระดิ่งเพื่อดูรายละเอียด</div>
-        </div>
-      </section>
+    <div class="grid">
+      <div class="card stat">
+        <div class="muted" data-i18n="pv.dueToday">ครบกำหนดวันนี้</div>
+        <div class="value" id="pvDue">-</div>
+      </div>
+      <div class="card stat">
+        <div class="muted" data-i18n="dash.quizScore">คะแนนแบบทดสอบ</div>
+        <div class="value" id="quizScore">-</div>
+      </div>
+    </div>
 
-      <section style="margin-top:14px">
-        <div class="card" style="padding:14px">
-          <div style="font-weight:800;margin-bottom:10px">สรุปล่าสุด</div>
-          <div id="summary" class="muted">กำลังโหลด…</div>
-        </div>
-      </section>
-    </main>
-  </div>
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900">Quick</div>
+      <div class="muted">— (จะต่อยอดรวมสถิติจาก preventive/quiz/fp ในสปรินต์ถัดไป)</div>
+    </div>
+  </main>
+</div>
 
-  <script type="module">
-    import { initUserShell } from "../js/shell.js";
-    import { api } from "../js/api.js";
+<script type="module">
+  import { initUserShell } from "../js/shell.js";
+  import { t, applyI18n } from "../js/i18n.js";
+  import { api } from "../js/api.js";
 
-    await initUserShell({ active: "dashboard", title: "แดชบอร์ด" });
+  await initUserShell({ active: "dashboard", title: t("page.dashboard") });
+  applyI18n(document);
 
-    const s = (id) => document.getElementById(id);
+  // MVP: ดึง dueToday จาก preventive.list (ถ้ามี)
+  try{
+    const pv = await api.preventiveList?.();
+    document.getElementById("pvDue").textContent = pv?.counts?.dueToday ?? "-";
+  }catch{}
 
-    // Preventive
-    try {
-      const p = await api.preventiveList();
-      s('dPrev').textContent = p.counts?.dueToday ?? 0;
-      s('dPrevHint').textContent = p.counts?.overdue ? `เลยกำหนด ${p.counts.overdue}` : 'พร้อมทำ';
-    } catch(e){ console.error(e); }
+  // MVP: คะแนนแบบทดสอบ (ถ้ามี endpoint)
+  try{
+    const r = await api.quizMyResults?.();
+    // แสดงคะแนนล่าสุดแบบง่าย
+    const last = Array.isArray(r?.items) ? r.items[0] : null;
+    document.getElementById("quizScore").textContent = last ? `${last.score}/${last.total}` : "-";
+  }catch{}
+</script>
 
-    // Quiz
-    try {
-      const r = await api.quizMyResults();
-      const last = Array.isArray(r) ? r[0] : null;
-      s('dQuiz').textContent = last ? `${last.score}/${last.total}` : '-';
-      s('dQuizHint').textContent = last ? (last.category ? `หมวด ${last.category}` : 'ผลล่าสุด') : 'ยังไม่มีผล';
-    } catch(e){ console.error(e); }
-
-    // Notifications
-    try {
-      const n = await api.userNotificationsUnreadCount();
-      s('dNotif').textContent = n.unreadCount ?? 0;
-    } catch(e){ s('dNotif').textContent = 0; }
-
-    // Summary
-    try {
-      const me = await api.me();
-      s('summary').textContent = `สวัสดี ${me.firstName||''} ${me.lastName||''}`.trim();
-    } catch {
-      s('summary').textContent = 'ยินดีต้อนรับ';
-    }
-  </script>
+<style>
+  .container{max-width:900px;margin:0 auto;padding:18px}
+  .muted{opacity:.7}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+  .stat{padding:14px}
+  .value{font-size:28px;font-weight:900;margin-top:6px}
+  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
 </body>
 </html>

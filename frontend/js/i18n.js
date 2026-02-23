@@ -31,6 +31,45 @@ const DICT = {
     "nav.knowledge": "คลังความรู้",
     "nav.quiz": "แบบทดสอบ",
 
+    // Page titles
+    "page.home": "หน้าแรก",
+    "page.tools": "เครื่องมือ",
+    "page.dashboard": "แดชบอร์ด",
+    "page.profile": "โปรไฟล์",
+    "page.preventive": "ดูแลสุขภาพเชิงป้องกัน",
+    "page.knowledge": "คลังความรู้",
+    "page.quiz": "แบบทดสอบ",
+    "page.notifications": "การแจ้งเตือน",
+    "page.familyPlanning": "วางแผนครอบครัว",
+
+    // Home (ตัวอย่างข้อความพื้นฐาน)
+    "home.welcome": "ยินดีต้อนรับ",
+    "home.quickActions": "เมนูทางลัด",
+    "home.today": "วันนี้",
+    "home.seeAll": "ดูทั้งหมด",
+
+    // Dashboard
+    "dash.subtitle": "สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ",
+    "dash.quizScore": "คะแนนแบบทดสอบ",
+    "dash.completed": "ทำแล้ว",
+    "dash.pending": "ค้างอยู่",
+
+    // Profile
+    "profile.subtitle": "ข้อมูลบัญชีของคุณ",
+    "profile.name": "ชื่อ-สกุล",
+    "profile.email": "อีเมล",
+    "profile.phone": "เบอร์โทร",
+    "profile.birthDate": "วันเกิด",
+    "profile.editNote": "หากต้องการแก้ไขข้อมูล โปรดติดต่อผู้ดูแลระบบ",
+
+    // Tools
+    "tools.subtitle": "รวมเครื่องมือเพื่อสุขภาพและการดูแลตนเอง",
+    "tools.preventive": "ดูแลสุขภาพ (Preventive)",
+    "tools.familyPlanning": "วางแผนครอบครัว",
+    "tools.pregnancy": "การตั้งครรภ์",
+    "tools.knowledge": "ความรู้",
+    "tools.quiz": "แบบทดสอบ",
+
     // Notifications page
     "noti.title": "การแจ้งเตือน",
     "noti.subtitle": "ข้อความแจ้งเตือนภายในแอป",
@@ -66,9 +105,48 @@ const DICT = {
     "fp.value.days": "{n} วัน",
     "fp.value.unknown": "ยังไม่ระบุ",
     "fp.value.noEnd": "ยังไม่ระบุวันสิ้นสุด",
+
+    // Preventive
+    "pv.title": "ดูแลสุขภาพเชิงป้องกัน",
+    "pv.subtitle": "รายการดูแลสุขภาพเชิงป้องกันของคุณ",
+    "pv.total": "งานทั้งหมด",
+    "pv.dueToday": "ครบกำหนดวันนี้",
+    "pv.overdue": "เลยกำหนด",
+    "pv.tabToday": "วันนี้",
+    "pv.tabUpcoming": "กำลังจะถึง",
+    "pv.tabAll": "ทั้งหมด",
+    "pv.done": "ทำแล้ว",
+    "pv.skip": "ข้าม",
+    // Knowledge page
+    "kp.subtitle": "บทความและข่าวสาร",
+    "kp.tab.kb": "ความรู้",
+    "kp.tab.news": "ข่าว",
+    "kp.empty": "ยังไม่มีข้อมูล",
+    "kp.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+
+    // Quiz page
+    "qz.subtitle": "ดูคะแนน/ประวัติการทำแบบทดสอบ",
+    "qz.lastScoreTitle": "คะแนนล่าสุด",
+    "qz.historyTitle": "ประวัติ",
+    "qz.empty": "ยังไม่มีประวัติ",
+    "qz.noteTitle": "หมายเหตุ",
+    "qz.noteBody": "หน้า \"ทำแบบทดสอบ\" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว",
+    "qz.noResult": "ยังไม่มีผล",
+    "qz.takenAt": "ทำเมื่อ {dt}",
+    "qz.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+
+    // Preventive extra strings
+    "pv.empty": "ยังไม่มีรายการ",
+    "pv.general": "ทั่วไป",
+    "pv.pillToday": "วันนี้",
+    "pv.pillOverdue": "เลยกำหนด",
+    "pv.dueLabel": "ครบกำหนด:",
+    "pv.skipPrompt": "เหตุผลที่ข้าม (ไม่บังคับ)",
+    "pv.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+    "pv.doneFailed": "ทำรายการไม่สำเร็จ",
+    "pv.skipFailed": "ข้ามรายการไม่สำเร็จ",
   },
 
-  // (มีไว้เป็น fallback แต่ยังไม่ทำปุ่มสลับภาษา)
   en: {
     "app.name": "FEMI",
     "nav.home": "Home",
@@ -77,6 +155,13 @@ const DICT = {
     "nav.profile": "Profile",
     "nav.notifications": "Notifications",
     "common.loading": "Loading…",
+    "page.home": "Home",
+    "page.tools": "Tools",
+    "page.dashboard": "Dashboard",
+    "page.profile": "Profile",
+    "page.preventive": "Preventive",
+    "page.knowledge": "Knowledge",
+    "page.quiz": "Quiz",
     "fp.title": "Family Planning",
     "noti.title": "Notifications",
   }
@@ -98,30 +183,20 @@ export function t(key, vars = {}) {
   const fallback = DICT[DEFAULT_LANG] || {};
 
   let s = table[key] ?? fallback[key] ?? key;
-
   s = String(s).replace(/\{(\w+)\}/g, (_, k) => {
     const v = vars[k];
     return (v === undefined || v === null) ? "" : String(v);
   });
-
   return s;
 }
 
-/**
- * Apply translations to DOM:
- * - data-i18n="key" -> textContent
- * - data-i18n-html="key" -> innerHTML (ใช้เฉพาะจำเป็น)
- * - data-i18n-placeholder="key" -> placeholder
- */
 export function applyI18n(root = document) {
   root.querySelectorAll("[data-i18n]").forEach(el => {
     el.textContent = t(el.getAttribute("data-i18n"));
   });
-
   root.querySelectorAll("[data-i18n-html]").forEach(el => {
     el.innerHTML = t(el.getAttribute("data-i18n-html"));
   });
-
   root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
     el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder")));
   });

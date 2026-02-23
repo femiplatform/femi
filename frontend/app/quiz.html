@@ -9,25 +9,27 @@
 <body>
   <div id="app">
     <main class="container">
-      <h1 class="page-title">แบบทดสอบ</h1>
-      <p class="page-sub muted">ดูคะแนน/ประวัติการทำแบบทดสอบ</p>
+      <h1 class="page-title" data-i18n="page.quiz">แบบทดสอบ</h1>
+      <p class="page-sub muted" data-i18n="qz.subtitle">ดูคะแนน/ประวัติการทำแบบทดสอบ</p>
 
       <div class="card" style="padding:14px">
-        <div style="font-weight:800">คะแนนล่าสุด</div>
+        <div style="font-weight:800" data-i18n="qz.lastScoreTitle">คะแนนล่าสุด</div>
         <div style="font-size:28px;font-weight:900;margin-top:6px" id="lastScore">-</div>
         <div class="muted" id="lastHint">-</div>
       </div>
 
       <div style="margin-top:12px" class="card">
-        <div style="padding:14px 14px 0;font-weight:800">ประวัติ</div>
-        <div id="loading" class="muted" style="padding:14px">กำลังโหลด…</div>
-        <div id="empty" class="muted hidden" style="padding:14px">ยังไม่มีประวัติ</div>
+        <div style="padding:14px 14px 0;font-weight:800" data-i18n="qz.historyTitle">ประวัติ</div>
+        <div id="loading" class="muted" style="padding:14px" data-i18n="common.loading">กำลังโหลด…</div>
+        <div id="empty" class="muted hidden" style="padding:14px" data-i18n="qz.empty">ยังไม่มีประวัติ</div>
         <div id="list" style="display:flex;flex-direction:column;gap:10px;padding:14px"></div>
       </div>
 
       <div class="card" style="padding:14px;margin-top:12px">
-        <div style="font-weight:800;margin-bottom:6px">หมายเหตุ</div>
-        <div class="muted">หน้า "ทำแบบทดสอบ" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว</div>
+        <div style="font-weight:800;margin-bottom:6px" data-i18n="qz.noteTitle">หมายเหตุ</div>
+        <div class="muted" data-i18n="qz.noteBody">
+          หน้า "ทำแบบทดสอบ" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว
+        </div>
       </div>
     </main>
   </div>
@@ -35,8 +37,10 @@
   <script type="module">
     import { initUserShell } from "../js/shell.js";
     import { api } from "../js/api.js";
+    import { t, applyI18n } from "../js/i18n.js";
 
-    await initUserShell({ active: "tools", title: "แบบทดสอบ" });
+    await initUserShell({ active: "tools", title: t("page.quiz") });
+    applyI18n(document);
 
     const elLoading = document.getElementById('loading');
     const elEmpty = document.getElementById('empty');
@@ -48,17 +52,21 @@
 
     try {
       const results = await api.quizMyResults();
-      const last = Array.isArray(results) ? results[0] : null;
+
+      // รองรับทั้งผลลัพธ์แบบ array หรือ {items:[...]}
+      const arr = Array.isArray(results) ? results : (Array.isArray(results?.items) ? results.items : []);
+      const last = arr[0] || null;
+
       document.getElementById('lastScore').textContent = last ? `${last.score}/${last.total}` : '-';
-      document.getElementById('lastHint').textContent = last ? `ทำเมื่อ ${fmt(last.takenAt)}` : 'ยังไม่มีผล';
+      document.getElementById('lastHint').textContent = last ? t("qz.takenAt", { dt: fmt(last.takenAt) }) : t("qz.noResult");
 
       elLoading.classList.add('hidden');
-      if (!results || !results.length){
+      if (!arr.length){
         elEmpty.classList.remove('hidden');
         return;
       }
 
-      results.slice(0, 20).forEach(r => {
+      arr.slice(0, 20).forEach(r => {
         const card = document.createElement('div');
         card.className = 'card';
         card.style.padding = '12px';
@@ -75,7 +83,7 @@
       });
     } catch(e){
       console.error(e);
-      elLoading.textContent = e?.error?.message || 'โหลดข้อมูลไม่สำเร็จ';
+      elLoading.textContent = e?.error?.message || t("qz.loadFailed");
     }
   </script>
 </body>

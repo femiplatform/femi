@@ -1,88 +1,46 @@
 <!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • หน้าแรก</title>
-  <link rel="stylesheet" href="../assets/app.css" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>FEMI • Home</title>
+  <link rel="stylesheet" href="../assets/app.css"/>
 </head>
 <body>
-  <div id="app">
-    <main class="container">
-      <h1 class="page-title">หน้าแรก</h1>
-      <p class="page-sub muted" id="hello">สวัสดี</p>
+<div id="app">
+  <main class="container">
+    <h1 data-i18n="page.home">หน้าแรก</h1>
+    <p class="muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
 
-      <section class="grid-2">
-        <div class="card stat" id="cardPrev">
-          <div class="k">Preventive วันนี้</div>
-          <div class="v" id="prevToday">-</div>
-          <div class="muted" id="prevHint">กำลังโหลด…</div>
-        </div>
-        <div class="card stat" id="cardQuiz">
-          <div class="k">คะแนนแบบทดสอบล่าสุด</div>
-          <div class="v" id="quizScore">-</div>
-          <div class="muted" id="quizHint">กำลังโหลด…</div>
-        </div>
-      </section>
+    <div class="card" style="padding:14px">
+      <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px">
+        <a class="tile" href="./preventive.html" data-i18n="tools.preventive">ดูแลสุขภาพ (Preventive)</a>
+        <a class="tile" href="./family_planning.html" data-i18n="tools.familyPlanning">วางแผนครอบครัว</a>
+        <a class="tile" href="./knowledge.html" data-i18n="tools.knowledge">ความรู้</a>
+        <a class="tile" href="./quiz.html" data-i18n="tools.quiz">แบบทดสอบ</a>
+      </div>
+    </div>
+  </main>
+</div>
 
-      <section style="margin-top:14px">
-        <div class="card" style="padding:14px">
-          <div style="font-weight:800;margin-bottom:10px">ทางลัด</div>
-          <div class="grid-2">
-            <a class="card" href="./preventive.html" style="padding:14px;border:1px solid var(--stroke)">
-              <div style="font-weight:800">Preventive</div>
-              <div class="muted">รายการดูแลสุขภาพเชิงป้องกัน</div>
-            </a>
-            <a class="card" href="./family_planning.html" style="padding:14px;border:1px solid var(--stroke)">
-              <div style="font-weight:800">Family Planning</div>
-              <div class="muted">รอบเดือน/คุมกำเนิด/ประเมิน</div>
-            </a>
-            <a class="card" href="./pregnancy.html" style="padding:14px;border:1px solid var(--stroke)">
-              <div style="font-weight:800">Pregnancy</div>
-              <div class="muted">ติดตามครรภ์/นัด/ลูกดิ้น</div>
-            </a>
-            <a class="card" href="./knowledge.html" style="padding:14px;border:1px solid var(--stroke)">
-              <div style="font-weight:800">คลังความรู้</div>
-              <div class="muted">บทความ/คำแนะนำ</div>
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+<script type="module">
+  import { initUserShell } from "../js/shell.js";
+  import { t, applyI18n } from "../js/i18n.js";
+  await initUserShell({ active: "home", title: t("page.home") });
+  applyI18n(document);
+</script>
 
-  <script type="module">
-    import { initUserShell } from "../js/shell.js";
-    import { api } from "../js/api.js";
-
-    await initUserShell({ active: "home", title: "หน้าแรก" });
-
-    // profile
-    try {
-      const me = await api.me();
-      document.getElementById("hello").textContent = `สวัสดี ${me.firstName || ""} ${me.lastName || ""}`.trim();
-    } catch {}
-
-    // preventive summary
-    try {
-      const res = await api.preventiveList();
-      document.getElementById("prevToday").textContent = res.counts?.dueToday ?? 0;
-      document.getElementById("prevHint").textContent = res.counts?.overdue ? `เลยกำหนด ${res.counts.overdue} รายการ` : "พร้อมทำวันนี้";
-    } catch (e) {
-      document.getElementById("prevHint").textContent = "โหลดข้อมูลไม่สำเร็จ";
-      console.error(e);
-    }
-
-    // quiz summary
-    try {
-      const r = await api.quizMyResults();
-      const last = Array.isArray(r) ? r[0] : null;
-      document.getElementById("quizScore").textContent = last ? `${last.score}/${last.total}` : "-";
-      document.getElementById("quizHint").textContent = last ? "ผลล่าสุด" : "ยังไม่มีผล";
-    } catch (e) {
-      document.getElementById("quizHint").textContent = "โหลดข้อมูลไม่สำเร็จ";
-      console.error(e);
-    }
-  </script>
+<style>
+  .container{max-width:900px;margin:0 auto;padding:18px}
+  .muted{opacity:.7}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+  .tile{
+    display:flex;align-items:center;justify-content:center;
+    padding:14px;border-radius:14px;
+    border:1px solid rgba(0,0,0,.10);
+    text-decoration:none;color:#111;background:#fff;font-weight:800;
+  }
+</style>
 </body>
 </html>

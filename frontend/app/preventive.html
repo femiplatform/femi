@@ -9,32 +9,32 @@
 <body>
   <div id="app">
     <main class="container">
-      <h1 class="page-title">Preventive Lifestyle</h1>
-      <p class="page-sub muted">รายการดูแลสุขภาพเชิงป้องกันของคุณ</p>
+      <h1 class="page-title" data-i18n="pv.title">ดูแลสุขภาพเชิงป้องกัน</h1>
+      <p class="page-sub muted" data-i18n="pv.subtitle">รายการดูแลสุขภาพเชิงป้องกันของคุณ</p>
 
       <section class="stat-row">
         <div class="card stat">
-          <div class="k">งานทั้งหมด</div>
+          <div class="k" data-i18n="pv.total">งานทั้งหมด</div>
           <div class="v" id="statTotal">-</div>
         </div>
         <div class="card stat">
-          <div class="k">ครบกำหนดวันนี้</div>
+          <div class="k" data-i18n="pv.dueToday">ครบกำหนดวันนี้</div>
           <div class="v" id="statToday">-</div>
         </div>
         <div class="card stat">
-          <div class="k">เลยกำหนด</div>
+          <div class="k" data-i18n="pv.overdue">เลยกำหนด</div>
           <div class="v" id="statOverdue">-</div>
         </div>
       </section>
 
       <div class="tabs">
-        <button class="tab active" data-tab="today">วันนี้</button>
-        <button class="tab" data-tab="upcoming">กำลังจะถึง</button>
-        <button class="tab" data-tab="all">ทั้งหมด</button>
+        <button class="tab active" data-tab="today" data-i18n="pv.tabToday">วันนี้</button>
+        <button class="tab" data-tab="upcoming" data-i18n="pv.tabUpcoming">กำลังจะถึง</button>
+        <button class="tab" data-tab="all" data-i18n="pv.tabAll">ทั้งหมด</button>
       </div>
 
-      <div id="loading" class="muted">กำลังโหลด…</div>
-      <div id="empty" class="card hidden" style="padding:14px">ยังไม่มีรายการ</div>
+      <div id="loading" class="muted" data-i18n="common.loading">กำลังโหลด…</div>
+      <div id="empty" class="card hidden" style="padding:14px" data-i18n="pv.empty">ยังไม่มีรายการ</div>
       <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
     </main>
   </div>
@@ -42,8 +42,10 @@
   <script type="module">
     import { initUserShell } from "../js/shell.js";
     import { api } from "../js/api.js";
+    import { t, applyI18n } from "../js/i18n.js";
 
-    await initUserShell({ active: "tools", title: "Preventive" });
+    await initUserShell({ active: "tools", title: t("page.preventive") });
+    applyI18n(document);
 
     const elList = document.getElementById('list');
     const elEmpty = document.getElementById('empty');
@@ -58,7 +60,7 @@
     let cache = [];
 
     function fmt(dt){
-      if(!dt) return '-';
+      if(!dt) return t("common.none");
       const d = new Date(dt);
       return d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
     }
@@ -80,20 +82,24 @@
       items.forEach(it => {
         const card = document.createElement('div');
         card.className = 'card item-card';
-        const pill = it.isOverdue ? `<span class="pill over">เลยกำหนด</span>` : it.isDueToday ? `<span class="pill due">วันนี้</span>` : `<span class="pill">${esc(it.category||'ทั่วไป')}</span>`;
+        const pill = it.isOverdue
+          ? `<span class="pill over">${t("pv.pillOverdue")}</span>`
+          : it.isDueToday
+            ? `<span class="pill due">${t("pv.pillToday")}</span>`
+            : `<span class="pill">${esc(it.category||t("pv.general"))}</span>`;
 
         card.innerHTML = `
           <div class="item-top">
             <div>
               <div class="item-title">${esc(it.title)}</div>
-              <div class="muted" style="margin-top:4px">ครบกำหนด: ${fmt(it.nextDueAt)}</div>
+              <div class="muted" style="margin-top:4px">${t("pv.dueLabel")} ${fmt(it.nextDueAt)}</div>
             </div>
             ${pill}
           </div>
           ${it.description ? `<div class="muted">${esc(it.description)}</div>` : ''}
           <div class="actions">
-            <button class="btn btn-ok" data-act="done">ทำแล้ว</button>
-            <button class="btn btn-warn" data-act="skip">ข้าม</button>
+            <button class="btn btn-ok" data-act="done">${t("pv.done")}</button>
+            <button class="btn btn-warn" data-act="skip">${t("pv.skip")}</button>
           </div>
         `;
 
@@ -101,7 +107,7 @@
           await actDone(it.userItemId);
         });
         card.querySelector('[data-act="skip"]').addEventListener('click', async () => {
-          const reason = prompt('เหตุผลที่ข้าม (ไม่บังคับ)') || '';
+          const reason = prompt(t("pv.skipPrompt")) || '';
           await actSkip(it.userItemId, reason);
         });
 
@@ -120,7 +126,7 @@
         render();
       } catch(e){
         console.error(e);
-        alert(e?.error?.message || 'โหลดข้อมูลไม่สำเร็จ');
+        alert(e?.error?.message || t("pv.loadFailed"));
       } finally {
         elLoading.classList.add('hidden');
       }
@@ -132,7 +138,7 @@
         await load();
       } catch(e){
         console.error(e);
-        alert(e?.error?.message || 'ทำรายการไม่สำเร็จ');
+        alert(e?.error?.message || t("pv.doneFailed"));
       }
     }
 
@@ -142,7 +148,7 @@
         await load();
       } catch(e){
         console.error(e);
-        alert(e?.error?.message || 'ข้ามรายการไม่สำเร็จ');
+        alert(e?.error?.message || t("pv.skipFailed"));
       }
     }
 
