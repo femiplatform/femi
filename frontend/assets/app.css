@@ -271,3 +271,71 @@ button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgb
   font-size: 12px;
   font-weight: 900;
 }
+
+/* ===== Home: Summary pastel backgrounds + themed pills ===== */
+.card.summary{
+  border: 1px solid rgba(2,6,23,.10);
+  box-shadow: none;
+}
+
+/* Summary backgrounds (pastel clean) */
+.card.summary.fp{
+  background: linear-gradient(135deg, rgba(237,233,254,.75) 0%, rgba(245,243,255,.88) 100%);
+}
+.card.summary.pv{
+  background: linear-gradient(135deg, rgba(224,242,254,.78) 0%, rgba(239,246,255,.88) 100%);
+}
+.card.summary.noti{
+  background: linear-gradient(135deg, rgba(255,228,230,.70) 0%, rgba(255,241,242,.88) 100%);
+}
+.card.summary.quiz{
+  background: linear-gradient(135deg, rgba(255,237,213,.78) 0%, rgba(255,247,237,.90) 100%);
+}
+
+/* Slightly boost readability inside summary cards */
+.card.summary .muted{ color: rgba(15,23,42,.70); }
+
+/* Themed pills */
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: rgba(248,250,252,.92);
+  font-weight: 700;
+}
+
+/* FP pill (purple) */
+.pill-fp{
+  border-color: rgba(99,102,241,.22);
+  background: rgba(237,233,254,.85);
+  color: rgba(55,48,163,.95);
+}
+.pill-fp:hover{ background: rgba(237,233,254,.95); }
+
+/* PV pill (cyan/blue) */
+.pill-pv{
+  border-color: rgba(6,182,212,.20);
+  background: rgba(224,242,254,.88);
+  color: rgba(12,74,110,.95);
+}
+.pill-pv:hover{ background: rgba(224,242,254,.98); }
+
+/* Notifications pill (pink/red) */
+.pill-noti{
+  border-color: rgba(244,63,94,.22);
+  background: rgba(255,228,230,.88);
+  color: rgba(159,18,57,.95);
+}
+.pill-noti:hover{ background: rgba(255,228,230,.98); }
+
+/* Quiz pill (orange) */
+.pill-quiz{
+  border-color: rgba(245,158,11,.22);
+  background: rgba(255,237,213,.90);
+  color: rgba(124,45,18,.95);
+}
+.pill-quiz:hover{ background: rgba(255,237,213,.99); }

@@ -12,21 +12,23 @@
       <h1 class="page-title" data-i18n="page.home">หน้าแรก</h1>
       <p class="page-sub muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
 
-      <!-- Summary card (กลับมาแล้ว) -->
+      <!-- Summary card -->
       <div class="card" style="padding:14px">
         <div style="font-weight:900" data-i18n="home.summaryTitle">สรุปวันนี้</div>
 
         <div class="grid2" style="margin-top:10px">
-          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+          <!-- FP -->
+          <div class="card summary fp" style="padding:12px;box-shadow:none">
             <div style="font-weight:900" data-i18n="home.fpCardTitle">รอบเดือนและช่วงเสี่ยง</div>
             <div class="muted" id="fpSummary" style="margin-top:6px">-</div>
             <div class="muted" id="fpDetail" style="margin-top:6px;line-height:1.5"></div>
             <div style="margin-top:10px">
-              <a class="pill" href="./family_planning.html">ไปที่วางแผนครอบครัว</a>
+              <a class="pill pill-fp" href="./family_planning.html">ไปที่วางแผนครอบครัว</a>
             </div>
           </div>
 
-          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+          <!-- Preventive -->
+          <div class="card summary pv" style="padding:12px;box-shadow:none">
             <div style="font-weight:900" data-i18n="home.pvCardTitle">งานดูแลสุขภาพ</div>
             <div style="display:flex;justify-content:space-between;margin-top:10px">
               <span class="muted" data-i18n="home.pvDueToday">ครบกำหนดวันนี้</span>
@@ -37,34 +39,36 @@
               <b id="pvOver">-</b>
             </div>
             <div style="margin-top:10px">
-              <a class="pill" href="./preventive.html">ไปที่ Preventive</a>
+              <a class="pill pill-pv" href="./preventive.html">ไปที่ Preventive</a>
             </div>
           </div>
 
-          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+          <!-- Notifications -->
+          <div class="card summary noti" style="padding:12px;box-shadow:none">
             <div style="font-weight:900" data-i18n="home.notiCardTitle">การแจ้งเตือน</div>
             <div style="display:flex;justify-content:space-between;margin-top:10px">
               <span class="muted" data-i18n="home.notiUnread">ยังไม่อ่าน</span>
               <b id="notiUnread">-</b>
             </div>
             <div style="margin-top:10px">
-              <a class="pill" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
+              <a class="pill pill-noti" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
             </div>
           </div>
 
-          <div class="card" style="padding:12px;box-shadow:none;background:rgba(255,255,255,.75)">
+          <!-- Quiz -->
+          <div class="card summary quiz" style="padding:12px;box-shadow:none">
             <div style="font-weight:900">แบบทดสอบ</div>
             <div class="muted" style="margin-top:6px">คะแนนล่าสุด</div>
             <div style="font-size:26px;font-weight:1000;margin-top:2px" id="quizLast">-</div>
             <div class="muted" style="font-size:12px" id="quizHint">-</div>
             <div style="margin-top:10px">
-              <a class="pill" href="./quiz.html">ไปที่แบบทดสอบ</a>
+              <a class="pill pill-quiz" href="./quiz.html">ไปที่แบบทดสอบ</a>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Quick tiles (สวยพาสเทลเหมือนเดิม) -->
+      <!-- Quick tiles -->
       <div class="card" style="padding:14px;margin-top:12px">
         <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
 
