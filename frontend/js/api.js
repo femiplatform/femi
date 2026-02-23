@@ -65,6 +65,17 @@ export const api = {
   userNotificationsList: (limit = 30) => request("user.notifications.list", { limit }),
   userNotificationsMarkRead: (notificationId) => request("user.notifications.markRead", { notificationId }),
   userNotificationsUnreadCount: () => request("user.notifications.unreadCount", {})
+
+  // Smart Family Planning – Sprint 2
+  fpCyclesList: () => request("fp.cycles.list", {}),
+  fpCyclesCreate: (payload) => request("fp.cycles.create", payload),
+  fpCyclesUpdate: (payload) => request("fp.cycles.update", payload),
+  fpCyclesDelete: (cycleId) => request("fp.cycles.delete", { cycleId }),
+
+  fpDailyListRange: ({ dateFrom, dateTo }) => request("fp.daily.listRange", { dateFrom, dateTo }),
+  fpDailyUpsert: (payload) => request("fp.daily.upsert", payload),
+
+  fpPredictRecompute: (payload = {}) => request("fp.predict.recompute", payload),
 };
 
 // expose for debugging

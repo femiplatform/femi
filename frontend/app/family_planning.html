@@ -9,21 +9,35 @@
 <body>
   <div id="app">
     <main class="container">
-      <h1 class="page-title">Family Planning</h1>
-      <p class="page-sub muted">รอบเดือน • วันเสี่ยง • คุมกำเนิด</p>
+      <h1>Family Planning</h1>
+      <p class="muted">MVP: เพิ่มรอบเดือน + บันทึกรายวัน + คาดการณ์วันไข่ตก (AvgCycle)</p>
 
       <div class="card" style="padding:14px">
-        <div style="font-weight:800">สถานะ</div>
-        <div class="muted" style="margin-top:6px">
-          หน้านี้จะพัฒนาใน Sprint 2–3 (Period tracker + Daily logs + Ovulation prediction + Contraception)
-        </div>
+        <div style="font-weight:900" id="predTitle">คาดการณ์ (ล่าสุด)</div>
+        <div class="muted" id="predText" style="margin-top:6px">-</div>
       </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="btnAddCycle">+ เพิ่มรอบเดือน</button>
+        <button class="btn btn-ghost" id="btnAddLog">+ บันทึกรายวัน</button>
+        <button class="btn btn-ghost" id="btnRecompute">คำนวณใหม่</button>
+      </div>
+
+      <div id="loading" class="muted" style="margin-top:12px">กำลังโหลด…</div>
+      <div id="list" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
     </main>
   </div>
 
-  <script type="module">
-    import { initUserShell } from "../js/shell.js";
-    await initUserShell({ active: "tools", title: "Family Planning" });
-  </script>
+  <script type="module" src="../js/pages/family_planning.js"></script>
+
+  <style>
+    .container{max-width:900px;margin:0 auto;padding:18px}
+    .muted{opacity:.7}
+    .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+    .btn{border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+    .btn-primary{background:#b91c1c;color:#fff}
+    .btn-ghost{background:#fff;border:1px solid rgba(0,0,0,.12)}
+    .row{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:12px}
+  </style>
 </body>
 </html>
