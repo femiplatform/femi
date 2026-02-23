@@ -12,7 +12,42 @@
     <h1 data-i18n="page.home">หน้าแรก</h1>
     <p class="muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
 
-    <div class="card" style="padding:14px">
+    <!-- Summary -->
+    <div class="card" style="padding:14px;margin-top:8px">
+      <div style="font-weight:900" data-i18n="home.summaryTitle">สรุปวันนี้</div>
+
+      <div class="grid" style="margin-top:10px">
+        <div class="subcard">
+          <div class="k" data-i18n="home.fpCardTitle">รอบเดือนและช่วงเสี่ยง</div>
+          <div class="muted" id="fpSummary">-</div>
+          <div class="muted" id="fpDetail" style="margin-top:6px"></div>
+        </div>
+
+        <div class="subcard">
+          <div class="k" data-i18n="home.pvCardTitle">งานดูแลสุขภาพ</div>
+          <div class="row">
+            <span class="muted" data-i18n="home.pvDueToday">ครบกำหนดวันนี้</span>
+            <b id="pvDue">-</b>
+          </div>
+          <div class="row">
+            <span class="muted" data-i18n="home.pvOverdue">เลยกำหนด</span>
+            <b id="pvOver">-</b>
+          </div>
+        </div>
+
+        <div class="subcard">
+          <div class="k" data-i18n="home.notiCardTitle">การแจ้งเตือน</div>
+          <div class="row">
+            <span class="muted" data-i18n="home.notiUnread">ยังไม่อ่าน</span>
+            <b id="notiUnread">-</b>
+          </div>
+          <a class="link" href="./notifications.html" data-i18n="nav.notifications">การแจ้งเตือน</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="card" style="padding:14px;margin-top:12px">
       <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px">
         <a class="tile" href="./preventive.html" data-i18n="tools.preventive">ดูแลสุขภาพ (Preventive)</a>
@@ -26,21 +61,78 @@
 
 <script type="module">
   import { initUserShell } from "../js/shell.js";
+  import { api } from "../js/api.js";
   import { t, applyI18n } from "../js/i18n.js";
+
   await initUserShell({ active: "home", title: t("page.home") });
   applyI18n(document);
+
+  const fpSummary = document.getElementById("fpSummary");
+  const fpDetail = document.getElementById("fpDetail");
+  const pvDue = document.getElementById("pvDue");
+  const pvOver = document.getElementById("pvOver");
+  const notiUnread = document.getElementById("notiUnread");
+
+  function fmtThai(iso){
+    if(!iso) return "-";
+    return new Date(iso).toLocaleDateString("th-TH",{dateStyle:"long"});
+  }
+
+  // 1) Family Planning summary (latest prediction)
+  try{
+    const pred = await api.fpPredLatest();
+    const item = pred?.item || null;
+
+    if(!item){
+      fpSummary.textContent = t("home.fpNoData");
+      fpDetail.textContent = "";
+    } else {
+      fpSummary.textContent = "✅ " + t("home.fpCardTitle");
+      fpDetail.innerHTML =
+        `${t("home.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b><br/>` +
+        `${t("home.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b><br/>` +
+        `${t("home.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b>`;
+    }
+  }catch{
+    fpSummary.textContent = t("home.fpNoData");
+    fpDetail.textContent = "";
+  }
+
+  // 2) Preventive counts
+  try{
+    const pv = await api.preventiveList();
+    pvDue.textContent = pv?.counts?.dueToday ?? "-";
+    pvOver.textContent = pv?.counts?.overdue ?? "-";
+  }catch{
+    pvDue.textContent = "-";
+    pvOver.textContent = "-";
+  }
+
+  // 3) Notifications unread
+  try{
+    const u = await api.userNotificationsUnreadCount();
+    notiUnread.textContent = (u?.unread ?? 0);
+  }catch{
+    notiUnread.textContent = "-";
+  }
 </script>
 
 <style>
   .container{max-width:900px;margin:0 auto;padding:18px}
   .muted{opacity:.7}
   .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .subcard{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;background:#fff}
+  .k{font-weight:900;margin-bottom:6px}
+  .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
   .tile{
     display:flex;align-items:center;justify-content:center;
     padding:14px;border-radius:14px;
     border:1px solid rgba(0,0,0,.10);
-    text-decoration:none;color:#111;background:#fff;font-weight:800;
+    text-decoration:none;color:#111;background:#fff;font-weight:900;
+    min-height:60px;text-align:center;
   }
+  .link{display:inline-block;margin-top:10px;text-decoration:none;font-weight:900}
 </style>
 </body>
 </html>

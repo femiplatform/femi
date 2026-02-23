@@ -172,6 +172,30 @@ const DICT = {
     "fp.pred.nextPeriod": "คาดว่าประจำเดือนรอบถัดไปจะมา:",
     "fp.pred.ovulation": "คาดว่าวันไข่ตก:",
     "fp.pred.fertile": "ช่วงเสี่ยงท้อง (ช่วงไข่ตก):",
+
+    // Home - summary cards
+    "home.summaryTitle": "สรุปวันนี้",
+    "home.fpCardTitle": "รอบเดือนและช่วงเสี่ยง",
+    "home.fpNextPeriod": "รอบถัดไปคาดว่า:",
+    "home.fpOvulation": "วันไข่ตกคาดว่า:",
+    "home.fpFertile": "ช่วงเสี่ยงท้อง:",
+    "home.fpNoData": "ยังไม่มีข้อมูลรอบเดือน — ไปเพิ่มในเมนูวางแผนครอบครัว",
+    "home.pvCardTitle": "งานดูแลสุขภาพ",
+    "home.pvDueToday": "ครบกำหนดวันนี้",
+    "home.pvOverdue": "เลยกำหนด",
+    "home.notiCardTitle": "การแจ้งเตือน",
+    "home.notiUnread": "ยังไม่อ่าน",
+
+    // Dashboard - stats
+    "dash.fpTitle": "วางแผนครอบครัว",
+    "dash.fpCycles": "จำนวนรอบเดือนที่บันทึก",
+    "dash.fpLogsMonth": "บันทึกรายวันเดือนนี้",
+    "dash.pvTitle": "Preventive",
+    "dash.pvDueToday": "ครบกำหนดวันนี้",
+    "dash.pvOverdue": "เลยกำหนด",
+    "dash.quizTitle": "แบบทดสอบ",
+    "dash.quizLastScore": "คะแนนล่าสุด",
+    "dash.quizNoData": "ยังไม่มีผลแบบทดสอบ",
   },
 
   en: {

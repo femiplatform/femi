@@ -12,55 +12,116 @@
     <h1 data-i18n="page.dashboard">แดชบอร์ด</h1>
     <p class="muted" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
 
-    <div class="grid">
-      <div class="card stat">
-        <div class="muted" data-i18n="pv.dueToday">ครบกำหนดวันนี้</div>
-        <div class="value" id="pvDue">-</div>
-      </div>
-      <div class="card stat">
-        <div class="muted" data-i18n="dash.quizScore">คะแนนแบบทดสอบ</div>
-        <div class="value" id="quizScore">-</div>
+    <div class="card" style="padding:14px;margin-top:10px">
+      <div style="font-weight:900" data-i18n="dash.fpTitle">วางแผนครอบครัว</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.fpCycles">จำนวนรอบเดือนที่บันทึก</div>
+          <div class="value" id="fpCycles">-</div>
+        </div>
+        <div class="stat">
+          <div class="muted" data-i18n="dash.fpLogsMonth">บันทึกรายวันเดือนนี้</div>
+          <div class="value" id="fpLogs">-</div>
+        </div>
       </div>
     </div>
 
     <div class="card" style="padding:14px;margin-top:12px">
-      <div style="font-weight:900">Quick</div>
-      <div class="muted">— (จะต่อยอดรวมสถิติจาก preventive/quiz/fp ในสปรินต์ถัดไป)</div>
+      <div style="font-weight:900" data-i18n="dash.pvTitle">Preventive</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.pvDueToday">ครบกำหนดวันนี้</div>
+          <div class="value" id="pvDue">-</div>
+        </div>
+        <div class="stat">
+          <div class="muted" data-i18n="dash.pvOverdue">เลยกำหนด</div>
+          <div class="value" id="pvOver">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.quizTitle">แบบทดสอบ</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.quizLastScore">คะแนนล่าสุด</div>
+          <div class="value" id="quizLast">-</div>
+          <div class="muted" id="quizHint" style="font-size:12px"></div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
 
 <script type="module">
   import { initUserShell } from "../js/shell.js";
-  import { t, applyI18n } from "../js/i18n.js";
   import { api } from "../js/api.js";
+  import { t, applyI18n } from "../js/i18n.js";
 
   await initUserShell({ active: "dashboard", title: t("page.dashboard") });
   applyI18n(document);
 
-  // MVP: ดึง dueToday จาก preventive.list (ถ้ามี)
-  try{
-    const pv = await api.preventiveList?.();
-    document.getElementById("pvDue").textContent = pv?.counts?.dueToday ?? "-";
-  }catch{}
+  const fpCycles = document.getElementById("fpCycles");
+  const fpLogs = document.getElementById("fpLogs");
+  const pvDue = document.getElementById("pvDue");
+  const pvOver = document.getElementById("pvOver");
+  const quizLast = document.getElementById("quizLast");
+  const quizHint = document.getElementById("quizHint");
 
-  // MVP: คะแนนแบบทดสอบ (ถ้ามี endpoint)
+  function iso(d){
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,"0");
+    const dd=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${dd}`;
+  }
+
+  // FP cycles count
   try{
-    const r = await api.quizMyResults?.();
-    // แสดงคะแนนล่าสุดแบบง่าย
-    const last = Array.isArray(r?.items) ? r.items[0] : null;
-    document.getElementById("quizScore").textContent = last ? `${last.score}/${last.total}` : "-";
-  }catch{}
+    const c = await api.fpCyclesList();
+    const cycles = c?.items || [];
+    fpCycles.textContent = cycles.length;
+  }catch{ fpCycles.textContent = "-"; }
+
+  // FP daily logs count this month
+  try{
+    const now = new Date();
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), 1));
+    const to = iso(new Date(now.getFullYear(), now.getMonth()+1, 0));
+    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
+    fpLogs.textContent = (r?.items || []).length;
+  }catch{ fpLogs.textContent = "-"; }
+
+  // Preventive counts
+  try{
+    const pv = await api.preventiveList();
+    pvDue.textContent = pv?.counts?.dueToday ?? "-";
+    pvOver.textContent = pv?.counts?.overdue ?? "-";
+  }catch{
+    pvDue.textContent = "-";
+    pvOver.textContent = "-";
+  }
+
+  // Quiz last score
+  try{
+    const res = await api.quizMyResults();
+    const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
+    const last = arr[0] || null;
+    quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
+    quizHint.textContent = last ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "") : t("dash.quizNoData");
+  }catch{
+    quizLast.textContent = "-";
+    quizHint.textContent = t("dash.quizNoData");
+  }
 </script>
 
 <style>
   .container{max-width:900px;margin:0 auto;padding:18px}
   .muted{opacity:.7}
-  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
   .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
-  .stat{padding:14px}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px}
   .value{font-size:28px;font-weight:900;margin-top:6px}
-  @media (max-width:700px){.grid{grid-template-columns:1fr}}
+  @media (max-width:700px){.grid2{grid-template-columns:1fr}}
 </style>
 </body>
 </html>
