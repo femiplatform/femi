@@ -29,7 +29,18 @@
     const elList = document.getElementById('list');
 
     function esc(s){
-      return String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+      return String(s ?? '')
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;');
+    }
+
+    function normalizeItems(res){
+      // รองรับทุกแบบ: array / {items:[...]} / {data:{items:[...]}} / null/undefined
+      if (Array.isArray(res)) return res;
+      if (Array.isArray(res?.items)) return res.items;
+      if (Array.isArray(res?.data?.items)) return res.data.items;
+      return [];
     }
 
     async function load(){
@@ -38,25 +49,38 @@
       elList.innerHTML = '';
       try {
         const res = await api.userNotificationsList(50);
-        const items = res.items || [];
-        if (!items.length) {
+        const items = normalizeItems(res);
+
+        if ((items?.length ?? 0) === 0) {
           elEmpty.classList.remove('hidden');
           return;
         }
+
         items.forEach(n => {
+          const created = n.createdAt || n.publishedAt || n.scheduleAt || "";
           const card = document.createElement('div');
           card.className = 'card';
           card.style.padding = '14px';
+
+          const id = n.notificationId || n.id || "";
+          const isRead = Boolean(n.isRead);
+
           card.innerHTML = `
             <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
               <div>
                 <div style="font-weight:900">${esc(n.title || 'แจ้งเตือน')}</div>
-                <div class="muted" style="margin-top:4px">${esc(n.message || '')}</div>
-                <div class="muted" style="font-size:12px;margin-top:8px">${n.createdAt ? new Date(n.createdAt).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}) : ''}</div>
+                <div class="muted" style="margin-top:4px">${esc(n.message || n.summary || '')}</div>
+                <div class="muted" style="font-size:12px;margin-top:8px">
+                  ${created ? new Date(created).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}) : ''}
+                </div>
               </div>
-              ${n.isRead ? `<span class="pill">อ่านแล้ว</span>` : `<button class="btn btn-ghost" data-id="${esc(n.notificationId)}">ทำเครื่องหมายว่าอ่านแล้ว</button>`}
+              ${isRead
+                ? `<span class="pill">อ่านแล้ว</span>`
+                : (id ? `<button class="btn btn-ghost" data-id="${esc(id)}">ทำเครื่องหมายว่าอ่านแล้ว</button>` : ``)
+              }
             </div>
           `;
+
           const btn = card.querySelector('button');
           if (btn){
             btn.addEventListener('click', async () => {
@@ -69,8 +93,10 @@
               }
             });
           }
+
           elList.appendChild(card);
         });
+
       } catch(e){
         console.error(e);
         alert(e?.error?.message || 'โหลดการแจ้งเตือนไม่สำเร็จ');
