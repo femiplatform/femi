@@ -16,6 +16,8 @@ const btnNext = document.getElementById("btnNext");
 const btnAddCycle = document.getElementById("btnAddCycle");
 const btnRecompute = document.getElementById("btnRecompute");
 
+const cyclesList = document.getElementById("cyclesList");
+
 // modal
 const logModal = document.getElementById("logModal");
 const btnCloseLog = document.getElementById("btnCloseLog");
@@ -29,6 +31,22 @@ const hadSex = document.getElementById("hadSex");
 const sexProtection = document.getElementById("sexProtection");
 const pillTaken = document.getElementById("pillTaken");
 const notes = document.getElementById("notes");
+
+
+// cycle modal
+const cycleModal = document.getElementById("cycleModal");
+const cycleBackdrop = document.getElementById("cycleBackdrop");
+const btnCloseCycle = document.getElementById("btnCloseCycle");
+const cycleModalTitle = document.getElementById("cycleModalTitle");
+const btnSaveCycle = document.getElementById("btnSaveCycle");
+const btnDeleteCycle = document.getElementById("btnDeleteCycle");
+
+const cycleStart = document.getElementById("cycleStart");
+const cycleEnd = document.getElementById("cycleEnd");
+const cycleLen = document.getElementById("cycleLen");
+const cycleFlow = document.getElementById("cycleFlow");
+const cyclePain = document.getElementById("cyclePain");
+const cycleNotes = document.getElementById("cycleNotes");
 
 let view = new Date();
 view = new Date(view.getFullYear(), view.getMonth(), 1);
@@ -92,6 +110,78 @@ function closeLogModal(){
   logModal.dataset.iso = "";
 }
 
+
+function openCycleModal(cycle){
+  const isEdit = !!cycle;
+  cycleModal.dataset.cycleId = isEdit ? String(cycle.cycleId) : "";
+  cycleModalTitle.textContent = isEdit ? t("fp.cycle.titleEdit") : t("fp.cycle.titleAdd");
+
+  cycleStart.value = (cycle?.periodStartDate || "");
+  cycleEnd.value = (cycle?.periodEndDate || "");
+  cycleLen.value = (cycle?.cycleLengthDays || "");
+  cycleFlow.value = (cycle?.flowLevel || "");
+  cyclePain.value = (cycle?.painLevel || "");
+  cycleNotes.value = (cycle?.notes || "");
+
+  btnDeleteCycle.style.display = isEdit ? "inline-flex" : "none";
+  cycleModal.classList.remove("hidden");
+}
+
+function closeCycleModal(){
+  cycleModal.classList.add("hidden");
+  cycleModal.dataset.cycleId = "";
+}
+
+btnCloseCycle.addEventListener("click", closeCycleModal);
+cycleBackdrop.addEventListener("click", closeCycleModal);
+
+btnSaveCycle.addEventListener("click", async ()=>{
+  const cycleId = cycleModal.dataset.cycleId;
+
+  const start = String(cycleStart.value||"").trim();
+  if(!start){ alert(t("fp.error.badDate")); return; }
+
+  const payload = {
+    periodStartDate: start,
+    periodEndDate: String(cycleEnd.value||"").trim(),
+    cycleLengthDays: cycleLen.value ? Number(cycleLen.value) : "",
+    flowLevel: cycleFlow.value,
+    painLevel: cyclePain.value,
+    notes: cycleNotes.value,
+    status: "Active"
+  };
+
+  try{
+    if(cycleId){
+      await api.fpCyclesUpdate({ cycleId, patch: payload });
+    }else{
+      await api.fpCyclesCreate(payload);
+    }
+    closeCycleModal();
+    await load();
+  }catch(e){
+    console.error(e);
+    alert(e?.error?.message || t("common.saveFailed"));
+  }
+});
+
+btnDeleteCycle.addEventListener("click", async ()=>{
+  const cycleId = cycleModal.dataset.cycleId;
+  if(!cycleId) return;
+  if(!confirm(t("fp.cycle.confirmDelete"))) return;
+
+  try{
+    await api.fpCyclesDelete(cycleId);
+    closeCycleModal();
+    await load();
+  }catch(e){
+    console.error(e);
+    alert(e?.error?.message || t("common.saveFailed"));
+  }
+});
+
+btnAddCycle.addEventListener("click", ()=> openCycleModal(null));
+
 btnCloseLog.addEventListener("click", closeLogModal);
 logBackdrop.addEventListener("click", closeLogModal);
 
@@ -138,46 +228,7 @@ btnRecompute.addEventListener("click", async ()=>{
   }
 });
 
-// + เพิ่มรอบเดือน (ยังใช้ prompt แต่รับ DD-MM-YYYY ผ่าน i18n ที่คุณตั้งไว้แล้ว)
-function parseDateInputDDMMYYYY_(input) {
-  const s = String(input || "").trim();
-  const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if (!m) return null;
-  const dd = Number(m[1]), mm = Number(m[2]), yyyy = Number(m[3]);
-  const d = new Date(yyyy, mm-1, dd);
-  if (d.getFullYear()!==yyyy || d.getMonth()!==(mm-1) || d.getDate()!==dd) return null;
-  return `${yyyy}-${String(mm).padStart(2,"0")}-${String(dd).padStart(2,"0")}`;
-}
-
-btnAddCycle.addEventListener("click", async ()=>{
-  const rawStart = prompt(t("fp.prompt.start"));
-  if(!rawStart) return;
-  const sIso = parseDateInputDDMMYYYY_(rawStart);
-  if(!sIso){ alert(t("fp.error.badDate")); return; }
-
-  const rawEnd = prompt(t("fp.prompt.end")) || "";
-  let eIso = "";
-  if(rawEnd.trim()){
-    const p = parseDateInputDDMMYYYY_(rawEnd);
-    if(!p){ alert(t("fp.error.badDate")); return; }
-    eIso = p;
-  }
-
-  const len = prompt(t("fp.prompt.cycleLen")) || "";
-
-  try{
-    await api.fpCyclesCreate({
-      periodStartDate: sIso,
-      periodEndDate: eIso,
-      cycleLengthDays: len ? Number(len) : "",
-      status:"Active"
-    });
-    await load();
-  }catch(e){
-    console.error(e);
-    alert(e?.error?.message || t("common.saveFailed"));
-  }
-});
+// + เพิ่ม/แก้ไขรอบเดือน (ใช้ modal)
 
 function getPeriodRanges(){
   // สร้างช่วงประจำเดือนจาก cycles (ถ้าไม่มี end ให้ใช้ periodLengthDays หรือ default 5 วัน)
@@ -269,11 +320,55 @@ function renderPrediction(){
   `;
 }
 
+
+
+function renderCycles(){
+  if(!cyclesList) return;
+  if(!cacheCycles.length){
+    cyclesList.innerHTML = `<div class="muted">${t("fp.cardNoData")}</div>`;
+    return;
+  }
+
+  const items = cacheCycles
+    .slice()
+    .sort((a,b)=> new Date(b.periodStartDate||0) - new Date(a.periodStartDate||0))
+    .slice(0, 12);
+
+  cyclesList.innerHTML = items.map(c=>{
+    const start = fmtThaiLong(c.periodStartDate);
+    const end = c.periodEndDate ? fmtThaiLong(c.periodEndDate) : t("fp.value.noEnd");
+    const cl = c.cycleLengthDays ? t("fp.value.days", { n: c.cycleLengthDays }) : t("fp.value.unknown");
+    const pl = c.periodLengthDays ? t("fp.value.days", { n: c.periodLengthDays }) : t("fp.value.unknown");
+
+    return `
+      <div class="cycle-item">
+        <div class="cycle-meta">
+          <div class="cycle-title">${start} → ${end}</div>
+          <div class="cycle-sub">${t("fp.label.cycleLen")}: ${cl} • ${t("fp.label.periodLen")}: ${pl}</div>
+        </div>
+        <div class="cycle-actions">
+          <button class="btn btn-ghost btn-sm" data-action="edit" data-id="${c.cycleId}">${t("common.edit")}</button>
+        </div>
+      </div>`;
+  }).join("");
+
+  cyclesList.querySelectorAll("button[data-action='edit']").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.dataset.id;
+      const c = cacheCycles.find(x=> String(x.cycleId)===String(id));
+      openCycleModal(c || null);
+    });
+  });
+}
+
+
 async function load(){
   elLoading.style.display = "block";
   try{
     const cyclesRes = await api.fpCyclesList();
     cacheCycles = cyclesRes.items || [];
+
+    renderCycles();
 
     // ensure predictions computed at least once
     if(cacheCycles.length){

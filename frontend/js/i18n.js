@@ -16,6 +16,8 @@ const DICT = {
     "common.computeDone": "คำนวณคาดการณ์ให้แล้ว",
     "common.ok": "ตกลง",
     "common.close": "ปิด",
+    "common.edit": "แก้ไข",
+    "common.delete": "ลบ",
 
     // Navigation / Shell
     "nav.menu": "เมนู",
@@ -88,6 +90,19 @@ const DICT = {
     "fp.btnAddCycle": "+ เพิ่มรอบเดือน",
     "fp.btnAddLog": "+ บันทึกรายวัน",
     "fp.btnRecompute": "คำนวณใหม่",
+    "fp.cycles.title": "รอบเดือนของฉัน",
+    "fp.cycles.hint": "แตะ “แก้ไข” เพื่อปรับข้อมูล หรือกด “เพิ่มรอบเดือน” เพื่อเพิ่มข้อมูลใหม่",
+    "fp.cycle.titleAdd": "เพิ่มรอบเดือน",
+    "fp.cycle.titleEdit": "แก้ไขรอบเดือน",
+    "fp.cycle.start": "วันเริ่มประจำเดือน",
+    "fp.cycle.end": "วันสิ้นสุดประจำเดือน",
+    "fp.cycle.cycleLen": "ความยาวรอบเดือน (วัน)",
+    "fp.cycle.flow": "ปริมาณเลือด",
+    "fp.cycle.pain": "อาการปวด",
+    "fp.cycle.notes": "หมายเหตุ",
+    "fp.cycle.save": "บันทึก",
+    "fp.cycle.delete": "ลบ",
+    "fp.cycle.confirmDelete": "ต้องการลบรอบเดือนนี้ใช่ไหม?",
     "fp.cardNoData": "ยังไม่มีข้อมูล",
 
     // ✅ ปรับเป็น DD-MM-YYYY

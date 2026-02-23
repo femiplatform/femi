@@ -25,6 +25,17 @@
         <button class="btn btn-ghost" id="btnRecompute" data-i18n="fp.btnRecompute"></button>
       </div>
 
+
+
+      <!-- Cycles list -->
+      <div class="card" id="cyclesCard" style="padding:14px;margin-top:12px">
+        <div class="row-head">
+          <div style="font-weight:900" data-i18n="fp.cycles.title">รอบเดือนของฉัน</div>
+          <div class="muted" id="cyclesHint" data-i18n="fp.cycles.hint"></div>
+        </div>
+        <div id="cyclesList" class="cycles-list"></div>
+      </div>
+
       <!-- Calendar -->
       <div class="card" style="padding:14px;margin-top:12px">
         <div class="cal-head">
@@ -45,6 +56,64 @@
 
       <div id="loading" class="muted" style="margin-top:12px" data-i18n="common.loading">กำลังโหลด…</div>
     </main>
+
+
+
+    <!-- Cycle Modal -->
+    <div class="modal hidden" id="cycleModal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <div class="modal-title" id="cycleModalTitle" data-i18n="fp.cycle.titleAdd">เพิ่มรอบเดือน</div>
+          <button class="icon-btn" id="btnCloseCycle" aria-label="close">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="field">
+            <label data-i18n="fp.cycle.start">วันเริ่มประจำเดือน</label>
+            <input id="cycleStart" type="date" />
+          </div>
+          <div class="field">
+            <label data-i18n="fp.cycle.end">วันสิ้นสุดประจำเดือน</label>
+            <input id="cycleEnd" type="date" />
+          </div>
+          <div class="field">
+            <label data-i18n="fp.cycle.cycleLen">ความยาวรอบเดือน (วัน)</label>
+            <input id="cycleLen" type="number" min="15" max="60" placeholder="28" />
+          </div>
+          <div class="field row2">
+            <div style="flex:1">
+              <label data-i18n="fp.cycle.flow">ปริมาณเลือด</label>
+              <select id="cycleFlow">
+                <option value="">-</option>
+                <option value="Light">Light</option>
+                <option value="Medium">Medium</option>
+                <option value="Heavy">Heavy</option>
+              </select>
+            </div>
+            <div style="flex:1">
+              <label data-i18n="fp.cycle.pain">อาการปวด</label>
+              <select id="cyclePain">
+                <option value="">-</option>
+                <option value="None">None</option>
+                <option value="Mild">Mild</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Severe">Severe</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label data-i18n="fp.cycle.notes">หมายเหตุ</label>
+            <textarea id="cycleNotes" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-foot" style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn btn-ghost" id="btnDeleteCycle" data-i18n="fp.cycle.delete">ลบ</button>
+          <button class="btn btn-primary" id="btnSaveCycle" data-i18n="fp.cycle.save">บันทึก</button>
+        </div>
+      </div>
+      <div class="backdrop" id="cycleBackdrop"></div>
+    </div>
 
     <!-- Daily Log Modal -->
     <div class="modal hidden" id="logModal">
@@ -167,6 +236,17 @@
     .chk{display:flex;gap:8px;align-items:center;font-weight:800}
     .modal-foot{padding:12px 14px;border-top:1px solid rgba(0,0,0,.06)}
     .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:-1}
+
+
+    .row-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .cycles-list{margin-top:10px;display:flex;flex-direction:column;gap:8px}
+    .cycle-item{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:10px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .cycle-meta{display:flex;flex-direction:column;gap:4px}
+    .cycle-title{font-weight:900}
+    .cycle-sub{font-size:12px;opacity:.75}
+    .cycle-actions{display:flex;gap:8px}
+    .btn-sm{padding:8px 10px;border-radius:10px;font-weight:900}
+
   </style>
 </body>
 </html>
