@@ -339,3 +339,9 @@ button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgb
   color: rgba(124,45,18,.95);
 }
 .pill-quiz:hover{ background: rgba(255,237,213,.99); }
+
+/* FORCE summary backgrounds (override inline) */
+.card.summary.fp{ background: linear-gradient(135deg, rgba(237,233,254,.75) 0%, rgba(245,243,255,.88) 100%) !important; }
+.card.summary.pv{ background: linear-gradient(135deg, rgba(224,242,254,.78) 0%, rgba(239,246,255,.88) 100%) !important; }
+.card.summary.noti{ background: linear-gradient(135deg, rgba(255,228,230,.70) 0%, rgba(255,241,242,.88) 100%) !important; }
+.card.summary.quiz{ background: linear-gradient(135deg, rgba(255,237,213,.78) 0%, rgba(255,247,237,.90) 100%) !important; }
