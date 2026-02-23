@@ -63,8 +63,11 @@ function renderShell_(title, active) {
       </div>
     </header>
 
+    <!-- Drawer: FIXED layering (backdrop below panel) -->
     <aside id="drawer" class="femi-drawer hidden" aria-hidden="true">
-      <div class="drawer-panel">
+      <div class="drawer-backdrop" id="drawerBackdrop" aria-label="close"></div>
+
+      <div class="drawer-panel" role="dialog" aria-modal="true">
         <div class="drawer-head">
           <div class="drawer-title" data-i18n="nav.menu">${t("nav.menu")}</div>
           <button class="icon-btn" id="btnDrawerClose" aria-label="${escapeHtml_(t("common.close"))}">✕</button>
@@ -86,7 +89,6 @@ function renderShell_(title, active) {
           <button class="btn btn-danger" id="btnLogout" data-i18n="nav.logout">${t("nav.logout")}</button>
         </div>
       </div>
-      <div class="drawer-backdrop" id="drawerBackdrop"></div>
     </aside>
 
     <div class="femi-content" data-shell-slot="main"></div>
@@ -145,13 +147,24 @@ function renderShell_(title, active) {
     .hidden{display:none !important}
     .femi-content{padding-bottom:72px;}
 
-    .femi-drawer{position:fixed;inset:0;z-index:60}
-    .drawer-panel{
-      position:absolute;top:0;right:0;height:100%;width:min(340px, 88vw);
-      background:#fff;box-shadow:-16px 0 40px rgba(0,0,0,.16);
-      display:flex;flex-direction:column;
+    /* Drawer (FIX) */
+    .femi-drawer{
+      position:fixed; inset:0; z-index:60;
     }
-    .drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.25)}
+    .drawer-backdrop{
+      position:absolute; inset:0;
+      background:rgba(0,0,0,.25);
+      z-index:0;
+    }
+    .drawer-panel{
+      position:absolute; top:0; right:0; height:100%;
+      width:min(340px, 88vw);
+      background:#fff;
+      box-shadow:-16px 0 40px rgba(0,0,0,.16);
+      display:flex; flex-direction:column;
+      z-index:1;
+    }
+
     .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid rgba(0,0,0,.06)}
     .drawer-title{font-weight:900}
     .drawer-nav{display:flex;flex-direction:column;padding:8px 14px;gap:2px;overflow:auto}
@@ -187,18 +200,39 @@ function bindShellEvents_() {
   const btnLogout = document.getElementById("btnLogout");
   const btnBell = document.getElementById("btnBell");
 
+  const lockScroll = () => {
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+  };
+  const unlockScroll = () => {
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  };
+
   const open = () => {
     drawer.classList.remove("hidden");
     drawer.setAttribute("aria-hidden", "false");
+    lockScroll();
   };
   const close = () => {
     drawer.classList.add("hidden");
     drawer.setAttribute("aria-hidden", "true");
+    unlockScroll();
   };
 
   btnMenu?.addEventListener("click", open);
   btnClose?.addEventListener("click", close);
   backdrop?.addEventListener("click", close);
+
+  // Close on ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+
+  // Safety: if any link clicked, close drawer
+  drawer?.querySelectorAll("a").forEach(a => {
+    a.addEventListener("click", close);
+  });
 
   btnLogout?.addEventListener("click", async () => {
     try { await authLogout("../login.html"); } catch { location.href = "../login.html"; }
