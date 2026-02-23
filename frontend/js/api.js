@@ -101,6 +101,26 @@ export const api = {
 
   fpPredictRecompute: (payload = {}) => request("fp.predict.recompute", payload),
   fpPredLatest: () => request("fp.pred.latest", {}),
+
+  // =========================================================
+  // ✅ Pregnancy – Sprint 4
+  // =========================================================
+  pregProfileGet: () => request("preg.profile.get", {}),
+  pregProfileUpsert: (payload) => request("preg.profile.upsert", payload),
+
+  pregAncList: (limit = 50) => request("preg.anc.list", { limit }),
+  pregAncUpsert: (payload) => request("preg.anc.upsert", payload),
+  pregAncDelete: (ancId) => request("preg.anc.delete", { ancId }),
+
+  pregKicksList: (limit = 20) => request("preg.kicks.list", { limit }),
+  pregKicksUpsert: (payload) => request("preg.kicks.upsert", payload),
+  pregKicksDelete: (kickId) => request("preg.kicks.delete", { kickId }),
+
+  pregVitalsList: (limit = 20) => request("preg.vitals.list", { limit }),
+  pregVitalsUpsert: (payload) => request("preg.vitals.upsert", payload),
+  pregVitalsDelete: (vitalId) => request("preg.vitals.delete", { vitalId }),
+
+  pregSummaryToday: () => request("preg.summary.today", {}),
 };
 
 // expose for console debugging

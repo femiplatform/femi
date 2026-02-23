@@ -4,26 +4,164 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FEMI • Pregnancy</title>
-  <link rel="stylesheet" href="../assets/app.css" />
+  <link rel="stylesheet" href="./assets/app.css" />
 </head>
 <body>
   <div id="app">
     <main class="container">
-      <h1 class="page-title">Pregnancy</h1>
-      <p class="page-sub muted">ติดตามการตั้งครรภ์ • นัดหมาย • ลูกดิ้น • ค่าวัด</p>
+      <h1 class="page-title" data-i18n="preg.title">การตั้งครรภ์</h1>
+      <p class="page-sub muted" data-i18n="preg.subtitle">ติดตามการตั้งครรภ์ • นัดหมาย • ลูกดิ้น • ค่าวัด</p>
 
-      <div class="card" style="padding:14px">
-        <div style="font-weight:800">สถานะ</div>
-        <div class="muted" style="margin-top:6px">
-          หน้านี้จะพัฒนาใน Sprint 4 (ตั้งครรภ์ + นัด ANC + ลูกดิ้น + น้ำหนัก/ความดัน)
+      <!-- Summary -->
+      <section class="card" style="padding:14px; margin-top:12px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+          <div>
+            <div style="font-weight:800" data-i18n="preg.summary.title">สรุปวันนี้</div>
+            <div class="muted" style="margin-top:4px" id="pregSummarySubtitle" data-i18n="common.loading">กำลังโหลด…</div>
+          </div>
+          <div class="pill" id="pregWeekPill" style="min-width:88px; text-align:center">-</div>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.summary.nextAnc">นัด ANC ถัดไป</div>
+            <div style="font-weight:800; margin-top:4px" id="pregNextAnc">-</div>
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.summary.kicksToday">ลูกดิ้นวันนี้</div>
+            <div style="font-weight:800; margin-top:4px" id="pregKicksToday">0</div>
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.summary.weightLatest">น้ำหนักล่าสุด</div>
+            <div style="font-weight:800; margin-top:4px" id="pregWeightLatest">-</div>
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.summary.bpLatest">ความดันล่าสุด</div>
+            <div style="font-weight:800; margin-top:4px" id="pregBpLatest">-</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs -->
+      <div class="segmented" style="margin-top:14px">
+        <button class="segmented-btn active" data-tab="profile" data-i18n="preg.tabs.profile">ข้อมูลครรภ์</button>
+        <button class="segmented-btn" data-tab="anc" data-i18n="preg.tabs.anc">นัด ANC</button>
+        <button class="segmented-btn" data-tab="kicks" data-i18n="preg.tabs.kicks">ลูกดิ้น</button>
+        <button class="segmented-btn" data-tab="vitals" data-i18n="preg.tabs.vitals">ค่าวัด</button>
+      </div>
+
+      <!-- Profile -->
+      <section id="tab-profile" class="card" style="padding:14px; margin-top:12px">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <div style="font-weight:800" data-i18n="preg.profile.title">ข้อมูลการตั้งครรภ์</div>
+          <button class="btn" id="btnEditProfile" data-i18n="common.edit">แก้ไข</button>
+        </div>
+
+        <div class="grid-2" style="margin-top:10px">
+          <div>
+            <div class="muted" data-i18n="preg.profile.lmp">วันแรกของประจำเดือนครั้งสุดท้าย (LMP)</div>
+            <div style="font-weight:800" id="profileLmp">-</div>
+          </div>
+          <div>
+            <div class="muted" data-i18n="preg.profile.edd">กำหนดคลอด (EDD)</div>
+            <div style="font-weight:800" id="profileEdd">-</div>
+          </div>
+          <div>
+            <div class="muted" data-i18n="preg.profile.gravida">ครรภ์ที่ (G)</div>
+            <div style="font-weight:800" id="profileGravida">-</div>
+          </div>
+          <div>
+            <div class="muted" data-i18n="preg.profile.para">คลอดแล้ว (P)</div>
+            <div style="font-weight:800" id="profilePara">-</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          <div class="muted" data-i18n="preg.profile.notes">หมายเหตุ</div>
+          <div id="profileNotes" style="margin-top:4px">-</div>
+        </div>
+      </section>
+
+      <!-- ANC -->
+      <section id="tab-anc" class="card" style="padding:14px; margin-top:12px; display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <div style="font-weight:800" data-i18n="preg.anc.title">นัด ANC</div>
+          <button class="btn" id="btnAddAnc" data-i18n="common.add">เพิ่ม</button>
+        </div>
+        <div id="ancEmpty" class="muted" style="margin-top:10px; display:none" data-i18n="preg.anc.empty">ยังไม่มีนัด</div>
+        <div id="ancList" style="margin-top:10px"></div>
+      </section>
+
+      <!-- Kicks -->
+      <section id="tab-kicks" class="card" style="padding:14px; margin-top:12px; display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <div>
+            <div style="font-weight:800" data-i18n="preg.kicks.title">ลูกดิ้น</div>
+            <div class="muted" style="margin-top:4px" data-i18n="preg.kicks.hint">กด “+1” ทุกครั้งที่รู้สึกลูกดิ้น แล้วกดบันทึก</div>
+          </div>
+          <button class="btn" id="btnSaveKickSession" data-i18n="common.save">บันทึก</button>
+        </div>
+
+        <div class="grid-2" style="margin-top:12px">
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.kicks.sessionDate">วันที่</div>
+            <input id="kickDate" type="date" class="input" />
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="preg.kicks.count">จำนวนครั้ง</div>
+            <div style="display:flex; align-items:center; gap:10px; margin-top:6px">
+              <button class="btn" id="btnKickMinus">-</button>
+              <div style="font-weight:900; font-size:22px" id="kickCount">0</div>
+              <button class="btn primary" id="btnKickPlus">+1</button>
+              <button class="btn" id="btnKickReset" data-i18n="common.reset">รีเซ็ต</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div style="font-weight:800" data-i18n="preg.kicks.recent">รายการล่าสุด</div>
+          <div id="kicksEmpty" class="muted" style="margin-top:8px; display:none" data-i18n="common.noData">ไม่มีข้อมูล</div>
+          <div id="kicksList" style="margin-top:8px"></div>
+        </div>
+      </section>
+
+      <!-- Vitals -->
+      <section id="tab-vitals" class="card" style="padding:14px; margin-top:12px; display:none">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+          <div style="font-weight:800" data-i18n="preg.vitals.title">ค่าวัด</div>
+          <button class="btn" id="btnAddVitals" data-i18n="common.add">เพิ่ม</button>
+        </div>
+        <div id="vitalsEmpty" class="muted" style="margin-top:10px; display:none" data-i18n="common.noData">ไม่มีข้อมูล</div>
+        <div id="vitalsList" style="margin-top:10px"></div>
+      </section>
+
+      <!-- Modal -->
+      <div id="modal" class="modal" style="display:none">
+        <div class="modal-backdrop"></div>
+        <div class="modal-sheet">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px">
+            <div style="font-weight:900" id="modalTitle">-</div>
+            <button class="btn" id="btnModalClose" aria-label="Close">✕</button>
+          </div>
+          <div id="modalBody" style="margin-top:10px"></div>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px">
+            <button class="btn" id="btnModalDelete" style="display:none" data-i18n="common.delete">ลบ</button>
+            <button class="btn" id="btnModalCancel" data-i18n="common.cancel">ยกเลิก</button>
+            <button class="btn primary" id="btnModalSave" data-i18n="common.save">บันทึก</button>
+          </div>
         </div>
       </div>
+
     </main>
   </div>
 
   <script type="module">
-    import { initUserShell } from "../js/shell.js";
+    import { initUserShell } from "./js/shell.js";
+    import { applyI18n } from "./js/i18n.js";
+    import { initPregnancyPage } from "./js/pages/pregnancy.js";
     await initUserShell({ active: "tools", title: "Pregnancy" });
+    applyI18n(document);
+    initPregnancyPage();
   </script>
 </body>
 </html>
