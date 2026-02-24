@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Menopause Tracker</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .mtHero{
+      background: linear-gradient(135deg, rgba(186,230,253,.30), rgba(251,207,232,.22));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.2fr .8fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 680px){ .kpiRow{ grid-template-columns: 1fr; } }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(236,72,153,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    /* trackers */
+    .trackGrid{ display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    .tCard{ padding: 12px; }
+    .tTitle{ font-weight: 900; margin-bottom: 6px; }
+    .scale{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .scaleBtn{
+      padding: 10px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      cursor:pointer;
+      font-weight: 900;
+      text-align:center;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+    }
+    .scaleBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.92); }
+    .scaleBtn.on{
+      border-color: rgba(236,72,153,.35);
+      background: rgba(251,207,232,.45);
+      box-shadow: 0 10px 26px rgba(236,72,153,.10);
+    }
+    .small{ font-size: 12px; opacity:.8; font-weight: 800; }
+
+    .moodRow{ display:grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; }
+    .moodBtn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.70);
+      cursor:pointer;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+      font-weight: 900;
+    }
+    .moodBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.92); }
+    .moodBtn.on{
+      border-color: rgba(59,130,246,.35);
+      background: rgba(219,234,254,.85);
+      box-shadow: 0 10px 26px rgba(59,130,246,.10);
+    }
+    .emoji{ font-size: 26px; line-height: 1; }
+    .emojiLbl{ font-size: 12px; opacity:.85; margin-top: 6px; text-align:center; }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">ระบบติดตามอาการวัยทอง</h1>
+      <p class="page-sub muted">บันทึกอาการรายวัน/รายสัปดาห์ (ร้อนวูบวาบ การนอน อารมณ์ ฯลฯ) เพื่อดูแนวโน้ม (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="mtHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">บันทึกวันนี้</div>
+                <div class="muted2">เลือกคะแนน 0–3 และอารมณ์โดยรวม</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button id="btnResetToday" class="btn btn-ghost">ล้างวันนี้</button>
+                <button id="btnSave" class="btn btn-ok">บันทึก</button>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">วันที่</label>
+                <input id="date" class="input" type="date" />
+              </div>
+              <div>
+                <label class="muted">รอบเดือน/สถานะ</label>
+                <select id="cycle" class="input">
+                  <option value="normal">ยังสม่ำเสมอ</option>
+                  <option value="irregular">เริ่มไม่สม่ำเสมอ</option>
+                  <option value="stopped_lt12">ขาด &lt; 12 เดือน</option>
+                  <option value="stopped_ge12">ขาด ≥ 12 เดือน</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <div style="font-weight:900">อารมณ์โดยรวม</div>
+              <div class="muted2">เลือก 1 อีโมจิ</div>
+              <div class="moodRow" id="moodRow"></div>
+            </div>
+
+            <div class="trackGrid" id="trackGrid"></div>
+
+            <div style="margin-top:10px">
+              <label class="muted">โน้ต</label>
+              <textarea id="note" class="input" placeholder="เช่น ปัจจัยกระตุ้นอาการ (อาหาร/อากาศ/ความเครียด), ยาที่ใช้ ฯลฯ"></textarea>
+            </div>
+
+            <div class="kpiRow">
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">ค่าเฉลี่ย 7 วัน</div>
+                <div class="big" id="kAvg7">-</div>
+                <div class="muted2" id="kAvg7Text">คะแนนรวมเฉลี่ย</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">แย่ที่สุด 30 วัน</div>
+                <div class="big" id="kWorst">-</div>
+                <div class="muted2" id="kWorstText">วันที่คะแนนรวมสูงสุด</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">อารมณ์ล่าสุด</div>
+                <div class="big" id="kMood">-</div>
+                <div class="muted2" id="kMoodText">จากรายการล่าสุด</div>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+              <button id="btnClearAll" class="btn btn-ghost">ล้างข้อมูลทั้งหมด</button>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ควรปรึกษาหน่วยบริการ หาก</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • อาการรุนแรงต่อเนื่องจนใช้ชีวิตลำบาก • นอนไม่หลับหนัก • อารมณ์แย่รุนแรง<br>
+                • เจ็บแน่นหน้าอก/หายใจลำบาก • เลือดออกผิดปกติ
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">รายการล่าสุด</div>
+            <div class="muted2" style="margin-top:6px">10 รายการล่าสุดในเครื่อง</div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">แนวทางดูแนวโน้ม</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ถ้าคะแนนรวมสูงขึ้นต่อเนื่อง: ลองหา “ตัวกระตุ้น” (อาหาร/ความเครียด/การนอน/อากาศ)<br>
+              • ปรับพฤติกรรมทีละอย่าง แล้วติดตาม 1–2 สัปดาห์<br>
+              • หากมีอาการรุนแรง หรือมีเลือดออกผิดปกติ ควรพบแพทย์ทันที
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ทิปสั้น ๆ</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ร้อนวูบวาบ: แต่งตัวเป็นชั้น หายใจช้า ลดเผ็ด/คาเฟอีน<br>
+              • นอน: ลดจอ 1 ชม.ก่อนนอน จัดห้องให้เย็นสบาย<br>
+              • อารมณ์: พูดคุย/ออกกำลัง/ทำสมาธิ ขอความช่วยเหลือเมื่อจำเป็น
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Menopause Tracker" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_MENOPAUSE_TRACKER_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { entries: [] };
+      }catch{
+        return { entries: [] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+    function isoToday(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function nowTs(){ return Date.now(); }
+    function toDate(iso){ return new Date(iso + "T00:00:00"); }
+
+    const dateEl = document.getElementById("date");
+    const cycleEl = document.getElementById("cycle");
+    const noteEl = document.getElementById("note");
+
+    const moodRow = document.getElementById("moodRow");
+    const trackGrid = document.getElementById("trackGrid");
+
+    const btnResetToday = document.getElementById("btnResetToday");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearAll = document.getElementById("btnClearAll");
+
+    const kAvg7 = document.getElementById("kAvg7");
+    const kAvg7Text = document.getElementById("kAvg7Text");
+    const kWorst = document.getElementById("kWorst");
+    const kWorstText = document.getElementById("kWorstText");
+    const kMood = document.getElementById("kMood");
+    const kMoodText = document.getElementById("kMoodText");
+
+    const recentEl = document.getElementById("recent");
+
+    const MOODS = [
+      { id: 5, emoji:"😄", label:"ดีมาก" },
+      { id: 4, emoji:"🙂", label:"ดี" },
+      { id: 3, emoji:"😐", label:"เฉย ๆ" },
+      { id: 2, emoji:"😟", label:"ไม่ค่อยดี" },
+      { id: 1, emoji:"😢", label:"แย่" },
+    ];
+
+    const TRACKS = [
+      { id:"hotflash", name:"ร้อนวูบวาบ/เหงื่อกลางคืน" },
+      { id:"sleep", name:"การนอน" },
+      { id:"moodSym", name:"หงุดหงิด/วิตกกังวล" },
+      { id:"fatigue", name:"อ่อนเพลีย" },
+      { id:"joint", name:"ปวดเมื่อยข้อ" },
+      { id:"vaginal", name:"ช่องคลอดแห้ง/เจ็บ" },
+      { id:"urinary", name:"ปัสสาวะ/กลั้นยาก" },
+    ];
+
+    let state = load();
+    let selectedMood = null;
+    let scores = {}; // track id -> 0..3
+
+    function renderMood(){
+      moodRow.innerHTML = MOODS.map(m=>`
+        <div class="moodBtn" data-mood="${m.id}">
+          <div class="emoji">${m.emoji}</div>
+          <div class="emojiLbl">${m.label}</div>
+        </div>
+      `).join("");
+
+      moodRow.querySelectorAll(".moodBtn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          moodRow.querySelectorAll(".moodBtn").forEach(x=>x.classList.remove("on"));
+          btn.classList.add("on");
+          selectedMood = Number(btn.getAttribute("data-mood"));
+        });
+      });
+    }
+
+    function renderTracks(){
+      trackGrid.innerHTML = TRACKS.map(t=>{
+        const current = Number(scores[t.id] ?? 0);
+        return `
+          <div class="card tCard">
+            <div class="tTitle">${escapeHtml(t.name)}</div>
+            <div class="muted2">0=ไม่มี • 1=เล็กน้อย • 2=ปานกลาง • 3=มาก</div>
+            <div class="scale" data-track="${t.id}">
+              ${[0,1,2,3].map(v=>`
+                <div class="scaleBtn ${v===current ? "on":""}" data-v="${v}">
+                  ${v}
+                  <div class="small">${v===0?"ไม่มี":v===1?"เล็กน้อย":v===2?"ปานกลาง":"มาก"}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      trackGrid.querySelectorAll(".scale").forEach(row=>{
+        row.querySelectorAll(".scaleBtn").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            const id = row.getAttribute("data-track");
+            const v = Number(btn.getAttribute("data-v"));
+            scores[id] = v;
+            row.querySelectorAll(".scaleBtn").forEach(x=>x.classList.remove("on"));
+            btn.classList.add("on");
+          });
+        });
+      });
+    }
+
+    function moodLabel(id){
+      const m = MOODS.find(x=>x.id===id);
+      return m ? `${m.emoji} ${m.label}` : "-";
+    }
+
+    function totalScore(entry){
+      const s = entry.scores || {};
+      return TRACKS.reduce((acc,t)=> acc + (Number(s[t.id]||0)), 0);
+    }
+
+    function upsertEntry(){
+      const d = dateEl.value || isoToday();
+      if(!selectedMood) {
+        alert("กรุณาเลือกอารมณ์โดยรวมก่อนบันทึก");
+        return;
+      }
+      const entry = {
+        date: d,
+        cycle: cycleEl.value || "normal",
+        mood: selectedMood,
+        scores: { ...scores },
+        note: (noteEl.value || "").trim(),
+        updatedAt: nowTs()
+      };
+
+      // upsert by date
+      const idx = (state.entries||[]).findIndex(e => e.date === d);
+      if(idx >= 0) state.entries[idx] = entry;
+      else state.entries = [entry, ...(state.entries||[])];
+
+      // sort desc by date
+      state.entries.sort((a,b)=> b.date.localeCompare(a.date));
+      // keep 180
+      state.entries = state.entries.slice(0, 180);
+
+      save(state);
+      renderAll();
+      toast("บันทึกแล้ว");
+    }
+
+    function resetToday(){
+      selectedMood = null;
+      scores = {};
+      noteEl.value = "";
+      cycleEl.value = "normal";
+      moodRow.querySelectorAll(".moodBtn").forEach(x=>x.classList.remove("on"));
+      renderTracks();
+    }
+
+    btnSave.addEventListener("click", upsertEntry);
+    btnResetToday.addEventListener("click", resetToday);
+
+    btnClearAll.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลทั้งหมดในเครื่องใช่ไหม?")){
+        state = { entries: [] };
+        save(state);
+        renderAll();
+        resetToday();
+      }
+    });
+
+    function renderKPIs(){
+      const entries = (state.entries || []).slice().sort((a,b)=> b.date.localeCompare(a.date));
+      if(!entries.length){
+        kAvg7.textContent = "-";
+        kWorst.textContent = "-";
+        kMood.textContent = "-";
+        kAvg7Text.textContent = "ยังไม่มีข้อมูล";
+        kWorstText.textContent = "—";
+        kMoodText.textContent = "—";
+        return;
+      }
+
+      // last 7 days by date order
+      const last7 = entries.slice(0, 7);
+      const avg = last7.reduce((acc,e)=> acc + totalScore(e), 0) / last7.length;
+      kAvg7.textContent = String(Math.round(avg * 10) / 10);
+
+      // worst in last 30 entries or 30 days approximation
+      const last30 = entries.slice(0, 30);
+      let worst = last30[0];
+      for(const e of last30){
+        if(totalScore(e) > totalScore(worst)) worst = e;
+      }
+      kWorst.textContent = String(totalScore(worst));
+      kWorstText.textContent = `วันที่ ${worst.date}`;
+
+      const latest = entries[0];
+      kMood.textContent = String(latest.mood);
+      kMoodText.textContent = moodLabel(latest.mood);
+    }
+
+    function renderRecent(){
+      const entries = (state.entries || []).slice(0, 10);
+      if(!entries.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = entries.map(e=>{
+        const total = totalScore(e);
+        let pill = { cls:"pill pillOk", text:"เบา" };
+        if(total >= 12) pill = { cls:"pill pillHigh", text:"มาก" };
+        else if(total >= 6) pill = { cls:"pill pillMid", text:"ปานกลาง" };
+
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${e.date}</div>
+                <div class="muted2">รวม: ${total} • อารมณ์: ${escapeHtml(moodLabel(e.mood))} • รอบเดือน: ${escapeHtml(e.cycle||"-")}</div>
+              </div>
+              <span class="${pill.cls}">${pill.text}</span>
+            </div>
+            ${e.note ? `<div class="muted2" style="margin-top:6px">โน้ต: ${escapeHtml(e.note)}</div>` : ""}
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-load="${e.date}">โหลด</button>
+              <button class="btn btn-ghost" data-del="${e.date}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const d = b.getAttribute("data-del");
+          if(confirm(`ลบรายการวันที่ ${d} ใช่ไหม?`)){
+            state.entries = (state.entries || []).filter(x => x.date !== d);
+            save(state);
+            renderAll();
+          }
+        });
+      });
+
+      recentEl.querySelectorAll("[data-load]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const d = b.getAttribute("data-load");
+          const rec = (state.entries || []).find(x => x.date === d);
+          if(!rec) return;
+
+          dateEl.value = rec.date;
+          cycleEl.value = rec.cycle || "normal";
+          noteEl.value = rec.note || "";
+          scores = rec.scores || {};
+          selectedMood = rec.mood || null;
+
+          // render mood selection
+          moodRow.querySelectorAll(".moodBtn").forEach(x=>x.classList.remove("on"));
+          if(selectedMood){
+            const btn = moodRow.querySelector(`.moodBtn[data-mood="${selectedMood}"]`);
+            if(btn) btn.classList.add("on");
+          }
+          renderTracks();
+          toast("โหลดแล้ว");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    function renderAll(){
+      renderKPIs();
+      renderRecent();
+    }
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","cycle","mood","moodLabel","total","note"].concat(TRACKS.map(t=>t.id));
+      const rows = [header];
+      const entries = (state.entries || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const e of entries){
+        const row = [
+          e.date,
+          e.cycle || "",
+          String(e.mood || ""),
+          moodLabel(e.mood || 0),
+          String(totalScore(e)),
+          (e.note || "").replaceAll("\n"," "),
+        ];
+        for(const t of TRACKS){
+          row.push(String((e.scores||{})[t.id] ?? 0));
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menopause_tracker.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    state = load();
+    dateEl.value = isoToday();
+    renderMood();
+    renderTracks();
+    renderAll();
+  </script>
+</body>
+</html>
