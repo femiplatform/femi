@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Menopause Psycho-Social Readiness</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .mpHero{
+      background: linear-gradient(135deg, rgba(221,214,254,.34), rgba(186,230,253,.22));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(139,92,246,.88), rgba(59,130,246,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แบบประเมินความพร้อมด้านจิตใจและสังคม (วัยทอง)</h1>
+      <p class="page-sub muted">ประเมินการรับมือความเครียด การสนับสนุนจากคนรอบตัว และความรู้สึกโดยรวม เพื่อวางแผนดูแลตนเอง (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="mpHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลพื้นฐาน</div>
+                <div class="muted2">ตอบตามความรู้สึกในช่วง 2–4 สัปดาห์ที่ผ่านมา</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="50" />
+              </div>
+              <div>
+                <label class="muted">ระดับความเครียดโดยรวม</label>
+                <select id="stress" class="input">
+                  <option value="low">น้อย</option>
+                  <option value="mid">ปานกลาง</option>
+                  <option value="high">มาก</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุ (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น ปัญหาครอบครัว/งาน/สุขภาพ, สิ่งที่ทำให้กังวล ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปความพร้อม</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลสรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนนความพร้อม</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">คะแนนยิ่งสูง ยิ่งพร้อม</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">จุดที่ควรโฟกัส</div>
+                  <div style="font-weight:900;margin-top:6px" id="resFocus">-</div>
+                  <div class="muted2" id="resFocusDesc">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">แผนแนะนำ (ย่อ)</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resPlan">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ควรขอความช่วยเหลือทันที หาก</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • รู้สึกสิ้นหวังมาก/ร้องไห้บ่อยจนทำงานไม่ได้ • นอนไม่หลับหนักต่อเนื่อง<br>
+                • มีความคิดทำร้ายตนเอง • ตื่นตระหนก/วิตกกังวลรุนแรง
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ประวัติการบันทึก</div>
+            <div class="muted2" style="margin-top:6px">8 รายการล่าสุดในเครื่อง</div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">คำถามด้านจิตใจและสังคม</div>
+            <div class="muted2" style="margin-top:6px">เลือกคำตอบที่ตรงที่สุด</div>
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:10px"></div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ทิปสั้น ๆ</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ตั้ง “เวลาพักใจ” วันละ 10 นาที (หายใจลึก/สวดมนต์/ทำสมาธิ)<br>
+              • พูดคุยกับคนที่ไว้ใจ หรือขอคำปรึกษา อสม./หน่วยบริการ<br>
+              • วางแผนกิจกรรมที่ทำให้มีความสุขเล็ก ๆ ในแต่ละสัปดาห์
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Menopause Psycho Ready" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_MENOPAUSE_PSYCHO_READY_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ age:"", stress:"mid", note:"" }, answers:{}, history:[] };
+      }catch{
+        return { profile:{ age:"", stress:"mid", note:"" }, answers:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Questions: more points = more readiness (coping + support + wellbeing)
+    const QUESTIONS = [
+      { key:"support", title:"ฉันมีคน/ช่องทางที่ขอความช่วยเหลือได้เมื่อเครียด",
+        opts:[ {v:"no",label:"ยังไม่มี/ไม่แน่ใจ",pts:0,focus:"สร้างเครือข่ายช่วยเหลือ"},
+               {v:"some",label:"มีบางส่วน",pts:1,focus:"เพิ่มช่องทางให้ชัดเจน"},
+               {v:"yes",label:"มีพร้อม",pts:2,focus:"ดีมาก"} ] },
+
+      { key:"cope", title:"ฉันมีวิธีรับมือความเครียดที่ใช้ได้ผลสำหรับฉัน",
+        opts:[ {v:"no",label:"ยังไม่มี",pts:0,focus:"ฝึกวิธีผ่อนคลาย"},
+               {v:"some",label:"มีบ้าง",pts:1,focus:"ทำให้สม่ำเสมอ"},
+               {v:"yes",label:"มีและทำได้ดี",pts:2,focus:"รักษาต่อเนื่อง"} ] },
+
+      { key:"sleep", title:"ฉันนอนหลับได้เพียงพอ/คุณภาพการนอนดี",
+        opts:[ {v:"no",label:"ไม่ค่อย",pts:0,focus:"ปรับการนอน"},
+               {v:"some",label:"พอได้",pts:1,focus:"ปรับพฤติกรรมก่อนนอน"},
+               {v:"yes",label:"ดี",pts:2,focus:"ดีมาก"} ] },
+
+      { key:"mood", title:"อารมณ์โดยรวมของฉันในช่วงหลังค่อนข้างมั่นคง",
+        opts:[ {v:"no",label:"แย่/แปรปรวนมาก",pts:0,focus:"ดูแลอารมณ์และขอคำปรึกษา"},
+               {v:"some",label:"พอได้",pts:1,focus:"เพิ่มกิจกรรมผ่อนคลาย"},
+               {v:"yes",label:"ดี",pts:2,focus:"ดีมาก"} ] },
+
+      { key:"meaning", title:"ฉันมีเป้าหมาย/สิ่งที่ทำให้รู้สึกมีคุณค่าในชีวิต",
+        opts:[ {v:"no",label:"ยังไม่ชัด",pts:0,focus:"ค้นหาเป้าหมายเล็ก ๆ"},
+               {v:"some",label:"มีบ้าง",pts:1,focus:"ทำให้ต่อเนื่อง"},
+               {v:"yes",label:"มีชัด",pts:2,focus:"ดีมาก"} ] },
+
+      { key:"social", title:"ฉันได้พบปะ/พูดคุยกับคนรอบตัวอย่างสม่ำเสมอ",
+        opts:[ {v:"no",label:"น้อยมาก/แยกตัว",pts:0,focus:"เพิ่มการเชื่อมต่อทางสังคม"},
+               {v:"some",label:"บ้าง",pts:1,focus:"จัดเวลาพบปะ"},
+               {v:"yes",label:"สม่ำเสมอ",pts:2,focus:"ดีมาก"} ] },
+    ];
+
+    // elements
+    const ageEl = document.getElementById("age");
+    const stressEl = document.getElementById("stress");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+
+    const qWrap = document.getElementById("qWrap");
+    const recentEl = document.getElementById("recent");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resFocus = document.getElementById("resFocus");
+    const resFocusDesc = document.getElementById("resFocusDesc");
+    const resPlan = document.getElementById("resPlan");
+
+    let state = load();
+    let answers = state.answers || {};
+    let lastResult = null;
+
+    // restore profile
+    ageEl.value = state.profile?.age ?? "";
+    stressEl.value = state.profile?.stress ?? "mid";
+    noteEl.value = state.profile?.note ?? "";
+
+    function persistProfile(){
+      state.profile = {
+        age: ageEl.value || "",
+        stress: stressEl.value || "mid",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    ageEl.addEventListener("input", persistProfile);
+    stressEl.addEventListener("change", persistProfile);
+    noteEl.addEventListener("input", persistProfile);
+
+    function renderQuestions(){
+      qWrap.innerHTML = QUESTIONS.map(q=>{
+        const current = answers[q.key];
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${escapeHtml(q.title)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${q.opts.map(o=>`
+                <label class="opt">
+                  <input type="radio" name="${q.key}" value="${o.v}" ${current===o.v ? "checked":""}/>
+                  <div>
+                    <span>${escapeHtml(o.label)}</span>
+                    <div class="muted2">คะแนน: ${o.pts}</div>
+                  </div>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = r.value;
+          state.answers = answers;
+          save(state);
+        });
+      });
+    }
+
+    function pillFor(level){
+      if(level==="good") return { cls:"pill pillOk", text:"พร้อมดี" };
+      if(level==="mid") return { cls:"pill pillMid", text:"พอใช้" };
+      return { cls:"pill pillHigh", text:"ควรดูแลเพิ่ม" };
+    }
+
+    function compute(){
+      for(const q of QUESTIONS){
+        if(!(q.key in answers)) return { ok:false, msg:"กรุณาตอบคำถามให้ครบทุกข้อ" };
+      }
+
+      let total = 0;
+      const focuses = [];
+      for(const q of QUESTIONS){
+        const v = answers[q.key];
+        const opt = q.opts.find(o=>o.v===v);
+        total += opt.pts;
+        if(opt.pts === 0) focuses.push({ title:q.title, focus: opt.focus, sev: 2 });
+        else if(opt.pts === 1) focuses.push({ title:q.title, focus: opt.focus, sev: 1 });
+      }
+      focuses.sort((a,b)=> b.sev - a.sev);
+
+      // stress modifier: does not change score, but guides plan
+      const stress = stressEl.value || "mid";
+
+      let level = "good";
+      if(total <= 5) level = "low";
+      else if(total <= 9) level = "mid";
+
+      const pill = pillFor(level);
+      const focus = focuses[0] ? focuses[0].focus : "รักษาสมดุลชีวิตต่อเนื่อง";
+      const focusDesc = focuses[0] ? `จากหัวข้อ: ${focuses[0].title}` : "—";
+
+      const plan = [];
+      plan.push("• ตั้งเวลาพักใจ: หายใจลึก ๆ/สวดมนต์/ทำสมาธิ วันละ 5–10 นาที");
+      plan.push("• วางแผนการนอน: ลดจอ 1 ชม.ก่อนนอน สร้างกิจวัตรก่อนนอน");
+      plan.push("• พูดคุยกับคนที่ไว้ใจ หรือขอคำปรึกษา อสม./หน่วยบริการ");
+      plan.push("• ทำกิจกรรมที่ชอบสัปดาห์ละ 1–2 ครั้ง เพื่อเติมพลังใจ");
+
+      if(stress === "high"){
+        plan.push("• ระดับความเครียดสูง: ลองประเมินสาเหตุและขอความช่วยเหลือเชิงรุก");
+      }else if(stress === "low"){
+        plan.push("• ความเครียดต่ำ: รักษารูทีนที่ดี และติดตามอารมณ์ต่อเนื่อง");
+      }
+
+      if(level==="low"){
+        plan.push("• เริ่มจาก 1 อย่างที่ทำได้แน่นอน (เช่น เดินสั้น ๆ/หายใจลึก) แล้วค่อยเพิ่ม");
+      }else if(level==="mid"){
+        plan.push("• เพิ่มความสม่ำเสมอของกิจกรรมผ่อนคลายและการเชื่อมต่อทางสังคม");
+      }else{
+        plan.push("• รักษาความสมดุล และเป็นกำลังใจให้คนรอบตัวร่วมกัน");
+      }
+
+      return {
+        ok:true,
+        date: todayIso(),
+        total,
+        level,
+        pill,
+        focus,
+        focusDesc,
+        planHtml: plan.join("<br>"),
+        profile: { age: ageEl.value||"", stress, note: (noteEl.value||"").trim() },
+        answers: { ...answers }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resFocus.textContent = r.focus;
+      resFocusDesc.textContent = r.focusDesc;
+      resPlan.innerHTML = r.planHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      const rec = { ...out, id: "MP_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลและคำตอบทั้งหมดใช่ไหม?")){
+        answers = {};
+        state.answers = {};
+        state.profile = { age:"", stress:"mid", note:"" };
+        ageEl.value = ""; stressEl.value = "mid"; noteEl.value = "";
+        save(state);
+        resWrap.style.display = "none";
+        renderQuestions();
+        toast("ล้างแล้ว");
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const pill = pillFor(h.level);
+        const a = h.profile?.age || "-";
+        const s = h.profile?.stress || "-";
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.total}/12 • อายุ: ${a} • เครียด: ${escapeHtml(s)}</div>
+              </div>
+              <span class="${pill.cls}">${pill.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x => x.id === id);
+          if(!rec) return;
+
+          const p = rec.profile || {};
+          ageEl.value = p.age || "";
+          stressEl.value = p.stress || "mid";
+          noteEl.value = p.note || "";
+          persistProfile();
+
+          answers = rec.answers || {};
+          state.answers = answers;
+          save(state);
+          renderQuestions();
+          showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x => x.id !== id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","score","level","focus","age","stress","note"].concat(QUESTIONS.map(q=>q.key));
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const p = h.profile || {};
+        const row = [
+          h.date,
+          String(h.total),
+          h.level,
+          h.focus,
+          p.age || "",
+          p.stress || "",
+          (p.note || "").replaceAll("\n"," "),
+        ];
+        for(const q of QUESTIONS){
+          row.push(String((h.answers||{})[q.key] ?? ""));
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menopause_psycho_ready.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderQuestions();
+    renderRecent();
+  </script>
+</body>
+</html>
