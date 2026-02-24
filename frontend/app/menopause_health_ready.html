@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Menopause Health Readiness</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .mhHero{
+      background: linear-gradient(135deg, rgba(186,230,253,.30), rgba(254,243,199,.40));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(245,158,11,.92));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แบบประเมินความพร้อมด้านสุขภาพ (วัยทอง)</h1>
+      <p class="page-sub muted">ประเมินปัจจัยเสี่ยง/พฤติกรรมสุขภาพที่สำคัญ เพื่อวางแผนดูแลระยะยาว (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="mhHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลพื้นฐาน</div>
+                <div class="muted2">กรอกเท่าที่ทราบ เพื่อให้คำแนะนำเหมาะสม</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างข้อมูล</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="50" />
+              </div>
+              <div>
+                <label class="muted">BMI (ถ้าทราบ)</label>
+                <input id="bmi" class="input" type="number" min="10" max="60" step="0.1" placeholder="24.0" />
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">ความดันล่าสุด (ถ้าทราบ)</label>
+                <input id="bp" class="input" placeholder="เช่น 120/80" />
+              </div>
+              <div>
+                <label class="muted">รอบเอว (ซม.) (ถ้าทราบ)</label>
+                <input id="waist" class="input" type="number" min="40" max="200" placeholder="80" />
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุ (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น โรคประจำตัว, ยาที่ใช้, ประวัติครอบครัว ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปความพร้อมด้านสุขภาพ</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลสรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนนความพร้อม</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">คะแนนยิ่งสูง ยิ่งพร้อม</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">จุดที่ควรโฟกัส</div>
+                  <div style="font-weight:900;margin-top:6px" id="resFocus">-</div>
+                  <div class="muted2" id="resFocusDesc">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">แผนแนะนำ (ย่อ)</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resPlan">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ควรปรึกษาหน่วยบริการ หาก</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • ความดันสูงมาก/เวียนศีรษะหนัก • เจ็บแน่นหน้าอก/หายใจลำบาก • น้ำตาลสูงผิดปกติ<br>
+                • มีอาการชาอ่อนแรงเฉียบพลัน • ปวดกระดูก/หลังมากผิดปกติ
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ประวัติการบันทึก</div>
+            <div class="muted2" style="margin-top:6px">8 รายการล่าสุดในเครื่อง</div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">คำถามพฤติกรรม/ความเสี่ยง</div>
+            <div class="muted2" style="margin-top:6px">เลือกคำตอบที่ตรงที่สุด</div>
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:10px"></div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">เช็กลิสต์แนะนำ (ย่อ)</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ความดัน/น้ำตาล/ไขมัน: ตรวจตามรอบ • น้ำหนัก/รอบเอว: ติดตามสม่ำเสมอ<br>
+              • กระดูก: ออกกำลังลงน้ำหนัก + แคลเซียม/วิตามินดี • หัวใจ: เดิน/ปั่น/ว่าย + ลดเค็ม‑มัน<br>
+              • วัคซีน/คัดกรอง: ตามวัยและสิทธิ (ปรึกษาหน่วยบริการ)
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Menopause Health Ready" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_MENOPAUSE_HEALTH_READY_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ age:"", bmi:"", bp:"", waist:"", note:"" }, answers:{}, history:[] };
+      }catch{
+        return { profile:{ age:"", bmi:"", bp:"", waist:"", note:"" }, answers:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Questions: more points = more health readiness (better habits / lower risk)
+    const QUESTIONS = [
+      { key:"smoke", title:"การสูบบุหรี่", opts:[
+        {v:"yes", label:"สูบเป็นประจำ", pts:0, focus:"เลิกบุหรี่/ลดควันบุหรี่"},
+        {v:"sometimes", label:"สูบบ้าง/เคยสูบ", pts:1, focus:"ลดควันบุหรี่ให้มากที่สุด"},
+        {v:"no", label:"ไม่สูบ", pts:2, focus:"รักษาพฤติกรรมนี้ต่อเนื่อง"},
+      ]},
+      { key:"alcohol", title:"การดื่มแอลกอฮอล์", opts:[
+        {v:"often", label:"ดื่มบ่อย", pts:0, focus:"ลดแอลกอฮอล์"},
+        {v:"sometimes", label:"ดื่มบ้าง", pts:1, focus:"จำกัดปริมาณ"},
+        {v:"no", label:"ไม่ดื่ม/นาน ๆ ครั้ง", pts:2, focus:"ดีมาก"},
+      ]},
+      { key:"activity", title:"การออกกำลังกาย (ต่อสัปดาห์)", opts:[
+        {v:"low", label:"น้อยมาก/แทบไม่ออกกำลัง", pts:0, focus:"เพิ่มกิจกรรมทางกาย"},
+        {v:"mid", label:"ออกบ้าง (1–2 วัน/สัปดาห์)", pts:1, focus:"เพิ่มความสม่ำเสมอ"},
+        {v:"good", label:"สม่ำเสมอ (≥ 3 วัน/สัปดาห์)", pts:2, focus:"รักษาความสม่ำเสมอ"},
+      ]},
+      { key:"diet", title:"พฤติกรรมอาหาร (หวาน‑มัน‑เค็ม)", opts:[
+        {v:"high", label:"ทานหวาน/มัน/เค็มมาก", pts:0, focus:"ปรับอาหาร"},
+        {v:"mid", label:"พอควบคุมได้บ้าง", pts:1, focus:"ลดหวาน‑มัน‑เค็มเพิ่มผัก"},
+        {v:"good", label:"คุมได้ดี", pts:2, focus:"รักษาพฤติกรรมนี้"},
+      ]},
+      { key:"checkup", title:"การตรวจสุขภาพประจำปี", opts:[
+        {v:"no", label:"ยังไม่ได้ตรวจ/ไม่สม่ำเสมอ", pts:0, focus:"วางแผนตรวจสุขภาพ"},
+        {v:"plan", label:"มีแผนจะตรวจ", pts:1, focus:"ยืนยันแผนและทำให้เกิดขึ้น"},
+        {v:"yes", label:"ตรวจสม่ำเสมอ", pts:2, focus:"ดีมาก"},
+      ]},
+      { key:"bone", title:"ดูแลกระดูก (แรงต้าน/แคลเซียม/วิตามินดี)", opts:[
+        {v:"no", label:"ยังไม่ได้ดูแล", pts:0, focus:"โฟกัสดูแลกระดูก"},
+        {v:"some", label:"ทำได้บ้าง", pts:1, focus:"เพิ่มแรงต้าน/โภชนาการ"},
+        {v:"yes", label:"ทำสม่ำเสมอ", pts:2, focus:"รักษาต่อเนื่อง"},
+      ]},
+    ];
+
+    // elements
+    const ageEl = document.getElementById("age");
+    const bmiEl = document.getElementById("bmi");
+    const bpEl = document.getElementById("bp");
+    const waistEl = document.getElementById("waist");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+
+    const qWrap = document.getElementById("qWrap");
+    const recentEl = document.getElementById("recent");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resFocus = document.getElementById("resFocus");
+    const resFocusDesc = document.getElementById("resFocusDesc");
+    const resPlan = document.getElementById("resPlan");
+
+    let state = load();
+    let answers = state.answers || {};
+    let lastResult = null;
+
+    // restore profile
+    ageEl.value = state.profile?.age ?? "";
+    bmiEl.value = state.profile?.bmi ?? "";
+    bpEl.value = state.profile?.bp ?? "";
+    waistEl.value = state.profile?.waist ?? "";
+    noteEl.value = state.profile?.note ?? "";
+
+    function persistProfile(){
+      state.profile = {
+        age: ageEl.value || "",
+        bmi: bmiEl.value || "",
+        bp: (bpEl.value || "").trim(),
+        waist: waistEl.value || "",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    ageEl.addEventListener("input", persistProfile);
+    bmiEl.addEventListener("input", persistProfile);
+    bpEl.addEventListener("input", persistProfile);
+    waistEl.addEventListener("input", persistProfile);
+    noteEl.addEventListener("input", persistProfile);
+
+    function renderQuestions(){
+      qWrap.innerHTML = QUESTIONS.map(q=>{
+        const current = answers[q.key];
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${escapeHtml(q.title)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${q.opts.map(o=>`
+                <label class="opt">
+                  <input type="radio" name="${q.key}" value="${o.v}" ${current===o.v ? "checked":""}/>
+                  <div>
+                    <span>${escapeHtml(o.label)}</span>
+                    <div class="muted2">คะแนน: ${o.pts}</div>
+                  </div>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = r.value;
+          state.answers = answers;
+          save(state);
+        });
+      });
+    }
+
+    function pillFor(level){
+      if(level==="good") return { cls:"pill pillOk", text:"พร้อมดี" };
+      if(level==="mid") return { cls:"pill pillMid", text:"พอใช้" };
+      return { cls:"pill pillHigh", text:"ควรปรับ" };
+    }
+
+    function compute(){
+      for(const q of QUESTIONS){
+        if(!(q.key in answers)) return { ok:false, msg:"กรุณาตอบคำถามให้ครบทุกข้อ" };
+      }
+
+      let total = 0;
+      const focuses = [];
+      for(const q of QUESTIONS){
+        const v = answers[q.key];
+        const opt = q.opts.find(o=>o.v===v);
+        total += opt.pts;
+        if(opt.pts === 0) focuses.push({ title:q.title, focus: opt.focus, sev: 2 });
+        else if(opt.pts === 1) focuses.push({ title:q.title, focus: opt.focus, sev: 1 });
+      }
+      focuses.sort((a,b)=> b.sev - a.sev);
+
+      const bmi = Number(bmiEl.value || 0);
+      const waist = Number(waistEl.value || 0);
+      const bp = (bpEl.value || "").trim();
+
+      const flags = [];
+      if(bmi && bmi >= 30) flags.push("BMI สูง (≥ 30) — แนะนำปรึกษาหน่วยบริการ");
+      else if(bmi && bmi >= 25) flags.push("BMI เริ่มสูง (≥ 25) — เน้นอาหาร/กิจกรรม");
+
+      if(waist && waist >= 90) flags.push("รอบเอวสูงมาก (≥ 90 ซม.) — แนะนำปรึกษาหน่วยบริการ");
+      else if(waist && waist >= 80) flags.push("รอบเอวเริ่มสูง (≥ 80 ซม.) — เพิ่มกิจกรรม/ลดหวาน‑มัน");
+
+      if(bp && /\d+\s*\/\s*\d+/.test(bp)) flags.push("มีค่าความดันที่บันทึกไว้ — ติดตามต่อเนื่อง");
+
+      let level = "good";
+      if(total <= 5) level = "low";
+      else if(total <= 9) level = "mid";
+
+      const pill = pillFor(level);
+      const focus = focuses[0] ? focuses[0].focus : "รักษาพฤติกรรมสุขภาพต่อเนื่อง";
+      const focusDesc = focuses[0] ? `จากหัวข้อ: ${focuses[0].title}` : "—";
+
+      const plan = [];
+      plan.push("• ตรวจสุขภาพประจำปี: ความดัน น้ำตาล ไขมัน น้ำหนัก/รอบเอว");
+      plan.push("• ออกกำลังกาย: แอโรบิก + เวท/แรงต้าน เพื่อหัวใจและมวลกระดูก");
+      plan.push("• โภชนาการ: ลดหวาน‑มัน‑เค็ม เพิ่มผักผลไม้ โปรตีนคุณภาพ");
+      plan.push("• กระดูก: แคลเซียม/วิตามินดี + กิจกรรมลงน้ำหนัก");
+      plan.push("• นอน/ความเครียด: จัดเวลานอน ฝึกผ่อนคลาย");
+
+      if(level==="low"){
+        plan.push("• เลือก 1–2 อย่างที่ทำได้ทันที (เช่น เดิน 10–15 นาที/วัน) แล้วค่อยเพิ่ม");
+      }else if(level==="mid"){
+        plan.push("• ตั้งเป้าหมายรายสัปดาห์และติดตามความสม่ำเสมอ");
+      }else{
+        plan.push("• รักษาความสม่ำเสมอ และตรวจคัดกรองตามวัยตามคำแนะนำหน่วยบริการ");
+      }
+      if(flags.length){
+        plan.push("• หมายเหตุจากข้อมูลที่กรอก: " + flags.join(" • "));
+      }
+
+      return {
+        ok:true,
+        date: todayIso(),
+        total,
+        level,
+        pill,
+        focus,
+        focusDesc,
+        planHtml: plan.join("<br>"),
+        profile: { age: ageEl.value||"", bmi: bmiEl.value||"", bp, waist: waistEl.value||"", note: (noteEl.value||"").trim() },
+        answers: { ...answers }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resFocus.textContent = r.focus;
+      resFocusDesc.textContent = r.focusDesc;
+      resPlan.innerHTML = r.planHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      const rec = { ...out, id: "MH_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลและคำตอบทั้งหมดใช่ไหม?")){
+        answers = {};
+        state.answers = {};
+        state.profile = { age:"", bmi:"", bp:"", waist:"", note:"" };
+        ageEl.value = ""; bmiEl.value = ""; bpEl.value = ""; waistEl.value = ""; noteEl.value = "";
+        save(state);
+        resWrap.style.display = "none";
+        renderQuestions();
+        toast("ล้างแล้ว");
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const pill = pillFor(h.level);
+        const a = h.profile?.age || "-";
+        const bmi = h.profile?.bmi || "-";
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.total}/12 • อายุ: ${a} • BMI: ${bmi}</div>
+              </div>
+              <span class="${pill.cls}">${pill.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x => x.id === id);
+          if(!rec) return;
+
+          const p = rec.profile || {};
+          ageEl.value = p.age || "";
+          bmiEl.value = p.bmi || "";
+          bpEl.value = p.bp || "";
+          waistEl.value = p.waist || "";
+          noteEl.value = p.note || "";
+          persistProfile();
+
+          answers = rec.answers || {};
+          state.answers = answers;
+          save(state);
+          renderQuestions();
+          showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x => x.id !== id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","score","level","focus","age","bmi","bp","waist","note"].concat(QUESTIONS.map(q=>q.key));
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const p = h.profile || {};
+        const row = [
+          h.date,
+          String(h.total),
+          h.level,
+          h.focus,
+          p.age || "",
+          p.bmi || "",
+          p.bp || "",
+          p.waist || "",
+          (p.note || "").replaceAll("\n"," "),
+        ];
+        for(const q of QUESTIONS){
+          row.push(String((h.answers||{})[q.key] ?? ""));
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menopause_health_ready.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderQuestions();
+    renderRecent();
+  </script>
+</body>
+</html>
