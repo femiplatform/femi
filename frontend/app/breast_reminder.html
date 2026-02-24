@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Breast Self‑Exam Monthly</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .bsHero{
+      background: linear-gradient(135deg, rgba(251,207,232,.45), rgba(186,230,253,.30));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .calWrap{ display:grid; gap: 10px; }
+    .calHead{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap:wrap;
+    }
+    .calTitle{ font-weight: 900; font-size: 16px; }
+    .calNav{ display:flex; gap: 8px; flex-wrap:wrap; }
+    .cal{
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.72);
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+    }
+    .dow{
+      padding: 10px 8px;
+      text-align:center;
+      font-weight: 900;
+      font-size: 12px;
+      background: rgba(248,250,252,.9);
+      border-bottom: 1px solid rgba(17,24,39,.06);
+    }
+    .day{
+      min-height: 74px;
+      padding: 10px 8px;
+      border-right: 1px solid rgba(17,24,39,.06);
+      border-bottom: 1px solid rgba(17,24,39,.06);
+      cursor:pointer;
+      background: rgba(255,255,255,.76);
+      transition: background .18s ease, transform .06s ease;
+      position: relative;
+    }
+    .day:hover{ background: rgba(255,255,255,.92); transform: translateY(-1px); }
+    .day:nth-child(7n){ border-right:none; }
+    .day.mutedDay{ background: rgba(248,250,252,.65); cursor: default; }
+    .day.mutedDay:hover{ transform:none; background: rgba(248,250,252,.65); }
+    .dNum{ font-weight: 900; font-size: 12px; opacity:.85; }
+    .badge{
+      position:absolute; right:8px; top:8px;
+      width: 12px; height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(226,232,240,.9);
+    }
+    .bOk{ background: rgba(34,197,94,.35); border-color: rgba(34,197,94,.35); }
+    .bWarn{ background: rgba(245,158,11,.35); border-color: rgba(245,158,11,.35); }
+    .bBad{ background: rgba(239,68,68,.35); border-color: rgba(239,68,68,.35); }
+    .bPlanned{ background: rgba(59,130,246,.30); border-color: rgba(59,130,246,.30); }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillWarn{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillBad{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillPlan{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(236,72,153,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    /* Modal */
+    .bsModal{ position: fixed; inset:0; z-index: 60; display:none; }
+    .bsModal.on{ display:block; }
+    .bsBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,.35); }
+    .bsPanel{
+      position:absolute; left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width: min(820px, 92vw);
+      max-height: 88vh;
+      overflow:auto;
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(17,24,39,.10);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
+    .bsPanelHead{
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      background: linear-gradient(135deg, rgba(224,242,254,.55), rgba(251,207,232,.35));
+      position: sticky; top: 0;
+    }
+    .bsPanelTitle{ font-weight: 900; }
+    .bsPanelBody{ padding: 14px; display:grid; gap: 10px; }
+    .bsFoot{
+      padding: 12px 14px;
+      border-top: 1px solid rgba(17,24,39,.08);
+      display:flex; gap: 10px; flex-wrap:wrap; justify-content:flex-end;
+      background: rgba(248,250,252,.9);
+      position: sticky; bottom: 0;
+    }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">เตือนตรวจเต้านมรายเดือน + บันทึกผล</h1>
+      <p class="page-sub muted">เลือกวันตรวจในแต่ละเดือน ดูปฏิทิน และบันทึกผลการตรวจเต้านมด้วยตนเอง (เก็บในเครื่องผู้ใช้)</p>
+
+      <div class="grid2">
+        <!-- Calendar + Summary -->
+        <div class="bsHero">
+          <div class="calWrap">
+            <div class="calHead">
+              <div>
+                <div class="calTitle" id="calTitle">-</div>
+                <div class="muted2" id="calSub">แตะวันที่เพื่อวางแผน/บันทึกผล</div>
+              </div>
+              <div class="calNav">
+                <button class="btn btn-ghost" id="btnPrev">◀ เดือนก่อน</button>
+                <button class="btn btn-ghost" id="btnToday">วันนี้</button>
+                <button class="btn btn-ghost" id="btnNext">เดือนถัดไป ▶</button>
+              </div>
+            </div>
+
+            <div class="cal">
+              <div class="calGrid" id="dowRow"></div>
+              <div class="calGrid" id="calGrid"></div>
+            </div>
+
+            <div class="kpiRow">
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">เดือนนี้</div>
+                <div class="big" id="kMonth">-</div>
+                <div class="muted2" id="kMonthText">-</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">สถิติ 90 วัน</div>
+                <div class="big" id="k90">-</div>
+                <div class="muted2" id="k90Text">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div style="font-weight:900">สัญลักษณ์ในปฏิทิน</div>
+                <button class="btn btn-ghost" id="btnClearAll">ล้างข้อมูลทั้งหมด</button>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                <span class="pill pillPlan"><span class="badge bPlanned" style="position:static"></span> วางแผนตรวจ</span>
+                <span class="pill pillOk"><span class="badge bOk" style="position:static"></span> ตรวจแล้ว ปกติ</span>
+                <span class="pill pillWarn"><span class="badge bWarn" style="position:static"></span> ตรวจแล้ว ควรติดตาม</span>
+                <span class="pill pillBad"><span class="badge bBad" style="position:static"></span> พบสิ่งผิดปกติ</span>
+              </div>
+              <div class="muted2" style="margin-top:10px">
+                * ถ้าพบก้อน/ผิวหนังบุ๋ม/เปลี่ยนแปลงรวดเร็ว/มีเลือดหรือน้ำไหลจากหัวนม ควรพบแพทย์ทันที
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Guidance + Recent -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">วิธีตรวจเต้านมด้วยตนเอง (สั้น ๆ)</div>
+            <ol class="muted" style="margin:10px 0 0 18px;line-height:1.7">
+              <li><b>ดู</b>: ยืนหน้ากระจก สังเกตขนาด/รูปร่าง/ผิวหนัง/หัวนม ทั้งยกแขนและเท้าเอว</li>
+              <li><b>คลำ</b>: ใช้ปลายนิ้ว 3 นิ้ว คลำเป็นวง/ขึ้นลง/เป็นรัศมี ครอบคลุมทั้งเต้านมและรักแร้</li>
+              <li><b>นอนคลำ</b>: วางหมอนใต้ไหล่ด้านที่จะตรวจ ยกแขนขึ้น แล้วคลำซ้ำอย่างเป็นระบบ</li>
+              <li><b>บันทึก</b>: ถ้าพบความเปลี่ยนแปลง ให้บันทึกและปรึกษาหน่วยบริการ</li>
+            </ol>
+            <div class="muted2" style="margin-top:10px">
+              ช่วงเวลาที่เหมาะ: หลังหมดประจำเดือน 7–10 วัน (ถ้ามีรอบเดือน) หรือกำหนดวันประจำทุกเดือน (ถ้ารอบไม่สม่ำเสมอ/ไม่มีรอบ)
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">รายการล่าสุด</div>
+                <div class="muted2">10 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button class="btn btn-ghost" id="btnExport">Export CSV</button>
+            </div>
+            <div id="recent" style="display:grid;gap:10px;margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div id="modal" class="bsModal" aria-hidden="true">
+        <div class="bsBackdrop"></div>
+        <div class="bsPanel" role="dialog" aria-modal="true">
+          <div class="bsPanelHead">
+            <div style="min-width:0">
+              <div class="bsPanelTitle" id="mTitle">-</div>
+              <div class="muted2" id="mSub">-</div>
+            </div>
+            <button class="icon-btn" id="mClose" aria-label="close">✕</button>
+          </div>
+
+          <div class="bsPanelBody">
+            <div class="card-soft" style="padding:12px">
+              <div class="muted2">
+                เลือกว่าจะ “วางแผนตรวจ” หรือ “บันทึกผลตรวจ” สำหรับวันที่นี้
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:900;margin-bottom:8px">สถานะ</div>
+
+              <label class="opt">
+                <input type="radio" name="status" value="planned" />
+                <div>
+                  <span>วางแผนตรวจ</span>
+                  <div class="muted2">ตั้งเป็นวันนัดของเดือนนี้</div>
+                </div>
+              </label>
+
+              <label class="opt">
+                <input type="radio" name="status" value="ok" />
+                <div>
+                  <span>ตรวจแล้ว: ปกติ</span>
+                  <div class="muted2">ไม่พบสิ่งผิดปกติชัดเจน</div>
+                </div>
+              </label>
+
+              <label class="opt">
+                <input type="radio" name="status" value="watch" />
+                <div>
+                  <span>ตรวจแล้ว: ควรติดตาม</span>
+                  <div class="muted2">มีอาการ/จุดที่อยากสังเกตต่อ</div>
+                </div>
+              </label>
+
+              <label class="opt">
+                <input type="radio" name="status" value="abnormal" />
+                <div>
+                  <span>พบสิ่งผิดปกติ</span>
+                  <div class="muted2">แนะนำพบแพทย์/หน่วยบริการ</div>
+                </div>
+              </label>
+
+              <label class="opt">
+                <input type="radio" name="status" value="clear" />
+                <div>
+                  <span>ลบรายการของวันนี้</span>
+                  <div class="muted2">ลบการวางแผน/บันทึกผล (ถ้ามี)</div>
+                </div>
+              </label>
+            </div>
+
+            <div>
+              <label class="muted">บันทึก/หมายเหตุ</label>
+              <textarea id="mNote" class="input" placeholder="เช่น ตำแหน่งที่คลำเจอ, อาการเจ็บ, นัดพบแพทย์ ฯลฯ"></textarea>
+            </div>
+
+            <div class="card-soft" style="padding:12px">
+              <div class="muted2">
+                ข้อควรพบแพทย์: ก้อนแข็ง/โตเร็ว, ผิวหนังบุ๋ม/แดง/หนาขึ้น, หัวนมบุ๋มใหม่, มีเลือด/น้ำไหลจากหัวนม, ต่อมน้ำเหลืองรักแร้โต
+              </div>
+            </div>
+          </div>
+
+          <div class="bsFoot">
+            <button id="mCancel" class="btn btn-ghost">ยกเลิก</button>
+            <button id="mSave" class="btn btn-ok">บันทึก</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Breast Reminder" });
+    try{ applyI18n(document); }catch{}
+
+    // ===== Storage =====
+    const LS_KEY = "FEMI_BREAST_SELFEXAM_V1";
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { marks: {} };
+      }catch{
+        return { marks: {} };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function nowTs(){ return Date.now(); }
+
+    function ymd(y,m,d){
+      const mm = String(m).padStart(2,"0");
+      const dd = String(d).padStart(2,"0");
+      return `${y}-${mm}-${dd}`;
+    }
+    function toDate(iso){ return new Date(iso + "T00:00:00"); }
+
+    const DOW = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+
+    // ===== Elements =====
+    const dowRow = document.getElementById("dowRow");
+    const calGrid = document.getElementById("calGrid");
+    const calTitle = document.getElementById("calTitle");
+
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnToday = document.getElementById("btnToday");
+    const btnClearAll = document.getElementById("btnClearAll");
+    const btnExport = document.getElementById("btnExport");
+
+    const kMonth = document.getElementById("kMonth");
+    const kMonthText = document.getElementById("kMonthText");
+    const k90 = document.getElementById("k90");
+    const k90Text = document.getElementById("k90Text");
+
+    const recent = document.getElementById("recent");
+
+    // modal
+    const modal = document.getElementById("modal");
+    const mTitle = document.getElementById("mTitle");
+    const mSub = document.getElementById("mSub");
+    const mClose = document.getElementById("mClose");
+    const mCancel = document.getElementById("mCancel");
+    const mSave = document.getElementById("mSave");
+    const mNote = document.getElementById("mNote");
+
+    let state = load();
+    let view = (() => {
+      const t = toDate(todayIso());
+      return { y: t.getFullYear(), m: t.getMonth()+1 };
+    })();
+
+    let activeIso = null;
+    let activeStatus = null;
+
+    // ===== Render =====
+    function renderDow(){
+      dowRow.innerHTML = DOW.map(x => `<div class="dow">${x}</div>`).join("");
+    }
+
+    function monthName(m){
+      const names = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+      return names[m-1] || "";
+    }
+
+    function badgeClass(status){
+      if(status === "planned") return "badge bPlanned";
+      if(status === "ok") return "badge bOk";
+      if(status === "watch") return "badge bWarn";
+      if(status === "abnormal") return "badge bBad";
+      return "badge";
+    }
+
+    function renderCalendar(){
+      const y = view.y, m = view.m;
+      calTitle.textContent = `${monthName(m)} ${y}`;
+
+      const first = new Date(y, m-1, 1);
+      const startDow = first.getDay(); // 0 sun
+      const daysInMonth = new Date(y, m, 0).getDate();
+
+      // build 42 cells (6 weeks)
+      const cells = [];
+      for(let i=0;i<startDow;i++){
+        cells.push({ type:"empty" });
+      }
+      for(let d=1; d<=daysInMonth; d++){
+        const iso = ymd(y,m,d);
+        const rec = state.marks?.[iso] || null;
+        cells.push({ type:"day", iso, d, rec });
+      }
+      while(cells.length % 7 !== 0) cells.push({ type:"empty" });
+      while(cells.length < 42) cells.push({ type:"empty" });
+
+      calGrid.innerHTML = cells.map(c=>{
+        if(c.type==="empty"){
+          return `<div class="day mutedDay"></div>`;
+        }
+        const st = c.rec?.status || "";
+        const badge = st ? `<span class="${badgeClass(st)}"></span>` : "";
+        const isToday = c.iso === todayIso();
+        return `
+          <div class="day" data-iso="${c.iso}" style="${isToday ? 'outline:2px solid rgba(59,130,246,.25);' : ''}">
+            <div class="dNum">${c.d}</div>
+            ${badge}
+            ${c.rec?.note ? `<div class="muted2" style="margin-top:6px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${escapeHtml(c.rec.note)}</div>` : ""}
+          </div>
+        `;
+      }).join("");
+
+      calGrid.querySelectorAll("[data-iso]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const iso = el.getAttribute("data-iso");
+          openModal(iso);
+        });
+      });
+
+      renderKPIs();
+      renderRecent();
+    }
+
+    function renderKPIs(){
+      const y = view.y, m = view.m;
+      const prefix = `${y}-${String(m).padStart(2,"0")}-`;
+
+      const entries = Object.entries(state.marks || {}).map(([iso, rec])=>({ iso, ...rec }));
+      const monthItems = entries.filter(x => x.iso.startsWith(prefix));
+
+      const planned = monthItems.filter(x => x.status==="planned").length;
+      const doneOk = monthItems.filter(x => x.status==="ok").length;
+      const doneWatch = monthItems.filter(x => x.status==="watch").length;
+      const doneBad = monthItems.filter(x => x.status==="abnormal").length;
+
+      kMonth.textContent = String(doneOk + doneWatch + doneBad);
+      kMonthText.textContent = `วางแผน ${planned} • ปกติ ${doneOk} • ติดตาม ${doneWatch} • ผิดปกติ ${doneBad}`;
+
+      // 90 days
+      const t = toDate(todayIso());
+      const cutoff = new Date(t.getFullYear(), t.getMonth(), t.getDate() - 90);
+      const last90 = entries.filter(x => toDate(x.iso) >= cutoff);
+
+      const done90 = last90.filter(x => x.status==="ok" || x.status==="watch" || x.status==="abnormal").length;
+      const bad90 = last90.filter(x => x.status==="abnormal").length;
+
+      k90.textContent = String(done90);
+      k90Text.textContent = bad90 ? `พบผิดปกติ ${bad90} ครั้ง (แนะนำพบแพทย์/หน่วยบริการ)` : "ยังไม่พบรายการผิดปกติ";
+    }
+
+    function statusLabel(s){
+      if(s==="planned") return { text:"วางแผนตรวจ", cls:"pill pillPlan" };
+      if(s==="ok") return { text:"ตรวจแล้ว: ปกติ", cls:"pill pillOk" };
+      if(s==="watch") return { text:"ตรวจแล้ว: ควรติดตาม", cls:"pill pillWarn" };
+      if(s==="abnormal") return { text:"พบสิ่งผิดปกติ", cls:"pill pillBad" };
+      return { text:"-", cls:"pill" };
+    }
+
+    function renderRecent(){
+      const entries = Object.entries(state.marks || {}).map(([iso, rec])=>({ iso, ...rec }));
+      entries.sort((a,b)=> b.iso.localeCompare(a.iso));
+      const top = entries.slice(0,10);
+
+      if(!top.length){
+        recent.innerHTML = '<div class="muted2">ยังไม่มีบันทึก</div>';
+        return;
+      }
+
+      recent.innerHTML = top.map(e=>{
+        const sl = statusLabel(e.status);
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${e.iso}</div>
+                <div class="muted2">${e.note ? `โน้ต: ${escapeHtml(e.note)}` : "—"}</div>
+              </div>
+              <span class="${sl.cls}">${sl.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-open="${e.iso}">เปิด</button>
+              <button class="btn btn-ghost" data-del="${e.iso}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recent.querySelectorAll("[data-open]").forEach(b=>{
+        b.addEventListener("click", ()=> openModal(b.getAttribute("data-open")));
+      });
+      recent.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const iso = b.getAttribute("data-del");
+          if(confirm(`ลบรายการวันที่ ${iso} ใช่ไหม?`)){
+            delete state.marks[iso];
+            save(state);
+            renderCalendar();
+            toast("ลบแล้ว");
+          }
+        });
+      });
+    }
+
+    // ===== Modal =====
+    function openModal(iso){
+      activeIso = iso;
+      const rec = state.marks?.[iso] || null;
+
+      mTitle.textContent = `วันที่ ${iso}`;
+      mSub.textContent = rec ? `สถานะเดิม: ${statusLabel(rec.status).text}` : "ยังไม่มีรายการ";
+
+      // set radio
+      activeStatus = rec?.status || "planned";
+      modal.querySelectorAll('input[name="status"]').forEach(r=>{
+        r.checked = (r.value === activeStatus);
+      });
+
+      mNote.value = rec?.note || "";
+
+      modal.classList.add("on");
+      modal.setAttribute("aria-hidden","false");
+      document.body.classList.add("no-scroll");
+    }
+
+    function closeModal(){
+      modal.classList.remove("on");
+      modal.setAttribute("aria-hidden","true");
+      document.body.classList.remove("no-scroll");
+      activeIso = null;
+      activeStatus = null;
+    }
+
+    modal.querySelectorAll('input[name="status"]').forEach(r=>{
+      r.addEventListener("change", ()=> activeStatus = r.value);
+    });
+
+    mClose.addEventListener("click", closeModal);
+    mCancel.addEventListener("click", closeModal);
+    modal.querySelector(".bsBackdrop").addEventListener("click", closeModal);
+    window.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && modal.classList.contains("on")) closeModal(); });
+
+    mSave.addEventListener("click", ()=>{
+      if(!activeIso) return;
+      const st = activeStatus || "planned";
+      if(st === "clear"){
+        if(state.marks?.[activeIso]) delete state.marks[activeIso];
+        save(state);
+        closeModal();
+        renderCalendar();
+        toast("ลบรายการแล้ว");
+        return;
+      }
+
+      state.marks = state.marks || {};
+      state.marks[activeIso] = {
+        status: st,
+        note: (mNote.value || "").trim(),
+        updatedAt: nowTs(),
+      };
+      save(state);
+      closeModal();
+      renderCalendar();
+      toast("บันทึกแล้ว");
+    });
+
+    // ===== Export =====
+    btnExport.addEventListener("click", ()=>{
+      const rows = [["date","status","note","updatedAt"]];
+      const entries = Object.entries(state.marks || {}).map(([iso, rec])=>({ iso, ...rec }));
+      entries.sort((a,b)=> a.iso.localeCompare(b.iso));
+      for(const e of entries){
+        rows.push([e.iso, e.status || "", (e.note||"").replaceAll("\n"," "), String(e.updatedAt||"")]);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "breast_self_exam.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    // ===== Navigation =====
+    btnPrev.addEventListener("click", ()=>{
+      view.m -= 1;
+      if(view.m < 1){ view.m = 12; view.y -= 1; }
+      renderCalendar();
+    });
+    btnNext.addEventListener("click", ()=>{
+      view.m += 1;
+      if(view.m > 12){ view.m = 1; view.y += 1; }
+      renderCalendar();
+    });
+    btnToday.addEventListener("click", ()=>{
+      const t = toDate(todayIso());
+      view = { y: t.getFullYear(), m: t.getMonth()+1 };
+      renderCalendar();
+    });
+
+    btnClearAll.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลทั้งหมดในเครื่องใช่ไหม?")){
+        state = { marks: {} };
+        save(state);
+        renderCalendar();
+        toast("ล้างข้อมูลแล้ว");
+      }
+    });
+
+    // ===== Helpers =====
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // tiny toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    state = load();
+    renderDow();
+    renderCalendar();
+  </script>
+</body>
+</html>
