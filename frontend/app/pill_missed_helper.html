@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Missed Pill Helper</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .phHero{
+      background: linear-gradient(135deg, rgba(254,243,199,.50), rgba(186,230,253,.24));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.05fr .95fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillInfo{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(245,158,11,.92), rgba(59,130,246,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .step{ padding: 12px; }
+    .step h3{ margin: 0; font-size: 16px; }
+    .bul{ margin: 8px 0 0 18px; line-height: 1.7; }
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+    .warnBox{
+      border: 1px solid rgba(239,68,68,.18);
+      background: rgba(254,226,226,.55);
+      border-radius: 16px;
+      padding: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">ช่วยแก้ปัญหาลืมกินยาคุม</h1>
+      <p class="page-sub muted">เครื่องมือช่วยตัดสินใจเบื้องต้นเมื่อ “ลืมกินยาคุม” (แบบทั่วไป) เพื่อความปลอดภัยควรอ่านฉลากยา/ปรึกษาหน่วยบริการ (เก็บข้อมูลในเครื่องผู้ใช้)</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="phHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">กรอกสถานการณ์</div>
+                <div class="muted2">ระบบจะสรุปแนวทาง “ทำอะไรต่อ” แบบปลอดภัย</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้าง</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">ชนิดยาคุม</label>
+                <select id="pillType" class="input">
+                  <option value="coc">ยาคุมฮอร์โมนรวม (COC)</option>
+                  <option value="pop">ยาคุมฮอร์โมนเดี่ยว (POP)</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">ลืมกี่เม็ด?</label>
+                <select id="missed" class="input">
+                  <option value="1">1 เม็ด</option>
+                  <option value="2">2 เม็ด</option>
+                  <option value="3">3 เม็ดขึ้นไป</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">ผ่านไปกี่ชั่วโมงจากเวลาที่ควรกิน?</label>
+                <select id="hours" class="input">
+                  <option value="lt24">&lt; 24 ชม.</option>
+                  <option value="ge24">≥ 24 ชม.</option>
+                  <option value="unk">ไม่แน่ใจ</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">อยู่สัปดาห์ไหนของแผง? (สำหรับ COC)</label>
+                <select id="week" class="input">
+                  <option value="w1">สัปดาห์ที่ 1</option>
+                  <option value="w2">สัปดาห์ที่ 2</option>
+                  <option value="w3">สัปดาห์ที่ 3</option>
+                  <option value="na">ไม่แน่ใจ/ไม่ใช่ COC</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">มีเพศสัมพันธ์โดยไม่ใช้ถุงยางใน 5 วันที่ผ่านมาไหม?</label>
+                <select id="unprotected" class="input">
+                  <option value="no">ไม่มี</option>
+                  <option value="yes">มี</option>
+                  <option value="unk">ไม่แน่ใจ</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">มีอาเจียน/ท้องเสียรุนแรงหลังทานยาไหม?</label>
+                <select id="vomit" class="input">
+                  <option value="no">ไม่มี</option>
+                  <option value="yes">มี</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุ (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น ลืมช่วงวันไหน, ชื่อยา, กำลังกินยาร่วมอื่น ๆ ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปแนวทาง</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">สรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">ระดับความเสี่ยงตั้งครรภ์ (โดยประมาณ)</div>
+                  <div class="big" id="resRisk">-</div>
+                  <div class="muted2" id="resRiskText">—</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">แนะนำ</div>
+                  <div style="font-weight:900;margin-top:6px" id="resTitle">-</div>
+                  <div class="muted2" id="resDesc">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">ทำอะไรต่อ (ขั้นตอน)</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resSteps">-</div>
+              </div>
+            </div>
+
+            <div class="warnBox" style="margin-top:12px">
+              <div style="font-weight:900">หมายเหตุความปลอดภัย</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • คำแนะนำนี้เป็น “แนวทางทั่วไป” — โปรดอ่านฉลากยาคุมที่ใช้อยู่ และยึดคำแนะนำหน่วยบริการเป็นหลัก<br>
+                • ถ้ามีความเสี่ยงสูงและมีเพศสัมพันธ์ไม่ป้องกัน: อาจต้องพิจารณา “ยาคุมฉุกเฉิน” และใช้ถุงยาง 7 วัน<br>
+                • หากอาเจียน/ท้องเสียรุนแรงหลังทานยา อาจถือว่า “ลืมยา” ในวันนั้น
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติการคำนวณ</div>
+                <div class="muted2">8 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card step" style="padding:14px">
+            <h3>แนวคิดหลัก</h3>
+            <ul class="bul muted">
+              <li>ยิ่งลืมหลายเม็ด/นาน → ความเสี่ยงตั้งครรภ์สูงขึ้น</li>
+              <li>ถ้าเป็น POP ต้อง “ตรงเวลา” กว่า COC</li>
+              <li>ถ้ามีเพศสัมพันธ์ไม่ป้องกันใกล้ช่วงลืมยา → พิจารณายาคุมฉุกเฉิน</li>
+            </ul>
+          </div>
+
+          <div class="card step" style="padding:14px;margin-top:12px">
+            <h3>ทิปกันลืม</h3>
+            <ul class="bul muted">
+              <li>ตั้งเวลาเดิมทุกวัน + วางยาไว้กับของที่ใช้ทุกวัน</li>
+              <li>ใช้กล่องแบ่งยา / ปฏิทินติ๊ก</li>
+              <li>ถ้าลืมบ่อย เลือกวิธีที่ไม่ต้องจำทุกวัน (ฉีด/ฝัง/ห่วง)</li>
+            </ul>
+          </div>
+
+          <div class="card step" style="padding:14px;margin-top:12px">
+            <h3>เมื่อไหร่ควรตรวจการตั้งครรภ์?</h3>
+            <ul class="bul muted">
+              <li>ถ้าประจำเดือนขาด/มาช้า หรือมีอาการสงสัย</li>
+              <li>หลังมีเพศสัมพันธ์ไม่ป้องกันและลืมยาหลายเม็ด</li>
+              <li>โดยทั่วไป: ตรวจหลังเหตุการณ์เสี่ยง ~2–3 สัปดาห์ (หรือตามคำแนะนำชุดตรวจ)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Missed Pill Helper" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_PILL_MISSED_HELPER_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{}, history:[] };
+      }catch{
+        return { profile:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const pillTypeEl = document.getElementById("pillType");
+    const missedEl = document.getElementById("missed");
+    const hoursEl = document.getElementById("hours");
+    const weekEl = document.getElementById("week");
+    const unprotectedEl = document.getElementById("unprotected");
+    const vomitEl = document.getElementById("vomit");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resRisk = document.getElementById("resRisk");
+    const resRiskText = document.getElementById("resRiskText");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const resSteps = document.getElementById("resSteps");
+
+    const recentEl = document.getElementById("recent");
+
+    let state = load();
+    let lastResult = null;
+
+    function setVal(el, v){ if(v !== undefined && v !== null && v !== "") el.value = v; }
+    setVal(pillTypeEl, state.profile?.pillType || "coc");
+    setVal(missedEl, state.profile?.missed || "1");
+    setVal(hoursEl, state.profile?.hours || "lt24");
+    setVal(weekEl, state.profile?.week || "w1");
+    setVal(unprotectedEl, state.profile?.unprotected || "no");
+    setVal(vomitEl, state.profile?.vomit || "no");
+    setVal(noteEl, state.profile?.note || "");
+
+    function persistProfile(){
+      state.profile = {
+        pillType: pillTypeEl.value || "coc",
+        missed: missedEl.value || "1",
+        hours: hoursEl.value || "lt24",
+        week: weekEl.value || "w1",
+        unprotected: unprotectedEl.value || "no",
+        vomit: vomitEl.value || "no",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    [pillTypeEl,missedEl,hoursEl,weekEl,unprotectedEl,vomitEl,noteEl].forEach(el=>{
+      el.addEventListener("change", persistProfile);
+      el.addEventListener("input", persistProfile);
+    });
+
+    function pillForRisk(r){
+      if(r==="high") return { cls:"pill pillHigh", text:"เสี่ยงสูง" };
+      if(r==="mid") return { cls:"pill pillMid", text:"ปานกลาง" };
+      return { cls:"pill pillOk", text:"ต่ำ" };
+    }
+
+    function compute(){
+      const type = pillTypeEl.value;
+      const missed = missedEl.value; // "1"|"2"|"3"
+      const hours = hoursEl.value;   // lt24|ge24|unk
+      const week = weekEl.value;     // w1|w2|w3|na
+      const unprot = unprotectedEl.value; // yes|no|unk
+      const vomit = vomitEl.value; // yes|no
+
+      // heuristic risk score
+      let score = 0;
+
+      // vomiting/diarrhea can be treated as a miss
+      if(vomit === "yes") score += 1;
+
+      if(type === "pop"){
+        // POP: more time-sensitive
+        if(missed === "1") score += (hours === "lt24" ? 2 : 3);
+        if(missed === "2") score += 4;
+        if(missed === "3") score += 5;
+      }else{
+        // COC
+        if(missed === "1") score += (hours === "lt24" ? 1 : 2);
+        if(missed === "2") score += 3;
+        if(missed === "3") score += 5;
+
+        // week 1 higher impact
+        if(week === "w1") score += 1;
+        if(week === "w3" && missed !== "1") score += 1;
+      }
+
+      if(unprot === "yes") score += 2;
+
+      let risk = "low";
+      if(score >= 7) risk = "high";
+      else if(score >= 4) risk = "mid";
+
+      const steps = [];
+      const title =
+        risk === "high" ? "ให้ใช้ถุงยาง + พิจารณายาคุมฉุกเฉิน/ปรึกษาหน่วยบริการ" :
+        risk === "mid"  ? "ควรใช้ถุงยาง 7 วัน และทำตามแนวทาง" :
+                          "แก้ไขได้ง่าย ทำตามขั้นตอน";
+
+      const desc =
+        type === "pop" ? "ยาคุมฮอร์โมนเดี่ยว (POP) ต้องกินตรงเวลามากกว่า — หากลืมหรือช้าควรระวังมากขึ้น" :
+                         "ยาคุมฮอร์โมนรวม (COC) ถ้าลืมหลายเม็ด/นาน ความเสี่ยงจะเพิ่มขึ้น";
+
+      // step guidance (general)
+      if(missed === "1" && (hours === "lt24" || hours === "unk")){
+        steps.push("1) กินเม็ดที่ลืมทันทีที่นึกได้ (อาจกิน 2 เม็ดในวันเดียว)");
+        steps.push("2) กินเม็ดถัดไปตามเวลาเดิม");
+        if(type === "pop"){
+          steps.push("3) ใช้ถุงยางอย่างน้อย 2 วัน (หรือทำตามฉลากยา)");
+        }else{
+          steps.push("3) โดยทั่วไปยังไม่จำเป็นต้องใช้ถุงยางเพิ่ม หากไม่ได้ลืมบ่อย (ดูฉลากยา)");
+        }
+      }else{
+        steps.push("1) กินเม็ดล่าสุดที่ลืมทันที (ข้ามเม็ดที่ลืมก่อนหน้านั้นถ้าจำไม่ได้)");
+        steps.push("2) กินเม็ดถัดไปตามเวลาเดิมต่อไป");
+        steps.push("3) ใช้ถุงยางอย่างน้อย 7 วัน");
+        if(type === "coc" && week === "w3"){
+          steps.push("4) สำหรับ COC สัปดาห์ที่ 3: อาจต้อง “ข้ามเม็ดเว้นว่าง/เม็ดแป้ง” แล้วเริ่มแผงใหม่ทันที (ยึดฉลากยา/ปรึกษาหน่วยบริการ)");
+        }
+      }
+
+      if(unprot === "yes" || risk === "high"){
+        steps.push("• หากมีเพศสัมพันธ์ไม่ป้องกันในช่วง 5 วันที่ผ่านมา: พิจารณายาคุมฉุกเฉิน และปรึกษาหน่วยบริการ/อ่านฉลากยา");
+        steps.push("• พิจารณาตรวจการตั้งครรภ์หากประจำเดือนขาด/มาช้า หรือหลังเหตุการณ์เสี่ยง ~2–3 สัปดาห์");
+      }
+
+      if(vomit === "yes"){
+        steps.push("• หากอาเจียน/ท้องเสียรุนแรงหลังทานยา: อาจถือว่า ‘ลืมยา’ ในวันนั้น (ยึดฉลากยา)");
+      }
+
+      // pill badge
+      const p = pillForRisk(risk);
+
+      return {
+        ok:true,
+        date: todayIso(),
+        score,
+        risk,
+        pill: p,
+        title,
+        desc,
+        stepsHtml: steps.join("<br>"),
+        profile: {
+          pillType:type, missed, hours, week, unprotected: unprot, vomit, note:(noteEl.value||"").trim()
+        }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resRisk.textContent = r.risk.toUpperCase();
+      resRiskText.textContent = `คะแนนภายใน: ${r.score}`;
+      resTitle.textContent = r.title;
+      resDesc.textContent = r.desc;
+      resSteps.innerHTML = r.stepsHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      const rec = { ...out, id: "PH_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลทั้งหมดใช่ไหม?")){
+        state.profile = {};
+        save(state);
+        pillTypeEl.value = "coc";
+        missedEl.value = "1";
+        hoursEl.value = "lt24";
+        weekEl.value = "w1";
+        unprotectedEl.value = "no";
+        vomitEl.value = "no";
+        noteEl.value = "";
+        resWrap.style.display = "none";
+        lastResult = null;
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const p = pillForRisk(h.risk);
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">ชนิด: ${escapeHtml(h.profile?.pillType||"-")} • ลืม: ${escapeHtml(h.profile?.missed||"-")} เม็ด • ไม่ป้องกัน: ${escapeHtml(h.profile?.unprotected||"-")}</div>
+              </div>
+              <span class="${p.cls}">${p.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x=>x.id===id);
+          if(!rec) return;
+
+          const p = rec.profile || {};
+          pillTypeEl.value = p.pillType || "coc";
+          missedEl.value = p.missed || "1";
+          hoursEl.value = p.hours || "lt24";
+          weekEl.value = p.week || "w1";
+          unprotectedEl.value = p.unprotected || "no";
+          vomitEl.value = p.vomit || "no";
+          noteEl.value = p.note || "";
+          persistProfile();
+
+          showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x=>x.id!==id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดใช่ไหม?")){
+        state.history = [];
+        save(state);
+        renderRecent();
+      }
+    });
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","risk","score","pillType","missed","hours","week","unprotected","vomit","note"];
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const p = h.profile || {};
+        rows.push([
+          h.date,
+          h.risk,
+          String(h.score),
+          p.pillType || "",
+          p.missed || "",
+          p.hours || "",
+          p.week || "",
+          p.unprotected || "",
+          p.vomit || "",
+          (p.note || "").replaceAll("\n"," "),
+        ]);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "pill_missed_helper.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderRecent();
+  </script>
+</body>
+</html>
