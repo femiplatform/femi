@@ -79,6 +79,35 @@
       color: transparent;
       line-height: 1.1;
     }
+    /* Slider (Breast_self_01.jpg - Breast_self_08.jpg) */
+    .sCard{ padding:14px; margin-top:12px; }
+    .sWrap{ position:relative; border-radius:18px; overflow:hidden; border:1px solid rgba(17,24,39,.08); background: rgba(255,255,255,.72); box-shadow:0 14px 40px rgba(0,0,0,.06); }
+    .sViewport{ overflow:hidden; }
+    .sTrack{ display:flex; width:100%; transition: transform .28s ease; }
+    .sSlide{ min-width:100%; padding: 10px; box-sizing:border-box; }
+    .sSlide img{ width:100%; height:auto; display:block; border-radius:16px; border:1px solid rgba(17,24,39,.06); background: rgba(248,250,252,.9); }
+    .sNav{
+      position:absolute; top:50%; transform: translateY(-50%);
+      width:40px; height:40px; border-radius:999px;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.92);
+      box-shadow:0 12px 30px rgba(0,0,0,.12);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; cursor:pointer; user-select:none;
+    }
+    .sNav:hover{ background: rgba(255,255,255,1); }
+    .sNav.prev{ left:10px; }
+    .sNav.next{ right:10px; }
+    .sDots{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
+    .sDot{
+      width:10px; height:10px; border-radius:999px;
+      border:1px solid rgba(17,24,39,.12);
+      background: rgba(226,232,240,.9);
+      cursor:pointer;
+    }
+    .sDot.on{ background: rgba(59,130,246,.55); border-color: rgba(59,130,246,.35); }
+    .sMeta{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+
   </style>
 </head>
 
@@ -137,156 +166,40 @@
             </div>
           </div>
 
-          <div class="stepGrid">
-            <!-- Step 1 -->
-            <div class="card stepCard">
-              <div class="stepTop">
-                <div class="num">1</div>
-                <div style="min-width:0">
-                  <div class="stTitle">ดู/สังเกตหน้ากระจก</div>
-                  <div class="muted2">แขนแนบลำตัว → ยกแขนขึ้น → เท้าเอว</div>
-                </div>
-              </div>
-              <div class="illus" aria-hidden="true">
-                ${""}
-                <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g1" x1="0" x2="1">
-                      <stop offset="0" stop-color="#fde2e4" stop-opacity="0.8"/>
-                      <stop offset="1" stop-color="#dbeafe" stop-opacity="0.8"/>
-                    </linearGradient>
-                  </defs>
-                  <rect x="0" y="0" width="720" height="420" rx="28" fill="url(#g1)"/>
-                  <rect x="70" y="70" width="250" height="280" rx="22" fill="white" fill-opacity="0.7" stroke="#111827" stroke-opacity="0.08"/>
-                  <rect x="400" y="70" width="250" height="280" rx="22" fill="white" fill-opacity="0.7" stroke="#111827" stroke-opacity="0.08"/>
-                  <text x="195" y="115" font-size="18" font-family="ui-sans-serif" fill="#111827" font-weight="700" text-anchor="middle">แขนแนบลำตัว</text>
-                  <text x="525" y="115" font-size="18" font-family="ui-sans-serif" fill="#111827" font-weight="700" text-anchor="middle">ยกแขนขึ้น</text>
-
-                  <!-- character left -->
-                  <circle cx="195" cy="170" r="26" fill="#fcd5ce"/>
-                  <rect x="168" y="196" width="54" height="78" rx="18" fill="#93c5fd" fill-opacity="0.85"/>
-                  <rect x="156" y="210" width="14" height="60" rx="7" fill="#fcd5ce"/>
-                  <rect x="220" y="210" width="14" height="60" rx="7" fill="#fcd5ce"/>
-                  <rect x="178" y="274" width="18" height="60" rx="9" fill="#cbd5e1"/>
-                  <rect x="206" y="274" width="18" height="60" rx="9" fill="#cbd5e1"/>
-
-                  <!-- character right -->
-                  <circle cx="525" cy="170" r="26" fill="#fcd5ce"/>
-                  <rect x="498" y="196" width="54" height="78" rx="18" fill="#93c5fd" fill-opacity="0.85"/>
-                  <path d="M500 220 q-30 -40 -10 -58 q18 -14 30 10" fill="#fcd5ce"/>
-                  <path d="M550 220 q30 -40 10 -58 q-18 -14 -30 10" fill="#fcd5ce"/>
-                  <rect x="508" y="274" width="18" height="60" rx="9" fill="#cbd5e1"/>
-                  <rect x="536" y="274" width="18" height="60" rx="9" fill="#cbd5e1"/>
-
-                  <text x="360" y="390" font-size="14" font-family="ui-sans-serif" fill="#111827" opacity="0.75" text-anchor="middle">
-                    สังเกตรูปร่าง ผิวหนัง รอยบุ๋ม บวมแดง หัวนมบุ๋ม/มีน้ำไหลผิดปกติ
-                  </text>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Step 2 -->
-            <div class="card stepCard">
-              <div class="stepTop">
-                <div class="num">2</div>
-                <div style="min-width:0">
-                  <div class="stTitle">คลำขณะอาบน้ำ/ยืน</div>
-                  <div class="muted2">ใช้นิ้ว 3 นิ้ว คลำเป็นวง/ขึ้น‑ลง ครอบคลุมทั้งเต้านมและรักแร้</div>
-                </div>
-              </div>
-              <div class="illus" aria-hidden="true">
-                <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g2" x1="0" x2="1">
-                      <stop offset="0" stop-color="#dbeafe" stop-opacity="0.8"/>
-                      <stop offset="1" stop-color="#bbf7d0" stop-opacity="0.75"/>
-                    </linearGradient>
-                  </defs>
-                  <rect x="0" y="0" width="720" height="420" rx="28" fill="url(#g2)"/>
-                  <circle cx="360" cy="155" r="36" fill="#fcd5ce"/>
-                  <rect x="320" y="195" width="80" height="120" rx="26" fill="#a7f3d0" fill-opacity="0.9"/>
-                  <path d="M325 240 q-60 30 -40 70" fill="none" stroke="#111827" stroke-opacity="0.28" stroke-width="8" stroke-linecap="round"/>
-                  <path d="M395 240 q60 30 40 70" fill="none" stroke="#111827" stroke-opacity="0.28" stroke-width="8" stroke-linecap="round"/>
-                  <path d="M345 250 q18 -18 36 0 q-18 18 -36 0z" fill="#fcd5ce"/>
-                  <path d="M375 260 q18 -18 36 0 q-18 18 -36 0z" fill="#fcd5ce"/>
-                  <path d="M355 270 q18 -18 36 0 q-18 18 -36 0z" fill="#fcd5ce"/>
-                  <path d="M360 260 m-70 0 a70 70 0 1 0 140 0 a70 70 0 1 0 -140 0" fill="none" stroke="#111827" stroke-opacity="0.22" stroke-width="6" stroke-dasharray="10 10"/>
-                  <text x="360" y="372" font-size="14" font-family="ui-sans-serif" fill="#111827" opacity="0.75" text-anchor="middle">
-                    คลำเป็นวงจากด้านนอกเข้าใน หรือคลำขึ้น‑ลงเป็นแถว ๆ ให้ครบทุกส่วน
-                  </text>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Step 3 -->
-            <div class="card stepCard">
-              <div class="stepTop">
-                <div class="num">3</div>
-                <div style="min-width:0">
-                  <div class="stTitle">นอนราบ/คลำซ้ำ</div>
-                  <div class="muted2">วางหมอนใต้ไหล่ข้างที่จะตรวจ ยกแขนขึ้น แล้วคลำอย่างเป็นระบบ</div>
-                </div>
-              </div>
-              <div class="illus" aria-hidden="true">
-                <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g3" x1="0" x2="1">
-                      <stop offset="0" stop-color="#fce7f3" stop-opacity="0.8"/>
-                      <stop offset="1" stop-color="#dbeafe" stop-opacity="0.75"/>
-                    </linearGradient>
-                  </defs>
-                  <rect x="0" y="0" width="720" height="420" rx="28" fill="url(#g3)"/>
-                  <rect x="90" y="240" width="540" height="110" rx="30" fill="white" fill-opacity="0.7" stroke="#111827" stroke-opacity="0.08"/>
-                  <rect x="160" y="210" width="180" height="60" rx="24" fill="#e2e8f0" fill-opacity="0.95"/>
-                  <circle cx="360" cy="185" r="30" fill="#fcd5ce"/>
-                  <rect x="300" y="215" width="120" height="70" rx="26" fill="#93c5fd" fill-opacity="0.85"/>
-                  <path d="M300 235 q-70 -10 -90 30" fill="none" stroke="#fcd5ce" stroke-width="18" stroke-linecap="round"/>
-                  <path d="M420 235 q70 -10 90 30" fill="none" stroke="#fcd5ce" stroke-width="18" stroke-linecap="round"/>
-                  <circle cx="410" cy="255" r="10" fill="#fcd5ce"/>
-                  <circle cx="395" cy="265" r="10" fill="#fcd5ce"/>
-                  <circle cx="380" cy="275" r="10" fill="#fcd5ce"/>
-                  <path d="M360 255 m-60 0 a60 60 0 1 0 120 0 a60 60 0 1 0 -120 0" fill="none" stroke="#111827" stroke-opacity="0.22" stroke-width="6" stroke-dasharray="10 10"/>
-                  <text x="360" y="388" font-size="14" font-family="ui-sans-serif" fill="#111827" opacity="0.75" text-anchor="middle">
-                    ท่่านอนช่วยให้เนื้อเต้านมแผ่ราบ คลำได้ทั่วถึงขึ้น
-                  </text>
-                </svg>
-              </div>
-            </div>
-
-            <!-- Step 4 -->
-            <div class="card stepCard">
-              <div class="stepTop">
-                <div class="num">4</div>
-                <div style="min-width:0">
-                  <div class="stTitle">ตรวจรักแร้ + หัวนม</div>
-                  <div class="muted2">คลำบริเวณรักแร้และเหนือไหปลาร้า สังเกตหัวนม/การมีน้ำไหลผิดปกติ</div>
-                </div>
-              </div>
-              <div class="illus" aria-hidden="true">
-                <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="g4" x1="0" x2="1">
-                      <stop offset="0" stop-color="#bbf7d0" stop-opacity="0.75"/>
-                      <stop offset="1" stop-color="#fde2e4" stop-opacity="0.8"/>
-                    </linearGradient>
-                  </defs>
-                  <rect x="0" y="0" width="720" height="420" rx="28" fill="url(#g4)"/>
-                  <circle cx="360" cy="150" r="34" fill="#fcd5ce"/>
-                  <rect x="300" y="190" width="120" height="140" rx="30" fill="#a7f3d0" fill-opacity="0.9"/>
-                  <path d="M300 230 q-90 10 -90 70" fill="none" stroke="#fcd5ce" stroke-width="18" stroke-linecap="round"/>
-                  <path d="M420 230 q90 10 90 70" fill="none" stroke="#fcd5ce" stroke-width="18" stroke-linecap="round"/>
-                  <circle cx="255" cy="292" r="12" fill="#fbbf24" fill-opacity="0.55"/>
-                  <circle cx="465" cy="292" r="12" fill="#fbbf24" fill-opacity="0.55"/>
-                  <text x="360" y="368" font-size="14" font-family="ui-sans-serif" fill="#111827" opacity="0.75" text-anchor="middle">
-                    คลำหาก้อน/ต่อมน้ำเหลือง และสังเกตหัวนมบุ๋มใหม่หรือมีน้ำไหลผิดปกติ
-                  </text>
-                </svg>
-              </div>
-            </div>
-          </div>
         </div>
 
+        <div class="card sCard">
+          <div class="sMeta">
+            <div>
+              <div style="font-weight:900;font-size:16px">ภาพสาธิตท่าทางตรวจเต้านม</div>
+              <div class="muted2">เลื่อนดูภาพ 1–8 (ลดความยาวของหน้า)</div>
+            </div>
+            <span class="pill pillPlan" id="slideCounter">1/8</span>
+          </div>
+
+          <div class="sWrap" id="sWrap" aria-label="Breast self exam slider">
+            <button class="sNav prev" id="sPrev" aria-label="previous">‹</button>
+            <div class="sViewport">
+              <div class="sTrack" id="sTrack">
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_01.jpg" alt="Breast self exam step 1" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_02.jpg" alt="Breast self exam step 2" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_03.jpg" alt="Breast self exam step 3" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_04.jpg" alt="Breast self exam step 4" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_05.jpg" alt="Breast self exam step 5" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_06.jpg" alt="Breast self exam step 6" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_07.jpg" alt="Breast self exam step 7" loading="lazy"></div>
+                <div class="sSlide"><img src="../assets/images_breast_self/Breast_self_08.jpg" alt="Breast self exam step 8" loading="lazy"></div>
+              </div>
+            </div>
+            <button class="sNav next" id="sNext" aria-label="next">›</button>
+          </div>
+
+          <div class="sDots" id="sDots"></div>
+        </div>
+      </div>
+
         <!-- Right -->
+
         <div>
           <div class="card" style="padding:14px">
             <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -612,6 +525,63 @@
       renderChecklist();
       renderHistory();
     }
+
+    // ===== Slider =====
+    const sTrack = document.getElementById("sTrack");
+    const sDots = document.getElementById("sDots");
+    const sPrev = document.getElementById("sPrev");
+    const sNext = document.getElementById("sNext");
+    const sWrap = document.getElementById("sWrap");
+    const slideCounter = document.getElementById("slideCounter");
+    const SLIDE_COUNT = 8;
+    let slideIndex = 0;
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function updateSlider(){
+      slideIndex = clamp(slideIndex, 0, SLIDE_COUNT-1);
+      sTrack.style.transform = `translateX(-${slideIndex * 100}%)`;
+      if(slideCounter) slideCounter.textContent = `${slideIndex+1}/${SLIDE_COUNT}`;
+      if(sDots){
+        sDots.querySelectorAll(".sDot").forEach((d, i)=> d.classList.toggle("on", i===slideIndex));
+      }
+    }
+    function buildDots(){
+      if(!sDots) return;
+      sDots.innerHTML = Array.from({length:SLIDE_COUNT}).map((_,i)=>`<button class="sDot ${i===0?'on':''}" data-i="${i}" aria-label="slide ${i+1}"></button>`).join("");
+      sDots.querySelectorAll("[data-i]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          slideIndex = Number(b.getAttribute("data-i")) || 0;
+          updateSlider();
+        });
+      });
+    }
+    if(sPrev && sNext){
+      sPrev.addEventListener("click", ()=>{ slideIndex -= 1; updateSlider(); });
+      sNext.addEventListener("click", ()=>{ slideIndex += 1; updateSlider(); });
+    }
+    // Keyboard support
+    window.addEventListener("keydown", (e)=>{
+      if(document.activeElement && ["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) return;
+      if(e.key === "ArrowLeft"){ slideIndex -= 1; updateSlider(); }
+      if(e.key === "ArrowRight"){ slideIndex += 1; updateSlider(); }
+    });
+    // Swipe support
+    let sx = null, dx = 0;
+    if(sWrap){
+      sWrap.addEventListener("touchstart", (e)=>{ sx = e.touches[0].clientX; dx = 0; }, {passive:true});
+      sWrap.addEventListener("touchmove", (e)=>{ if(sx==null) return; dx = e.touches[0].clientX - sx; }, {passive:true});
+      sWrap.addEventListener("touchend", ()=>{
+        if(sx==null) return;
+        if(Math.abs(dx) > 40){
+          slideIndex += (dx < 0 ? 1 : -1);
+          updateSlider();
+        }
+        sx = null; dx = 0;
+      });
+    }
+    buildDots();
+    updateSlider();
+
 
     render();
   </script>
