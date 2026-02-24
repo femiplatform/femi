@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Mood Tracker</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .mtHero{
+      background: linear-gradient(135deg, rgba(187,247,208,.45), rgba(186,230,253,.35));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .mtRow{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 980px){ .mtRow{ grid-template-columns: 1.15fr .85fr; } }
+
+    .emojiGrid{
+      display:grid; grid-template-columns: repeat(5, 1fr);
+      gap: 10px; margin-top: 8px;
+    }
+    .emojiBtn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding: 12px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.70);
+      cursor:pointer;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+      font-weight: 900;
+    }
+    .emojiBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.9); }
+    .emojiBtn.on{
+      border-color: rgba(16,185,129,.40);
+      background: rgba(236,253,245,.95);
+      box-shadow: 0 10px 26px rgba(16,185,129,.12);
+    }
+    .emoji{ font-size: 26px; line-height: 1; }
+    .emojiLbl{ font-size: 12px; opacity: .85; margin-top: 6px; text-align:center; }
+
+    .mtKpi{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .mtBig{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(16,185,129,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 700; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .mtList{ display:grid; gap: 10px; margin-top: 12px; }
+    .mtItem{ padding: 12px; }
+    .mtItemTop{ display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+    .mtPill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .dangerPill{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .warnPill{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .okPill{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+
+    .mtModal{
+      position: fixed; inset: 0; z-index: 60;
+      display:none;
+    }
+    .mtModal.on{ display:block; }
+    .mtBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,.35); }
+    .mtPanel{
+      position:absolute; left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width: min(820px, 92vw);
+      max-height: 88vh;
+      overflow:auto;
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(17,24,39,.10);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
+    .mtPanelHead{
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      background: linear-gradient(135deg, rgba(224,242,254,.55), rgba(187,247,208,.35));
+      position: sticky; top: 0;
+    }
+    .mtPanelTitle{ font-weight: 900; }
+    .mtPanelBody{ padding: 14px; display:grid; gap: 10px; }
+    .mtFoot{
+      padding: 12px 14px;
+      border-top: 1px solid rgba(17,24,39,.08);
+      display:flex; gap: 10px; flex-wrap:wrap; justify-content:flex-end;
+      background: rgba(248,250,252,.9);
+      position: sticky; bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">Mood Tracker: Emoji + EPDS</h1>
+      <p class="page-sub muted">บันทึกอารมณ์แบบง่าย ๆ และทำแบบประเมิน EPDS เพื่อคัดกรองความเสี่ยงภาวะซึมเศร้าหลังคลอด (เก็บข้อมูลไว้ในเครื่องของผู้ใช้)</p>
+
+      <div class="mtRow">
+        <!-- Left: Mood quick log -->
+        <div class="mtHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.70);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-weight:900;font-size:16px;">บันทึกอารมณ์วันนี้</div>
+                <div class="muted2">เลือกอีโมจิ + ใส่โน้ตสั้น ๆ (ถ้าต้องการ)</div>
+              </div>
+              <button id="btnTodayReset" class="btn btn-ghost">ล้าง</button>
+            </div>
+
+            <div class="emojiGrid" id="emojiGrid"></div>
+
+            <div style="display:grid;gap:8px;margin-top:10px">
+              <div>
+                <label class="muted">โน้ต</label>
+                <textarea id="note" class="input" placeholder="เช่น วันนี้เหนื่อยมาก / นอนไม่พอ / ได้รับกำลังใจจากครอบครัว" style="min-height:90px"></textarea>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <button id="btnSaveMood" class="btn btn-ok">บันทึกอารมณ์</button>
+                <button id="btnOpenEpsd" class="btn btn-warn">ทำแบบประเมิน EPDS</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px;background:rgba(255,255,255,.70);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-weight:900;">สรุป 7 วันล่าสุด</div>
+                <div class="muted2">ดูแนวโน้มอารมณ์ + คะแนน EPDS (ถ้ามี)</div>
+              </div>
+              <button id="btnClearAll" class="btn btn-ghost">ล้างประวัติทั้งหมด</button>
+            </div>
+
+            <div class="mtKpi" style="margin-top:10px">
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">อารมณ์เฉลี่ย</div>
+                <div class="mtBig" id="avgMood">-</div>
+                <div class="muted2" id="avgMoodText">-</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">EPDS ล่าสุด</div>
+                <div class="mtBig" id="lastEpsd">-</div>
+                <div class="muted2" id="lastEpsdText">-</div>
+              </div>
+            </div>
+
+            <div id="recentList" class="mtList"></div>
+
+            <div class="muted2" style="margin-top:8px">
+              * ข้อมูลนี้เป็นการคัดกรอง/ติดตาม ไม่ใช่การวินิจฉัย หากมีความกังวลหรือมีความคิดทำร้ายตนเอง ให้ติดต่อบุคลากรสาธารณสุข/สายด่วนในพื้นที่ทันที
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Quick guidance -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">แนวทางอ่านผล EPDS (สรุป)</div>
+            <ul class="muted" style="margin:10px 0 0 18px;line-height:1.7">
+              <li>คะแนนรวม 0–9: โดยรวมความเสี่ยงต่ำ (แนะนำติดตามต่อเนื่อง)</li>
+              <li>คะแนนรวม 10–12: อาจมีความเสี่ยง (ควรประเมินซ้ำ/ขอคำปรึกษา)</li>
+              <li>คะแนนรวม ≥ 13: เสี่ยงสูง ควรติดตาม/ปรึกษาผู้เชี่ยวชาญ</li>
+              <li><b>ข้อ 10 (ความคิดทำร้ายตนเอง)</b>: ถ้าตอบ “มี” ไม่ว่าคะแนนรวมเท่าไร ควรได้รับการประเมินทันที</li>
+            </ul>
+            <div class="muted2" style="margin-top:10px">
+              หมายเหตุ: เกณฑ์อาจต่างกันตามบริบท/แนวทางหน่วยบริการ โปรดใช้วิจารณญาณร่วมกับการประเมินทางคลินิก
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">เคล็ดลับดูแลตัวเอง (สั้น ๆ)</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              <div>• พยายามพักผ่อน/งีบเมื่อมีโอกาส</div>
+              <div>• ขอความช่วยเหลือจากคนใกล้ชิด</div>
+              <div>• พูดคุยกับ อสม./รพ.สต./หน่วยบริการเมื่อรู้สึกไม่ไหว</div>
+              <div>• บันทึกอารมณ์ทุกวันช่วยให้เห็นสัญญาณได้เร็ว</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EPDS Modal -->
+      <div id="epsdModal" class="mtModal" aria-hidden="true">
+        <div class="mtBackdrop"></div>
+        <div class="mtPanel" role="dialog" aria-modal="true">
+          <div class="mtPanelHead">
+            <div style="min-width:0">
+              <div class="mtPanelTitle">แบบประเมิน EPDS (คัดกรอง)</div>
+              <div class="muted2">ตอบตามความรู้สึก “ใน 7 วันที่ผ่านมา”</div>
+            </div>
+            <button class="icon-btn" id="epsdClose" aria-label="close">✕</button>
+          </div>
+
+          <div class="mtPanelBody">
+            <div class="card-soft" style="padding:12px">
+              <div class="muted2">
+                หมายเหตุ: เพื่อความถูกต้องเชิงมาตรฐาน กรุณาใช้ข้อความแบบสอบถามที่หน่วยงานของคุณรับรอง
+                (หน้านี้จัดโครงสร้าง + การให้คะแนนไว้พร้อมใช้งาน)
+              </div>
+            </div>
+
+            <div id="qWrap" style="display:grid;gap:10px"></div>
+
+            <div class="card-soft" style="padding:12px">
+              <div class="muted2">
+                หากตอบในข้อ 10 ว่า “มีความคิดทำร้ายตนเอง” แม้เพียงบางครั้ง ควรติดต่อบุคลากรสาธารณสุขทันที
+              </div>
+            </div>
+          </div>
+
+          <div class="mtFoot">
+            <button id="epsdReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            <button id="epsdSubmit" class="btn btn-ok">คำนวณคะแนน</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Mood Tracker" });
+    try{ applyI18n(document); }catch{}
+
+    // ===== Storage =====
+    const LS_KEY = "FEMI_MOOD_V1";
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { entries: [] };
+      }catch{
+        return { entries: [] };
+      }
+    }
+    function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+
+    function isoToday(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function nowTs(){ return Date.now(); }
+
+    // ===== Mood =====
+    const MOODS = [
+      { id: 5, emoji:"😄", label:"ดีมาก" },
+      { id: 4, emoji:"🙂", label:"ดี" },
+      { id: 3, emoji:"😐", label:"เฉย ๆ" },
+      { id: 2, emoji:"😟", label:"ไม่ค่อยดี" },
+      { id: 1, emoji:"😢", label:"แย่" },
+    ];
+
+    const emojiGrid = document.getElementById("emojiGrid");
+    const noteEl = document.getElementById("note");
+    const btnSaveMood = document.getElementById("btnSaveMood");
+    const btnTodayReset = document.getElementById("btnTodayReset");
+    const btnClearAll = document.getElementById("btnClearAll");
+
+    const avgMoodEl = document.getElementById("avgMood");
+    const avgMoodTextEl = document.getElementById("avgMoodText");
+    const lastEpsdEl = document.getElementById("lastEpsd");
+    const lastEpsdTextEl = document.getElementById("lastEpsdText");
+    const recentList = document.getElementById("recentList");
+
+    let state = loadState();
+    let selectedMood = null;
+
+    function renderEmoji(){
+      emojiGrid.innerHTML = MOODS.map(m => `
+        <div class="emojiBtn" data-mood="${m.id}">
+          <div class="emoji">${m.emoji}</div>
+          <div class="emojiLbl">${m.label}</div>
+        </div>
+      `).join("");
+
+      emojiGrid.querySelectorAll(".emojiBtn").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          emojiGrid.querySelectorAll(".emojiBtn").forEach(x=>x.classList.remove("on"));
+          btn.classList.add("on");
+          selectedMood = Number(btn.dataset.mood);
+        });
+      });
+    }
+
+    function upsertTodayMood(){
+      const day = isoToday();
+      const note = (noteEl.value || "").trim();
+
+      if(!selectedMood){
+        alert("กรุณาเลือกอีโมจิอารมณ์ก่อนบันทึก");
+        return;
+      }
+
+      const existing = state.entries.find(e => e.date === day);
+      if(existing){
+        existing.mood = selectedMood;
+        existing.note = note;
+        existing.updatedAt = nowTs();
+      }else{
+        state.entries.push({ date: day, mood: selectedMood, note, createdAt: nowTs(), updatedAt: nowTs(), epsd: null });
+      }
+
+      // keep sorted desc
+      state.entries.sort((a,b)=> (b.date.localeCompare(a.date)));
+      saveState(state);
+      renderAll();
+      toast("บันทึกอารมณ์แล้ว");
+    }
+
+    function resetTodayInputs(){
+      selectedMood = null;
+      noteEl.value = "";
+      emojiGrid.querySelectorAll(".emojiBtn").forEach(x=>x.classList.remove("on"));
+    }
+
+    btnSaveMood.addEventListener("click", upsertTodayMood);
+    btnTodayReset.addEventListener("click", resetTodayInputs);
+    btnClearAll.addEventListener("click", ()=>{
+      if(confirm("ต้องการล้างประวัติทั้งหมดใช่ไหม?")){
+        state = { entries: [] };
+        saveState(state);
+        renderAll();
+        resetTodayInputs();
+      }
+    });
+
+    // ===== EPDS =====
+    // IMPORTANT: This is a scaffold. Replace question/option text with your approved EPDS version.
+    // Scoring rules:
+    // - Items 1,2,4: 0..3 (top option=0, bottom=3)
+    // - Items 3,5-10: reverse (top option=3, bottom=0)
+    const EPDS_ITEMS = [
+      { n:1, key:"q1", text:"1) รู้สึกหัวเราะ/เห็นเรื่องตลกได้", normal:true },
+      { n:2, key:"q2", text:"2) รู้สึกมีความสุข/ตั้งตารอสิ่งต่าง ๆ", normal:true },
+      { n:3, key:"q3", text:"3) โทษตัวเองโดยไม่จำเป็นเมื่ออะไรผิดพลาด", normal:false },
+      { n:4, key:"q4", text:"4) กังวล/ตื่นตระหนกโดยไม่มีเหตุ", normal:true },
+      { n:5, key:"q5", text:"5) รู้สึกกลัว/หวาดผวาเกินเหตุ", normal:false },
+      { n:6, key:"q6", text:"6) รู้สึกว่ามีเรื่องถาโถมจนรับมือยาก", normal:false },
+      { n:7, key:"q7", text:"7) รู้สึกเศร้า/ไม่มีความสุข", normal:false },
+      { n:8, key:"q8", text:"8) ร้องไห้ง่าย/อยากร้องไห้", normal:false },
+      { n:9, key:"q9", text:"9) นอนไม่หลับเพราะความทุกข์ใจ", normal:false },
+      { n:10, key:"q10", text:"10) มีความคิดทำร้ายตนเอง", normal:false, isRisk:true },
+    ];
+
+    const EPDS_OPTIONS = [
+      "มาก/บ่อยที่สุด",
+      "ค่อนข้างมาก/บ่อย",
+      "นาน ๆ ครั้ง/เล็กน้อย",
+      "ไม่เลย",
+    ];
+
+    const btnOpenEpsd = document.getElementById("btnOpenEpsd");
+    const epsdModal = document.getElementById("epsdModal");
+    const epsdClose = document.getElementById("epsdClose");
+    const epsdReset = document.getElementById("epsdReset");
+    const epsdSubmit = document.getElementById("epsdSubmit");
+    const qWrap = document.getElementById("qWrap");
+
+    let epsdAnswers = {}; // key -> idx(0..3)
+
+    function openEpsd(){
+      buildQuestions();
+      epsdModal.classList.add("on");
+      epsdModal.setAttribute("aria-hidden","false");
+      document.body.classList.add("no-scroll");
+    }
+    function closeEpsd(){
+      epsdModal.classList.remove("on");
+      epsdModal.setAttribute("aria-hidden","true");
+      document.body.classList.remove("no-scroll");
+    }
+    btnOpenEpsd.addEventListener("click", openEpsd);
+    epsdClose.addEventListener("click", closeEpsd);
+    epsdModal.querySelector(".mtBackdrop").addEventListener("click", closeEpsd);
+    window.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && epsdModal.classList.contains("on")) closeEpsd(); });
+
+    function buildQuestions(){
+      qWrap.innerHTML = EPDS_ITEMS.map(it=>{
+        const name = it.key;
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${escapeHtml(it.text)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${EPDS_OPTIONS.map((opt, idx)=>`
+                <label class="opt">
+                  <input type="radio" name="${name}" value="${idx}" />
+                  <span>${escapeHtml(opt)}</span>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // restore existing answers if any
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          epsdAnswers[r.name] = Number(r.value);
+        });
+      });
+    }
+
+    epsdReset.addEventListener("click", ()=>{
+      epsdAnswers = {};
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=> r.checked = false);
+    });
+
+    function scoreItem(item, idx){
+      // idx 0..3 (top->bottom)
+      if(item.normal){
+        // 0,1,2,3
+        return idx;
+      }
+      // reverse: 3,2,1,0
+      return 3 - idx;
+    }
+
+    function interpret(total, riskFlag){
+      if(riskFlag){
+        return { level:"urgent", pill:"ต้องประเมินทันที", cls:"dangerPill", msg:"ข้อ 10 มีสัญญาณเสี่ยง (มีความคิดทำร้ายตนเอง) แนะนำติดต่อบุคลากรสาธารณสุขทันที" };
+      }
+      if(total >= 13){
+        return { level:"high", pill:"เสี่ยงสูง", cls:"warnPill", msg:"คะแนนรวม ≥ 13 แนะนำติดตาม/ปรึกษาผู้เชี่ยวชาญ" };
+      }
+      if(total >= 10){
+        return { level:"mid", pill:"อาจเสี่ยง", cls:"warnPill", msg:"คะแนนรวม 10–12 อาจมีความเสี่ยง ควรประเมินซ้ำ/ขอคำปรึกษา" };
+      }
+      return { level:"low", pill:"เสี่ยงต่ำ", cls:"okPill", msg:"คะแนนรวม 0–9 โดยรวมความเสี่ยงต่ำ แนะนำติดตามต่อเนื่อง" };
+    }
+
+    epsdSubmit.addEventListener("click", ()=>{
+      // ensure all answered
+      for(const it of EPDS_ITEMS){
+        if(!(it.key in epsdAnswers)){
+          alert("กรุณาตอบให้ครบทุกข้อก่อนคำนวณคะแนน");
+          return;
+        }
+      }
+
+      let total = 0;
+      let riskFlag = false;
+      for(const it of EPDS_ITEMS){
+        const idx = epsdAnswers[it.key];
+        const s = scoreItem(it, idx);
+        total += s;
+        if(it.isRisk && s > 0) riskFlag = true; // any non-zero after reverse scoring means some risk
+      }
+
+      const day = isoToday();
+      // attach to today's entry (create if none)
+      const existing = state.entries.find(e => e.date === day);
+      const payload = { total, answers: epsdAnswers, riskFlag, createdAt: nowTs() };
+
+      if(existing){
+        existing.epsd = payload;
+        existing.updatedAt = nowTs();
+      }else{
+        // If no mood yet, create entry with neutral mood
+        state.entries.push({ date: day, mood: selectedMood || 3, note: (noteEl.value||"").trim(), createdAt: nowTs(), updatedAt: nowTs(), epsd: payload });
+      }
+
+      state.entries.sort((a,b)=> (b.date.localeCompare(a.date)));
+      saveState(state);
+
+      closeEpsd();
+      renderAll();
+
+      const itp = interpret(total, riskFlag);
+      alert(`คะแนน EPDS: ${total}/30\nผลสรุป: ${itp.pill}\n\n${itp.msg}`);
+    });
+
+    // ===== Recent list + KPIs =====
+    function moodLabel(id){
+      const m = MOODS.find(x=>x.id===id);
+      return m ? `${m.emoji} ${m.label}` : "-";
+    }
+
+    function calcAvgMood(last7){
+      if(!last7.length) return null;
+      const s = last7.reduce((acc,e)=> acc + (Number(e.mood)||0), 0);
+      return s / last7.length;
+    }
+
+    function renderAll(){
+      state = loadState();
+
+      // last 7 by date
+      const last7 = state.entries.slice(0, 7);
+
+      // KPIs
+      const avg = calcAvgMood(last7);
+      if(avg == null){
+        avgMoodEl.textContent = "-";
+        avgMoodTextEl.textContent = "ยังไม่มีข้อมูล";
+      }else{
+        const rounded = Math.round(avg * 10) / 10;
+        avgMoodEl.textContent = String(rounded);
+        // map to label
+        const nearest = Math.min(5, Math.max(1, Math.round(avg)));
+        avgMoodTextEl.textContent = `ใกล้เคียง: ${moodLabel(nearest)}`;
+      }
+
+      // last EPDS
+      const lastWithEpsd = state.entries.find(e => e.epsd && typeof e.epsd.total === "number");
+      if(!lastWithEpsd){
+        lastEpsdEl.textContent = "-";
+        lastEpsdTextEl.textContent = "ยังไม่มีการทำแบบประเมิน";
+      }else{
+        const total = lastWithEpsd.epsd.total;
+        const itp = interpret(total, !!lastWithEpsd.epsd.riskFlag);
+        lastEpsdEl.textContent = String(total);
+        lastEpsdTextEl.textContent = `${itp.pill} • ${lastWithEpsd.date}`;
+      }
+
+      // list
+      recentList.innerHTML = last7.map(e=>{
+        const epsd = e.epsd && typeof e.epsd.total === "number" ? e.epsd.total : null;
+        const itp = epsd != null ? interpret(epsd, !!e.epsd.riskFlag) : null;
+        const pill = epsd != null
+          ? `<span class="mtPill ${itp.cls}">EPDS ${epsd} • ${itp.pill}</span>`
+          : `<span class="mtPill">EPDS -</span>`;
+
+        const note = e.note ? `<div class="muted2" style="margin-top:6px">โน้ต: ${escapeHtml(e.note)}</div>` : "";
+
+        return `
+          <div class="card mtItem">
+            <div class="mtItemTop">
+              <div style="min-width:0">
+                <div style="font-weight:900">${e.date}</div>
+                <div class="muted2">อารมณ์: ${escapeHtml(moodLabel(e.mood))}</div>
+              </div>
+              ${pill}
+            </div>
+            ${note}
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-del="${e.date}">ลบรายการ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentList.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const d = b.getAttribute("data-del");
+          if(confirm(`ลบรายการวันที่ ${d} ใช่ไหม?`)){
+            state.entries = state.entries.filter(x => x.date !== d);
+            saveState(state);
+            renderAll();
+          }
+        });
+      });
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // tiny toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderEmoji();
+    renderAll();
+  </script>
+</body>
+</html>
