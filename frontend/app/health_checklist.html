@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Health Checklist</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+
+  <style>
+    .hcHero{
+      background: linear-gradient(135deg, rgba(187,247,208,.45), rgba(186,230,253,.35));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .hcRow{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 820px){ .hcRow{ grid-template-columns: 1fr 1fr 1fr; } }
+
+    .hcInputRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (min-width: 820px){ .hcInputRow{ grid-template-columns: 1fr 1fr 1fr 1fr; } }
+
+    .hcLegend{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .hcLegend .pill{ font-weight: 800; }
+    .pill-ok{ border-color: rgba(22,163,74,.25); background: rgba(220,252,231,.8); }
+    .pill-due{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pill-over{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .hcModal{
+      position: fixed; inset: 0; z-index: 60;
+      display:none;
+    }
+    .hcModal.on{ display:block; }
+    .hcBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,.35); }
+    .hcPanel{
+      position:absolute; left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width: min(720px, 92vw);
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(17,24,39,.10);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+      overflow:hidden;
+    }
+    .hcPanelHead{
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      background: linear-gradient(135deg, rgba(224,242,254,.55), rgba(187,247,208,.35));
+    }
+    .hcPanelTitle{ font-weight: 900; }
+    .hcPanelBody{ padding: 14px; display:grid; gap: 10px; }
+    .hcGrid2{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 820px){ .hcGrid2{ grid-template-columns: 1fr 1fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .hcFoot{
+      padding: 12px 14px;
+      border-top: 1px solid rgba(17,24,39,.08);
+      display:flex; gap: 10px; flex-wrap:wrap; justify-content:flex-end;
+      background: rgba(248,250,252,.9);
+    }
+    .hcSmall{ font-size: 12px; color: var(--muted); }
+    .hcStrong{ font-weight: 900; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">ตารางวางแผนตรวจสุขภาพ (To-do รายปี)</h1>
+      <p class="page-sub muted">สร้างเช็กลิสต์ตรวจสุขภาพรายปีแบบง่าย ๆ ติ๊กงาน บันทึกวันที่/ผล/หมายเหตุ (เก็บในเครื่องของผู้ใช้)</p>
+
+      <!-- Hero / Inputs -->
+      <div class="hcHero">
+        <div class="hcInputRow">
+          <div>
+            <label class="muted">อายุ (ปี)</label>
+            <input id="age" class="input" type="number" min="10" max="120" placeholder="30" />
+          </div>
+
+          <div>
+            <label class="muted">ช่วงงาน</label>
+            <select id="scope" class="input">
+              <option value="all">ทั้งหมด</option>
+              <option value="basic">พื้นฐาน</option>
+              <option value="women">สุขภาพสตรี</option>
+              <option value="metabolic">เมตาบอลิก/น้ำตาล/ไขมัน</option>
+              <option value="cancer">คัดกรองมะเร็ง</option>
+              <option value="mental">สุขภาพใจ</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="muted">ปีแผน</label>
+            <select id="planYear" class="input"></select>
+          </div>
+
+          <div style="display:flex;align-items:flex-end;gap:10px">
+            <button id="btnReset" class="btn btn-ghost" style="width:100%">ล้างข้อมูลในหน้านี้</button>
+          </div>
+        </div>
+
+        <div class="hcLegend">
+          <span class="pill pill-ok">ครบแล้ว</span>
+          <span class="pill pill-due">ถึงกำหนด</span>
+          <span class="pill pill-over">เกินกำหนด</span>
+        </div>
+
+        <div class="stat-row">
+          <div class="card stat" style="background:rgba(255,255,255,.75)">
+            <div class="k">ทั้งหมด</div>
+            <div class="v" id="kAll">0</div>
+          </div>
+          <div class="card stat" style="background:rgba(255,255,255,.75)">
+            <div class="k">ต้องทำ</div>
+            <div class="v" id="kDue">0</div>
+          </div>
+          <div class="card stat" style="background:rgba(255,255,255,.75)">
+            <div class="k">ทำแล้ว</div>
+            <div class="v" id="kDone">0</div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-tab="all">ทั้งหมด</button>
+          <button class="tab" data-tab="due">ต้องทำ</button>
+          <button class="tab" data-tab="done">ทำแล้ว</button>
+        </div>
+
+        <div class="hcSmall">
+          * หมายเหตุ: รายการแนะนำเป็นแนวทางทั่วไปเพื่อการวางแผน ไม่ใช่คำวินิจฉัยทางการแพทย์
+        </div>
+      </div>
+
+      <!-- List -->
+      <div id="list" style="display:grid;gap:12px;margin-top:12px"></div>
+
+      <!-- Modal -->
+      <div id="modal" class="hcModal" aria-hidden="true">
+        <div class="hcBackdrop"></div>
+        <div class="hcPanel" role="dialog" aria-modal="true">
+          <div class="hcPanelHead">
+            <div style="min-width:0">
+              <div class="hcPanelTitle" id="mTitle">-</div>
+              <div class="hcSmall" id="mMeta">-</div>
+            </div>
+            <button class="icon-btn" id="mClose" aria-label="close">✕</button>
+          </div>
+
+          <div class="hcPanelBody">
+            <div class="hcGrid2">
+              <div>
+                <label class="muted">สถานะ</label>
+                <select id="mStatus" class="input">
+                  <option value="todo">ยังไม่ทำ</option>
+                  <option value="done">ทำแล้ว</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">วันที่ตรวจ/ทำ</label>
+                <input id="mDate" class="input" type="date" />
+              </div>
+            </div>
+
+            <div class="hcGrid2">
+              <div>
+                <label class="muted">ผล/ค่าที่ได้ (ถ้ามี)</label>
+                <input id="mResult" class="input" placeholder="เช่น BP 120/80, FBS 95, LDL 110" />
+              </div>
+              <div>
+                <label class="muted">สถานที่/หน่วยบริการ (ถ้ามี)</label>
+                <input id="mPlace" class="input" placeholder="เช่น รพ.สต., รพ., คลินิก" />
+              </div>
+            </div>
+
+            <div>
+              <label class="muted">หมายเหตุ</label>
+              <textarea id="mNote" class="input" placeholder="บันทึกเพิ่มเติม..."></textarea>
+            </div>
+          </div>
+
+          <div class="hcFoot">
+            <button id="mClear" class="btn btn-ghost">ล้างรายการนี้</button>
+            <button id="mSave" class="btn btn-ok">บันทึก</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n, t } from "../js/i18n.js";
+
+    // Shell + i18n (ถ้า key ยังไม่ถูกเพิ่ม ระบบจะยังแสดงข้อความไทยที่เขียนใน HTML อยู่)
+    await initUserShell({ active: "tools", title: (t ? t("page.healthChecklist") : "Health Checklist") });
+    try{ applyI18n(document); }catch{}
+
+    // ===== Data model (general guidance) =====
+    // NOTE: FEMI target is female; items focus on women's health + general annual checks.
+    const CHECKS = [
+      // BASIC
+      { id:"bp", title:"วัดความดันโลหิต", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง หรือถ้ามีความเสี่ยงตรวจบ่อยขึ้น" },
+      { id:"bmi_waist", title:"ชั่งน้ำหนัก/วัดส่วนสูง + รอบเอว", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"ติดตาม BMI และรอบเอวเพื่อประเมินความเสี่ยงเมตาบอลิก" },
+
+      // METABOLIC
+      { id:"fbs_hba1c", title:"น้ำตาลในเลือด (FBS หรือ HbA1c)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีประวัติครอบครัว/น้ำหนักเกิน/ความดันสูง อาจเริ่มตรวจเร็วกว่านี้" },
+      { id:"lipid", title:"ไขมันในเลือด (Cholesterol profile)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีปัจจัยเสี่ยง แนะนำตรวจตามแพทย์/หน่วยบริการ" },
+
+      // WOMEN / CANCER
+      { id:"cervical", title:"คัดกรองมะเร็งปากมดลูก (Pap smear / HPV test)", scope:["women","cancer"], minAge:21, intervalMonths:36, hint:"แนวทางขึ้นกับอายุและวิธีตรวจ (Pap/HPV) ให้ยึดคำแนะนำหน่วยบริการ" },
+      { id:"breast_clinical", title:"ตรวจเต้านมโดยบุคลากร (Clinical breast exam)", scope:["women","cancer"], minAge:20, intervalMonths:12, hint:"ควรทำร่วมกับการตรวจเต้านมด้วยตนเองเป็นประจำ" },
+
+      // WOMEN / LIFE
+      { id:"dental", title:"ตรวจสุขภาพช่องปาก/ฟัน", scope:["basic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง" },
+      { id:"eye", title:"ตรวจสายตา/สุขภาพตา", scope:["basic"], minAge:18, intervalMonths:24, hint:"หากมีอาการหรือมีโรคประจำตัวควรตรวจถี่ขึ้น" },
+
+      // MENTAL
+      { id:"mental", title:"ประเมินสุขภาพใจ/ความเครียด", scope:["mental"], minAge:15, intervalMonths:12, hint:"ประเมินตนเองและปรึกษาหน่วยบริการเมื่อมีสัญญาณเสี่ยง" },
+
+      // VACCINE (as yearly plan reminders)
+      { id:"flu", title:"วัคซีนไข้หวัดใหญ่ (ตามความเหมาะสม)", scope:["basic"], minAge:15, intervalMonths:12, hint:"กลุ่มเสี่ยงควรรับวัคซีนทุกปี (ขึ้นกับนโยบาย/สิทธิ)" },
+    ];
+
+    // ===== Local storage =====
+    const LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { age: "", year: new Date().getFullYear(), scope:"all", items:{} };
+      }catch{
+        return { age: "", year: new Date().getFullYear(), scope:"all", items:{} };
+      }
+    }
+    function saveState(s){
+      localStorage.setItem(LS_KEY, JSON.stringify(s));
+    }
+
+    function ymToday(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return { yyyy, mm, dd, iso: `${yyyy}-${mm}-${dd}` };
+    }
+    function addMonths(dateIso, months){
+      const d = new Date(dateIso + "T00:00:00");
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const day = d.getDate();
+      const nd = new Date(y, m + months, day);
+      const yyyy = nd.getFullYear();
+      const mm = String(nd.getMonth()+1).padStart(2,"0");
+      const dd = String(nd.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function isBefore(aIso, bIso){
+      return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
+    }
+
+    // ===== Due logic =====
+    function getItemStatus(item, rec, planYear){
+      // rec: { status, date, result, note, place }
+      // planYear: used for simple year planning view
+      const today = ymToday().iso;
+
+      if(!rec || !rec.status || rec.status === "todo"){
+        return { state:"todo", pillClass:"pill-due", pillText:"ถึงกำหนด", due:true };
+      }
+
+      const last = rec.date || "";
+      if(!last){
+        return { state:"done", pillClass:"pill-ok", pillText:"ครบแล้ว", due:false };
+      }
+
+      // If last done date exceeds interval -> due/over
+      const nextDue = addMonths(last, item.intervalMonths || 12);
+      if(isBefore(nextDue, today)){
+        // over if overdue more than 3 months
+        const overMark = addMonths(nextDue, 3);
+        const isOver = isBefore(overMark, today);
+        return {
+          state:"done",
+          pillClass: isOver ? "pill-over" : "pill-due",
+          pillText: isOver ? "เกินกำหนด" : "ถึงกำหนด",
+          due:true,
+          nextDue
+        };
+      }
+      return { state:"done", pillClass:"pill-ok", pillText:"ครบแล้ว", due:false, nextDue };
+    }
+
+    function inAge(item, age){
+      const a = Number(age);
+      if(!Number.isFinite(a) || !age) return true; // if age empty, show all
+      if(item.minAge != null && a < item.minAge) return false;
+      if(item.maxAge != null && a > item.maxAge) return false;
+      return true;
+    }
+
+    function inScope(item, scope){
+      if(scope === "all") return true;
+      return (item.scope || []).includes(scope);
+    }
+
+    // ===== UI =====
+    const elAge = document.getElementById("age");
+    const elScope = document.getElementById("scope");
+    const elYear = document.getElementById("planYear");
+    const elList = document.getElementById("list");
+    const elReset = document.getElementById("btnReset");
+
+    const kAll = document.getElementById("kAll");
+    const kDue = document.getElementById("kDue");
+    const kDone = document.getElementById("kDone");
+
+    // modal elements
+    const modal = document.getElementById("modal");
+    const mTitle = document.getElementById("mTitle");
+    const mMeta = document.getElementById("mMeta");
+    const mClose = document.getElementById("mClose");
+    const mStatus = document.getElementById("mStatus");
+    const mDate = document.getElementById("mDate");
+    const mResult = document.getElementById("mResult");
+    const mPlace = document.getElementById("mPlace");
+    const mNote = document.getElementById("mNote");
+    const mSave = document.getElementById("mSave");
+    const mClear = document.getElementById("mClear");
+
+    let state = loadState();
+    let activeTab = "all";
+    let activeItemId = null;
+
+    // year select
+    (function initYears(){
+      const now = new Date().getFullYear();
+      const years = [now-1, now, now+1];
+      elYear.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+      elYear.value = String(state.year || now);
+    })();
+
+    // restore inputs
+    elAge.value = state.age ?? "";
+    elScope.value = state.scope ?? "all";
+
+    // tabs
+    document.querySelectorAll(".tab").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        activeTab = btn.dataset.tab;
+        render();
+      });
+    });
+
+    function openModal(item){
+      activeItemId = item.id;
+      const rec = state.items?.[item.id] || { status:"todo", date:"", result:"", note:"", place:"" };
+
+      mTitle.textContent = item.title;
+      mMeta.textContent = `แนะนำทุก ${Math.round((item.intervalMonths||12)/12)} ปี / เริ่มอายุ ${item.minAge || "-" }+ • ${item.hint || ""}`.trim();
+
+      mStatus.value = rec.status || "todo";
+      mDate.value = rec.date || "";
+      mResult.value = rec.result || "";
+      mPlace.value = rec.place || "";
+      mNote.value = rec.note || "";
+
+      modal.classList.add("on");
+      modal.setAttribute("aria-hidden","false");
+      document.body.classList.add("no-scroll");
+    }
+    function closeModal(){
+      modal.classList.remove("on");
+      modal.setAttribute("aria-hidden","true");
+      document.body.classList.remove("no-scroll");
+      activeItemId = null;
+    }
+
+    mClose.addEventListener("click", closeModal);
+    modal.querySelector(".hcBackdrop").addEventListener("click", closeModal);
+    window.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && modal.classList.contains("on")) closeModal(); });
+
+    mSave.addEventListener("click", ()=>{
+      if(!activeItemId) return;
+      const rec = {
+        status: mStatus.value,
+        date: mDate.value || "",
+        result: (mResult.value || "").trim(),
+        place: (mPlace.value || "").trim(),
+        note: (mNote.value || "").trim()
+      };
+      state.items = state.items || {};
+      state.items[activeItemId] = rec;
+      saveState(state);
+      closeModal();
+      render();
+    });
+
+    mClear.addEventListener("click", ()=>{
+      if(!activeItemId) return;
+      if(state.items && state.items[activeItemId]) delete state.items[activeItemId];
+      saveState(state);
+      closeModal();
+      render();
+    });
+
+    // input listeners
+    elAge.addEventListener("input", ()=>{
+      state.age = elAge.value;
+      saveState(state);
+      render();
+    });
+    elScope.addEventListener("change", ()=>{
+      state.scope = elScope.value;
+      saveState(state);
+      render();
+    });
+    elYear.addEventListener("change", ()=>{
+      state.year = Number(elYear.value);
+      saveState(state);
+      render();
+    });
+
+    elReset.addEventListener("click", ()=>{
+      // reset only page inputs; keep saved items
+      state.age = "";
+      state.scope = "all";
+      state.year = new Date().getFullYear();
+      saveState(state);
+      elAge.value = "";
+      elScope.value = "all";
+      elYear.value = String(state.year);
+      activeTab = "all";
+      document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+      document.querySelector('.tab[data-tab="all"]').classList.add("active");
+      render();
+    });
+
+    function render(){
+      const age = state.age;
+      const scope = state.scope || "all";
+      const planYear = Number(state.year || new Date().getFullYear());
+
+      const filtered = CHECKS
+        .filter(it => inAge(it, age))
+        .filter(it => inScope(it, scope))
+        .map(it=>{
+          const rec = state.items?.[it.id];
+          const st = getItemStatus(it, rec, planYear);
+          return { ...it, rec, st };
+        });
+
+      // KPIs
+      const total = filtered.length;
+      const dueCount = filtered.filter(x => x.st.due).length;
+      const doneCount = filtered.filter(x => x.st.state === "done").length;
+
+      kAll.textContent = String(total);
+      kDue.textContent = String(dueCount);
+      kDone.textContent = String(doneCount);
+
+      // Tab filtering
+      const shown = filtered.filter(x=>{
+        if(activeTab === "due") return x.st.due;
+        if(activeTab === "done") return x.st.state === "done" && !x.st.due;
+        return true;
+      });
+
+      elList.innerHTML = shown.map(x=>{
+        const last = x.rec?.date ? `ทำล่าสุด: <span class="hcStrong">${x.rec.date}</span>` : `ยังไม่มีบันทึก`;
+        const next = x.st?.nextDue ? `• กำหนดถัดไป: <span class="hcStrong">${x.st.nextDue}</span>` : "";
+        const result = x.rec?.result ? `<div class="hcSmall">ผล: ${escapeHtml(x.rec.result)}</div>` : "";
+        const note = x.rec?.note ? `<div class="hcSmall">หมายเหตุ: ${escapeHtml(x.rec.note)}</div>` : "";
+
+        return `
+          <div class="card item-card">
+            <div class="item-top">
+              <div style="min-width:0">
+                <div class="item-title">${escapeHtml(x.title)}</div>
+                <div class="hcSmall">${last} ${next}</div>
+                ${result}
+                ${note}
+              </div>
+              <span class="pill ${x.st.pillClass}">${x.st.pillText}</span>
+            </div>
+            <div class="actions">
+              <button class="btn btn-warn" data-open="${x.id}">เปิด/บันทึก</button>
+              <button class="btn btn-ok" data-quickdone="${x.id}">ทำแล้ววันนี้</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // bind buttons
+      elList.querySelectorAll("[data-open]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-open");
+          const item = CHECKS.find(x=>x.id===id);
+          if(item) openModal(item);
+        });
+      });
+      elList.querySelectorAll("[data-quickdone]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-quickdone");
+          const item = CHECKS.find(x=>x.id===id);
+          if(!item) return;
+          const today = ymToday().iso;
+          state.items = state.items || {};
+          const prev = state.items[id] || {};
+          state.items[id] = { ...prev, status:"done", date: today };
+          saveState(state);
+          render();
+        });
+      });
+    }
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    render();
+  </script>
+</body>
+</html>
