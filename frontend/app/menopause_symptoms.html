@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Menopause Symptoms Assessment</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .msHero{
+      background: linear-gradient(135deg, rgba(254,243,199,.52), rgba(186,230,253,.26));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(245,158,11,.92), rgba(59,130,246,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .sCard{ padding: 12px; }
+    .sTitle{ font-weight: 900; margin-bottom: 8px; }
+    .scale{
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .scaleBtn{
+      padding: 10px 8px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      cursor:pointer;
+      font-weight: 900;
+      text-align:center;
+      transition: transform .06s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+    }
+    .scaleBtn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.92); }
+    .scaleBtn.on{
+      border-color: rgba(245,158,11,.35);
+      background: rgba(255,237,213,.92);
+      box-shadow: 0 10px 26px rgba(245,158,11,.10);
+    }
+    .small{ font-size: 12px; opacity:.8; font-weight: 800; }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แบบประเมินอาการปัจจุบัน (วัยทอง)</h1>
+      <p class="page-sub muted">ให้คะแนนความรบกวนของอาการในช่วง 2 สัปดาห์ที่ผ่านมา เพื่อใช้ติดตามแนวโน้ม (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="msHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลเบื้องต้น</div>
+                <div class="muted2">เลือกคะแนน 0–3 (0 = ไม่มี / 3 = รบกวนมาก)</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคะแนน</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="50" />
+              </div>
+              <div>
+                <label class="muted">รอบเดือนล่าสุด</label>
+                <select id="cycle" class="input">
+                  <option value="normal">ยังสม่ำเสมอ</option>
+                  <option value="irregular">เริ่มไม่สม่ำเสมอ</option>
+                  <option value="stopped_lt12">ขาด &lt; 12 เดือน</option>
+                  <option value="stopped_ge12">ขาด ≥ 12 เดือน</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น ยาที่ใช้, มีโรคประจำตัว, ปัจจัยกระตุ้นอาการ ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปคะแนน</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลสรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนนรวม</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">ยิ่งสูง ยิ่งรบกวนมาก</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">อาการเด่น</div>
+                  <div style="font-weight:900;margin-top:6px" id="resTop">-</div>
+                  <div class="muted2" id="resTopDesc">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">คำแนะนำ (ย่อ)</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resAdvice">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ควรปรึกษาหน่วยบริการ หาก</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • อาการรุนแรง/ต่อเนื่องจนใช้ชีวิตลำบาก • นอนไม่หลับมาก • อารมณ์แย่รุนแรง<br>
+                • เจ็บหน้าอก/หายใจลำบาก • เลือดออกผิดปกติ
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ประวัติการบันทึก</div>
+            <div class="muted2" style="margin-top:6px">8 รายการล่าสุดในเครื่อง</div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right: Symptom scales -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">ให้คะแนนอาการ</div>
+            <div class="muted2" style="margin-top:6px">0 = ไม่มี • 1 = เล็กน้อย • 2 = ปานกลาง • 3 = รบกวนมาก</div>
+            <div id="sWrap" style="display:grid;gap:10px;margin-top:10px"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Menopause Symptoms" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_MENOPAUSE_SYMPTOMS_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ age:"", cycle:"normal", note:"" }, scores:{}, history:[] };
+      }catch{
+        return { profile:{ age:"", cycle:"normal", note:"" }, scores:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Symptom list (simple tracking scale)
+    const SYMPTOMS = [
+      { id:"hotflash", name:"ร้อนวูบวาบ/เหงื่อออกกลางคืน", tip:"หลีกเลี่ยงอาหารเผ็ด/คาเฟอีน/แอลกอฮอล์, แต่งตัวเป็นชั้น, ฝึกหายใจช้า" },
+      { id:"sleep", name:"นอนไม่หลับ/หลับไม่สนิท", tip:"จัดเวลานอน, ลดจอ 1 ชม.ก่อนนอน, ผ่อนคลาย, ออกกำลังช่วงกลางวัน" },
+      { id:"mood", name:"อารมณ์แปรปรวน/หงุดหงิด/วิตกกังวล", tip:"พูดคุยระบาย, ฝึกผ่อนคลาย, ขอความช่วยเหลือเมื่อจำเป็น" },
+      { id:"fatigue", name:"อ่อนเพลีย/เหนื่อยง่าย", tip:"ประเมินการนอน/โภชนาการ/ออกกำลังเบา ๆ และตรวจสุขภาพเมื่อจำเป็น" },
+      { id:"joint", name:"ปวดเมื่อยข้อ/กล้ามเนื้อ", tip:"ยืดเหยียด, เวทเบา ๆ, ประคบอุ่น, ปรึกษาหากปวดมาก" },
+      { id:"vaginal", name:"ช่องคลอดแห้ง/แสบ/เจ็บ", tip:"ใช้สารหล่อลื่น/มอยส์เจอร์ไรเซอร์ และปรึกษาหน่วยบริการถ้ารบกวนมาก" },
+      { id:"urinary", name:"ปัสสาวะบ่อย/แสบขัด/กลั้นยาก", tip:"ฝึกขมิบ (Kegel), ดื่มน้ำพอ, พบแพทย์ถ้ามีแสบขัด/ไข้" },
+      { id:"memory", name:"สมาธิลดลง/หลงลืม", tip:"พักผ่อนพอ, แบ่งงานเป็นช่วง, ฝึกสมอง/จดโน้ต" },
+    ];
+
+    // elements
+    const ageEl = document.getElementById("age");
+    const cycleEl = document.getElementById("cycle");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+
+    const sWrap = document.getElementById("sWrap");
+    const recentEl = document.getElementById("recent");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resTop = document.getElementById("resTop");
+    const resTopDesc = document.getElementById("resTopDesc");
+    const resAdvice = document.getElementById("resAdvice");
+
+    let state = load();
+    let scores = state.scores || {};
+    let lastResult = null;
+
+    // restore profile
+    ageEl.value = state.profile?.age ?? "";
+    cycleEl.value = state.profile?.cycle ?? "normal";
+    noteEl.value = state.profile?.note ?? "";
+
+    function persistProfile(){
+      state.profile = {
+        age: ageEl.value || "",
+        cycle: cycleEl.value || "normal",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    ageEl.addEventListener("input", persistProfile);
+    cycleEl.addEventListener("change", persistProfile);
+    noteEl.addEventListener("input", persistProfile);
+
+    function renderScales(){
+      sWrap.innerHTML = SYMPTOMS.map(sym=>{
+        const current = Number(scores[sym.id] ?? 0);
+        return `
+          <div class="card sCard">
+            <div class="sTitle">${escapeHtml(sym.name)}</div>
+            <div class="muted2">${escapeHtml(sym.tip)}</div>
+            <div class="scale" data-sym="${sym.id}">
+              ${[0,1,2,3].map(v=>`
+                <div class="scaleBtn ${v===current ? "on":""}" data-v="${v}">
+                  ${v}
+                  <div class="small">${v===0?"ไม่มี":v===1?"เล็กน้อย":v===2?"ปานกลาง":"มาก"}</div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      sWrap.querySelectorAll(".scale").forEach(row=>{
+        row.querySelectorAll(".scaleBtn").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            const symId = row.getAttribute("data-sym");
+            const v = Number(btn.getAttribute("data-v"));
+            scores[symId] = v;
+            state.scores = scores;
+            save(state);
+
+            row.querySelectorAll(".scaleBtn").forEach(x=>x.classList.remove("on"));
+            btn.classList.add("on");
+          });
+        });
+      });
+    }
+
+    function compute(){
+      let total = 0;
+      const ranked = [];
+      for(const sym of SYMPTOMS){
+        const v = Number(scores[sym.id] ?? 0);
+        total += v;
+        ranked.push({ id:sym.id, name:sym.name, v, tip:sym.tip });
+      }
+      ranked.sort((a,b)=> b.v - a.v);
+
+      let level = "low";
+      if(total >= 14) level = "high";
+      else if(total >= 7) level = "mid";
+
+      const pill =
+        level==="high" ? { cls:"pill pillHigh", text:"รบกวนมาก" } :
+        level==="mid"  ? { cls:"pill pillMid", text:"ปานกลาง" } :
+                         { cls:"pill pillOk", text:"เล็กน้อย" };
+
+      const top = ranked[0];
+      const topText = top.v === 0 ? "ยังไม่มีอาการเด่น" : top.name;
+      const topDesc = top.v === 0 ? "คะแนนทุกอาการอยู่ที่ 0" : `ระดับ ${top.v}/3 • ทิป: ${top.tip}`;
+
+      const advice = [];
+      advice.push("• ติดตามอาการต่อเนื่อง (เช่น สัปดาห์ละครั้ง/เดือนละครั้ง) เพื่อดูแนวโน้ม");
+      if(level === "high"){
+        advice.push("• อาการรบกวนมาก แนะนำปรึกษาหน่วยบริการเพื่อประเมินและวางแผนดูแล");
+      }else if(level === "mid"){
+        advice.push("• ลองปรับพฤติกรรม (นอน/อาหาร/ออกกำลัง/ผ่อนคลาย) และติดตามผล");
+      }else{
+        advice.push("• รักษาพฤติกรรมสุขภาพต่อเนื่อง และดูแลสุขภาพระยะยาวตามวัย");
+      }
+      advice.push("• หากมีอาการผิดปกติรุนแรง หรือเลือดออกผิดปกติ ให้พบแพทย์ทันที");
+
+      return {
+        ok:true,
+        date: todayIso(),
+        age: ageEl.value || "",
+        cycle: cycleEl.value || "normal",
+        note: (noteEl.value || "").trim(),
+        total,
+        level,
+        pill,
+        topText,
+        topDesc,
+        adviceHtml: advice.join("<br>"),
+        scores: { ...scores }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resTop.textContent = r.topText;
+      resTopDesc.textContent = r.topDesc;
+      resAdvice.innerHTML = r.adviceHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      const rec = { ...out, id: "MS_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างคะแนนทั้งหมดใช่ไหม?")){
+        scores = {};
+        state.scores = {};
+        save(state);
+        resWrap.style.display = "none";
+        renderScales();
+        toast("ล้างแล้ว");
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const pill =
+          h.level==="high" ? { cls:"pill pillHigh", text:"มาก" } :
+          h.level==="mid"  ? { cls:"pill pillMid", text:"ปานกลาง" } :
+                             { cls:"pill pillOk", text:"เล็กน้อย" };
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนนรวม: ${h.total} • อาการเด่น: ${escapeHtml(h.topText)}</div>
+              </div>
+              <span class="${pill.cls}">${pill.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x => x.id === id);
+          if(rec){
+            // restore profile + scores from record, then show
+            ageEl.value = rec.age || "";
+            cycleEl.value = rec.cycle || "normal";
+            noteEl.value = rec.note || "";
+            scores = rec.scores || {};
+            state.scores = scores;
+            persistProfile();
+            save(state);
+            renderScales();
+            showResult(rec);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x => x.id !== id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","age","cycle","total","level","top","note"].concat(SYMPTOMS.map(s=>s.id));
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const row = [
+          h.date, h.age || "", h.cycle || "", String(h.total), h.level, h.topText,
+          (h.note || "").replaceAll("\n"," ")
+        ];
+        for(const s of SYMPTOMS){
+          row.push(String((h.scores||{})[s.id] ?? 0));
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menopause_symptoms.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderScales();
+    renderRecent();
+  </script>
+</body>
+</html>
