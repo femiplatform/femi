@@ -8,6 +8,44 @@
   <!-- CSS (absolute + fallback) -->
   <link rel="stylesheet" href="/assets/app.css" />
   <link rel="stylesheet" href="../assets/app.css" />
+
+  <style>
+    .quiz-choice{
+      width:100%;
+      text-align:left;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.70);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      transition: background .18s ease, border-color .18s ease, transform .06s ease;
+    }
+    .quiz-choice:hover{
+      background: rgba(185,28,28,.06);
+      border-color: rgba(185,28,28,.25);
+    }
+    .quiz-choice:active{ transform: scale(.99); }
+    .quiz-choice.is-selected{
+      background: rgba(185,28,28,.10);
+      border-color: rgba(185,28,28,.35);
+    }
+    .quiz-choice.is-correct{
+      background: rgba(34,197,94,.10);
+      border-color: rgba(34,197,94,.50);
+    }
+    .quiz-choice.is-wrong{
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.50);
+    }
+    .quiz-choice:disabled{
+      opacity: .95;
+      cursor: default;
+    }
+  </style>
+
 </head>
 <body>
   <div id="app">

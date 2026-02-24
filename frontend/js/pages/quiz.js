@@ -81,24 +81,20 @@ function renderDaily(){
   host.innerHTML = "";
   state.choices.forEach((c, idx) => {
     const btn = document.createElement("button");
-    btn.className = "btn";
-    btn.style.textAlign = "left";
-    btn.style.width = "100%";
-    btn.style.padding = "12px";
-    btn.style.borderRadius = "14px";
-    btn.style.display = "flex";
-    btn.style.justifyContent = "space-between";
-    btn.style.gap = "10px";
-    btn.innerHTML = `<span>${c.choiceText}</span><span class="muted">#${idx+1}</span>`;
+    btn.className = "quiz-choice";
+            btn.innerHTML = `<span>${c.choiceText}</span><span class="muted">#${idx+1}</span>`;
 
     if (state.alreadyAnswered && state.answer){
       const isSelected = state.answer.selectedChoiceId === c.choiceId;
       const isCorrect = state.answer.correctChoiceId === c.choiceId;
-      if (isCorrect) btn.style.borderColor = "rgba(34,197,94,.6)";
-      if (isSelected && !isCorrect) btn.style.borderColor = "rgba(239,68,68,.6)";
-      btn.disabled = true;
+      if (isCorrect)       if (isSelected && !isCorrect)       btn.disabled = true;
     } else {
-      btn.onclick = () => submitAnswer(c.choiceId);
+      btn.onclick = () => {
+        // optimistic UI
+        host.querySelectorAll('.quiz-choice').forEach(x=>x.classList.remove('is-selected'));
+        btn.classList.add('is-selected');
+        submitAnswer(c.choiceId);
+      };
     }
     host.appendChild(btn);
   });
