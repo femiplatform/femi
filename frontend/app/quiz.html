@@ -10,14 +10,50 @@
   <div id="app">
     <main class="container">
       <h1 class="page-title" data-i18n="page.quiz">แบบทดสอบ</h1>
-      <p class="page-sub muted" data-i18n="qz.subtitle">ดูคะแนน/ประวัติการทำแบบทดสอบ</p>
+      <p class="page-sub muted" data-i18n="qz.subtitle">ทำแบบทดสอบความรู้รายวัน + ดูคะแนนสะสม</p>
 
+      <!-- Daily quiz -->
       <div class="card" style="padding:14px">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+          <div>
+            <div style="font-weight:900" data-i18n="qz.dailyTitle">แบบทดสอบรายวัน</div>
+            <div class="muted" style="margin-top:2px" data-i18n="qz.dailyHint">วันละ 1 ข้อ (สุ่มไม่ซ้ำ) ตอบแล้วจะเฉลยทันที</div>
+          </div>
+          <div class="pill" id="dailyStatus" style="min-width:120px;text-align:center"> </div>
+        </div>
+
+        <div id="dailyQ" style="margin-top:12px"></div>
+        <div id="dailyChoices" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+        <div id="dailyMsg" class="pill hidden" style="margin-top:12px;display:inline-block"></div>
+      </div>
+
+      <!-- cumulative stats -->
+      <div class="card" style="padding:14px;margin-top:12px">
+        <div style="font-weight:900" data-i18n="qz.statsTitle">คะแนนสะสม</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px">
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="qz.statsTotal">ทำแล้ว</div>
+            <div style="font-size:22px;font-weight:900" id="statTotal">0</div>
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="qz.statsCorrect">ถูก</div>
+            <div style="font-size:22px;font-weight:900" id="statCorrect">0</div>
+          </div>
+          <div class="card-soft" style="padding:12px">
+            <div class="muted" data-i18n="qz.statsStreak">ต่อเนื่อง</div>
+            <div style="font-size:22px;font-weight:900" id="statStreak">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- last score -->
+      <div class="card" style="padding:14px;margin-top:12px">
         <div style="font-weight:800" data-i18n="qz.lastScoreTitle">คะแนนล่าสุด</div>
         <div style="font-size:28px;font-weight:900;margin-top:6px" id="lastScore">-</div>
         <div class="muted" id="lastHint">-</div>
       </div>
 
+      <!-- history -->
       <div style="margin-top:12px" class="card">
         <div style="padding:14px 14px 0;font-weight:800" data-i18n="qz.historyTitle">ประวัติ</div>
         <div id="loading" class="muted" style="padding:14px" data-i18n="common.loading">กำลังโหลด…</div>
@@ -28,7 +64,7 @@
       <div class="card" style="padding:14px;margin-top:12px">
         <div style="font-weight:800;margin-bottom:6px" data-i18n="qz.noteTitle">หมายเหตุ</div>
         <div class="muted" data-i18n="qz.noteBody">
-          หน้า "ทำแบบทดสอบ" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว
+          ทำแบบทดสอบรายวัน วันละ 1 ข้อ ระบบสุ่มคำถามไม่ซ้ำและเก็บคะแนนสะสม
         </div>
       </div>
     </main>
@@ -36,55 +72,12 @@
 
   <script type="module">
     import { initUserShell } from "../js/shell.js";
-    import { api } from "../js/api.js";
     import { t, applyI18n } from "../js/i18n.js";
+    import { initQuizPage } from "../js/pages/quiz.js";
 
     await initUserShell({ active: "tools", title: t("page.quiz") });
     applyI18n(document);
-
-    const elLoading = document.getElementById('loading');
-    const elEmpty = document.getElementById('empty');
-    const elList = document.getElementById('list');
-
-    function fmt(dt){
-      return dt ? new Date(dt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : '';
-    }
-
-    try {
-      const results = await api.quizMyResults();
-
-      // รองรับทั้งผลลัพธ์แบบ array หรือ {items:[...]}
-      const arr = Array.isArray(results) ? results : (Array.isArray(results?.items) ? results.items : []);
-      const last = arr[0] || null;
-
-      document.getElementById('lastScore').textContent = last ? `${last.score}/${last.total}` : '-';
-      document.getElementById('lastHint').textContent = last ? t("qz.takenAt", { dt: fmt(last.takenAt) }) : t("qz.noResult");
-
-      elLoading.classList.add('hidden');
-      if (!arr.length){
-        elEmpty.classList.remove('hidden');
-        return;
-      }
-
-      arr.slice(0, 20).forEach(r => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.style.padding = '12px';
-        card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;gap:10px">
-            <div>
-              <div style="font-weight:900">${r.score}/${r.total}</div>
-              <div class="muted" style="font-size:12px">${fmt(r.takenAt)}</div>
-            </div>
-            <span class="pill">${r.category || 'general'}</span>
-          </div>
-        `;
-        elList.appendChild(card);
-      });
-    } catch(e){
-      console.error(e);
-      elLoading.textContent = e?.error?.message || t("qz.loadFailed");
-    }
+    initQuizPage();
   </script>
 </body>
 </html>

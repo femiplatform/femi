@@ -76,6 +76,9 @@ export const api = {
   quizQuestionsList: (category = "") => request("quiz.questions.list", { category }, { withToken: false }),
   quizSubmit: (payload) => request("quiz.submit", payload),
   quizMyResults: () => request("quiz.results.my", {}),
+  quizDailyGet: () => request("quiz.daily.get", {}),
+  quizDailyAnswer: (questionId, choiceId) => request("quiz.daily.answer", { questionId, choiceId }),
+  quizDailyStats: () => request("quiz.daily.stats", {}),
 
   // --- notifications (user) ---
   userNotificationsList: (limit = 50) => request("user.notifications.list", { limit }),
@@ -101,52 +104,6 @@ export const api = {
 
   fpPredictRecompute: (payload = {}) => request("fp.predict.recompute", payload),
   fpPredLatest: () => request("fp.pred.latest", {}),
-
-  // =========================================================
-  // ✅ Pregnancy
-  // =========================================================
-  // Profile
-  pregProfileGet: () => request("preg.profile.get", {}),
-  pregProfileUpsert: (payload) => request("preg.profile.upsert", payload),
-
-  // Appointments (ANC)
-  pregAncList: (payload = {}) => request("preg.anc.list", payload),
-  pregAncUpsert: (payload) => request("preg.anc.upsert", payload),
-  pregAncDelete: (ancId) => request("preg.anc.delete", { ancId }),
-
-  // Backward/alternate names used by some pages
-  pregApptList: (payload = {}) => request("preg.anc.list", payload),
-  pregApptUpsert: (payload) => request("preg.anc.upsert", payload),
-  pregApptDelete: (ancId) => request("preg.anc.delete", { ancId }),
-
-  // Kicks
-  pregKicksList: (payload = {}) => request("preg.kicks.list", payload),
-  pregKicksUpsert: (payload) => request("preg.kicks.upsert", payload),
-  pregKicksDelete: (kickId) => request("preg.kicks.delete", { kickId }),
-
-  // Alternate short names
-  pregKickList: (payload = {}) => request("preg.kicks.list", payload),
-  pregKickUpsert: (payload) => request("preg.kicks.upsert", payload),
-  pregKickDelete: (kickId) => request("preg.kicks.delete", { kickId }),
-
-  // Vitals (weight / BP / edema)
-  pregVitalsList: (payload = {}) => request("preg.vitals.list", payload),
-  pregVitalsUpsert: (payload) => request("preg.vitals.upsert", payload),
-  pregVitalsDelete: (vitalId) => request("preg.vitals.delete", { vitalId }),
-
-  pregSummaryToday: (payload = {}) => request("preg.summary.today", payload),
-
-  // =========================================================
-  // ✅ Knowledge (random)
-  // =========================================================
-  knowledgeFeaturedRandom: (category = "") =>
-    request("knowledge.featured.random", { category }),
-
-  knowledgeRecommendedRandom: (excludeIds = [], category = "") =>
-    request("knowledge.recommended.random", { excludeIds, category }),
-
-  knowledgeGetById: (knowledgeId) =>
-    request("knowledge.getById", { knowledgeId }),  
 };
 
 // expose for console debugging

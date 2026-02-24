@@ -138,15 +138,27 @@ const DICT = {
     "kp.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
 
     // Quiz page
-    "qz.subtitle": "ดูคะแนน/ประวัติการทำแบบทดสอบ",
+    "qz.subtitle": "ทำแบบทดสอบความรู้รายวัน + ดูคะแนนสะสม",
     "qz.lastScoreTitle": "คะแนนล่าสุด",
     "qz.historyTitle": "ประวัติ",
     "qz.empty": "ยังไม่มีประวัติ",
     "qz.noteTitle": "หมายเหตุ",
-    "qz.noteBody": "หน้า \"ทำแบบทดสอบ\" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว",
+    "qz.noteBody": "ทำแบบทดสอบรายวัน วันละ 1 ข้อ ระบบสุ่มคำถามไม่ซ้ำและเก็บคะแนนสะสม"ทำแบบทดสอบ\" แบบโต้ตอบจะทำใน Sprint ถัดไป (ต้องเพิ่ม API choices แบบ public) — ตอนนี้ระบบเก็บคะแนนและแสดงประวัติได้แล้ว",
     "qz.noResult": "ยังไม่มีผล",
     "qz.takenAt": "ทำเมื่อ {dt}",
     "qz.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+    "qz.reveal": "เฉลย",
+    "qz.wrong": "ยังไม่ถูก",
+    "qz.correct": "ถูกต้อง",
+    "qz.btnTryTomorrow": "พรุ่งนี้ค่อยมาใหม่",
+    "qz.btnAnswer": "ตอบ",
+    "qz.days": "{n} วัน",
+    "qz.statsStreak": "ต่อเนื่อง",
+    "qz.statsCorrect": "ถูก",
+    "qz.statsTotal": "ทำแล้ว",
+    "qz.statsTitle": "คะแนนสะสม",
+    "qz.dailyHint": "วันละ 1 ข้อ (สุ่มไม่ซ้ำ) ตอบแล้วจะเฉลยทันที",
+    "qz.dailyTitle": "แบบทดสอบรายวัน",
 
     // Preventive extra strings
     "pv.empty": "ยังไม่มีรายการ",
@@ -214,29 +226,8 @@ const DICT = {
     "dash.streakTitle": "ความสม่ำเสมอการบันทึก",
     "dash.streak7": "7 วันล่าสุด บันทึกแล้ว",
     "dash.days": "{n} วัน",
-
-    // Common UI
-    "common.edit": "แก้ไข",
-    "common.add": "เพิ่ม",
-    "common.save": "บันทึก",
-    "common.cancel": "ยกเลิก",
-    "common.delete": "ลบ",
-    "common.reset": "รีเซ็ต",
-    "common.note": "หมายเหตุ",
-    "common.noData": "ไม่มีข้อมูล",
-    "common.saved": "บันทึกแล้ว",
-    "common.deleted": "ลบแล้ว",
-    "kp.featured": "ความรู้วันนี้",
-    "kp.recommended": "ความรู้แนะนำ",
-    "kp.shuffle": "สุ่มใหม่",
-    "kp.cat.preventive": "การสร้างเสริมสุขภาพและป้องกันโรค",
-    "kp.cat.holistic": "สุขภาพองค์รวม",
-    "kp.cat.breast_ca": "มะเร็งเต้านม",
-    "kp.cat.cervical_ca": "มะเร็งปากมดลูก",
-    "kp.cat.menopause": "วัยทอง",
-    "kp.cat.family_planning": "การวางแผนครอบครัว",
-    "kp.cat.pregnancy": "การดูแลครรภ์",
   },
+
   en: {
     "app.name": "FEMI",
     "nav.home": "Home",
@@ -261,18 +252,6 @@ const DICT = {
     "page.quiz": "Quiz",
     "fp.title": "Family Planning",
     "noti.title": "Notifications",
-
-    // Common UI
-    "common.edit": "Edit",
-    "common.add": "Add",
-    "common.save": "Save",
-    "common.cancel": "Cancel",
-    "common.delete": "Delete",
-    "common.reset": "Reset",
-    "common.note": "Note",
-    "common.noData": "No data",
-    "common.saved": "Saved",
-    "common.deleted": "Deleted",
   }
 };
 
