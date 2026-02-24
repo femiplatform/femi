@@ -214,6 +214,27 @@ const DICT = {
     "dash.streakTitle": "ความสม่ำเสมอการบันทึก",
     "dash.streak7": "7 วันล่าสุด บันทึกแล้ว",
     "dash.days": "{n} วัน",
+
+// Added for Knowledge/Quiz
+    "kp.featured": "ความรู้วันนี้",
+    "kp.recommended": "ความรู้แนะนำ",
+    "kp.shuffle": "สุ่มใหม่",
+    "kp.cat.preventive": "การสร้างเสริมสุขภาพและป้องกันโรค",
+    "kp.cat.holistic": "สุขภาพองค์รวม",
+    "kp.cat.breast_ca": "มะเร็งเต้านม",
+    "kp.cat.cervical_ca": "มะเร็งปากมดลูก",
+    "kp.cat.menopause": "วัยทอง",
+    "kp.cat.family_planning": "การวางแผนครอบครัว",
+    "kp.cat.pregnancy": "การดูแลครรภ์",
+    "qz.dailyTitle": "แบบทดสอบรายวัน",
+    "qz.dailyHint": "วันละ 1 ข้อ (สุ่มไม่ซ้ำ) ตอบแล้วจะเฉลยทันที",
+    "qz.statsTitle": "คะแนนสะสม",
+    "qz.statsTotal": "ทำแล้ว",
+    "qz.statsCorrect": "ถูก",
+    "qz.statsStreak": "ต่อเนื่อง",
+    "qz.days": "{n} วัน",
+    "qz.correct": "ถูกต้อง",
+    "qz.wrong": "ยังไม่ถูก",
   },
 
   en: {

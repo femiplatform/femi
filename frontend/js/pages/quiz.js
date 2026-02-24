@@ -10,6 +10,20 @@ function fmt(dt){
   return dt ? new Date(dt).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }) : '';
 }
 
+function catLabel(cat){
+  const map = {
+    preventive: t("kp.cat.preventive"),
+    holistic: t("kp.cat.holistic"),
+    breast_ca: t("kp.cat.breast_ca"),
+    cervical_ca: t("kp.cat.cervical_ca"),
+    menopause: t("kp.cat.menopause"),
+    family_planning: t("kp.cat.family_planning"),
+    pregnancy: t("kp.cat.pregnancy"),
+    daily: "รายวัน",
+  };
+  return map[cat] || cat || "-";
+}
+
 function apiErr(e){
   return e?.error?.message || e?.message || t("common.loadFailed");
 }
@@ -27,8 +41,10 @@ async function loadStats(){
     const d = res?.data || res;
     setText("#statTotal", `${d.totalAnswered ?? 0}`);
     setText("#statCorrect", `${d.correctAnswered ?? 0}`);
-    setText("#statStreak", t("qz.days", { n: (d.streak ?? 0) }));
-  }catch(e){
+    const n = (d.streak ?? 0);
+    const tpl = t("qz.days") || "{n} วัน";
+    setText("#statStreak", tpl.replace("{n}", String(n)));
+}catch(e){
     // keep defaults
   }
 }
@@ -57,7 +73,7 @@ function renderDaily(){
     return;
   }
   setHTML("#dailyQ", `
-    <div class="pill" style="display:inline-block;margin-bottom:10px">${q.category || "daily"}</div>
+    <div class="pill" style="display:inline-block;margin-bottom:10px">${catLabel(q.category || "daily")}</div>
     <div style="font-weight:900;font-size:18px;line-height:1.35">${q.questionText}</div>
   `);
 
