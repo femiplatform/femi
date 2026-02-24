@@ -70,7 +70,9 @@ export function initHealthAgePage(){
     const tdee = bmr * act;
 
     const tag = bmiTag(bmi);
-    qs("#bmiTag").textContent = `${t("ha.bmiLabel") || "BMI"}: ${bmi.toFixed(1)} • ${t(tag.key) || ""}`;
+    const bmiText = (t(tag.key) || "");
+    const emoji = (bmi < 18.5) ? "🟦" : (bmi < 23) ? "🟩" : (bmi < 25) ? "🟨" : (bmi < 30) ? "🟧" : "🟥";
+    qs("#bmiTag").textContent = `${emoji} ${(t("ha.bmiLabel") || "BMI")}: ${bmi.toFixed(1)} • ${bmiText}`;
 
     qs("#bmr").textContent = round0(bmr);
     qs("#tdee").textContent = round0(tdee);

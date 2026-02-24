@@ -5,6 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>FEMI • Health Age</title>
   <link rel="stylesheet" href="../assets/app.css" />
+
+  <style>
+    .haHero{
+      background: linear-gradient(135deg, rgba(191,219,254,.55), rgba(253,230,138,.35), rgba(216,180,254,.35));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+    }
+    .haSexRow .btn{
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.65);
+      transition: transform .06s ease, background .18s ease, border-color .18s ease;
+    }
+    .haSexRow .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.85); }
+    .haSexRow .btn.primary{
+      background: rgba(236,253,245,.9);
+      border-color: rgba(16,185,129,.35);
+    }
+    .haPrimary{
+      background: linear-gradient(135deg, rgba(253,230,138,.55), rgba(251,207,232,.40));
+      border-color: rgba(249,115,22,.18);
+    }
+    .haPrimary:hover{ background: linear-gradient(135deg, rgba(253,230,138,.70), rgba(251,207,232,.52)); }
+    .haKpiNum{
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: .2px;
+      background: linear-gradient(135deg, rgba(59,130,246,.85), rgba(168,85,247,.85));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+    .haKpiNumWarm{
+      font-size: 30px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(249,115,22,.92), rgba(236,72,153,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+    .haTag{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      font-weight: 800;
+    }
+  </style>
+
 </head>
 <body>
   <div id="app">
@@ -12,11 +68,11 @@
       <h1 class="page-title" data-i18n="ha.title">เครื่องคำนวณอายุสุขภาพ</h1>
       <p class="page-sub muted" data-i18n="ha.subtitle">คำนวณ BMR/TDEE และเปรียบเทียบอายุจริงกับอายุสุขภาพ (โดยประมาณ)</p>
 
-      <div class="card" style="padding:14px">
+      <div class="haHero" style="padding:14px">
         <div style="display:grid;grid-template-columns:1fr;gap:12px">
           <div>
             <label class="muted" data-i18n="ha.sex">เพศ</label>
-            <div style="display:flex;gap:10px;margin-top:6px">
+            <div class="haSexRow" style="display:flex;gap:10px;margin-top:6px">
               <button class="btn ha-sex" data-sex="female" data-i18n="ha.female">หญิง</button>
               <button class="btn ha-sex" data-sex="male" data-i18n="ha.male">ชาย</button>
             </div>
@@ -51,7 +107,7 @@
           </div>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button id="btnCalc" class="btn primary" data-i18n="ha.calc">คำนวณ</button>
+            <button id="btnCalc" class="btn primary haPrimary" data-i18n="ha.calc">คำนวณ</button>
             <button id="btnReset" class="btn" data-i18n="common.reset">รีเซ็ต</button>
           </div>
         </div>
@@ -59,24 +115,24 @@
 
       <div id="result" class="card hidden" style="padding:14px;margin-top:12px">
         <div style="display:grid;grid-template-columns:1fr;gap:10px">
-          <div class="pill" id="bmiTag"></div>
+          <div class="haTag" id="bmiTag"></div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div class="card-soft" style="padding:12px">
               <div class="muted" data-i18n="ha.bmr">BMR</div>
-              <div style="font-size:22px;font-weight:900" id="bmr">-</div>
+              <div style="font-size:22px;font-weight:900" id="bmr" class="haKpiNum">-</div>
               <div class="muted" style="font-size:12px" data-i18n="ha.kcalDay">kcal/วัน</div>
             </div>
             <div class="card-soft" style="padding:12px">
               <div class="muted" data-i18n="ha.tdee">TDEE</div>
-              <div style="font-size:22px;font-weight:900" id="tdee">-</div>
+              <div style="font-size:22px;font-weight:900" id="tdee" class="haKpiNum">-</div>
               <div class="muted" style="font-size:12px" data-i18n="ha.kcalDay">kcal/วัน</div>
             </div>
           </div>
 
           <div class="card-soft" style="padding:12px">
             <div class="muted" data-i18n="ha.healthAge">อายุสุขภาพ (โดยประมาณ)</div>
-            <div style="font-size:28px;font-weight:900" id="healthAge">-</div>
+            <div style="font-size:28px;font-weight:900" id="healthAge" class="haKpiNumWarm">-</div>
             <div class="muted" style="margin-top:6px" id="ageExplain"></div>
           </div>
 
