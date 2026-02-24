@@ -66,6 +66,49 @@ export const api = {
   logout: () => request("auth.logout", {}),
   whoami: () => request("debug.whoami", {}),
 
+  // --- admin/dashboard ---
+  adminStatsV2: (days = 30) => request("admin.stats.v2", { days }),
+
+  // --- users (admin) ---
+  usersList: (q = "") => request("users.list", { q }),
+  usersGet: (userId) => request("users.get", { userId }),
+  usersCreate: (payload) => request("users.create", payload),
+  usersUpdate: (userId, patch) => request("users.update", { userId, patch }),
+  usersDelete: (userId) => request("users.delete", { userId }),
+
+  // --- content (admin) ---
+  newsListAdmin: () => request("news.listAdmin", {}),
+  newsGetAdmin: (newsId) => request("news.getAdmin", { newsId }),
+  newsCreate: (payload) => request("news.create", payload),
+  newsUpdate: (newsId, patch) => request("news.update", { newsId, patch }),
+  newsDelete: (newsId) => request("news.delete", { newsId }),
+
+  knowledgeListAdmin: () => request("knowledge.listAdmin", {}),
+  knowledgeGetAdmin: (kbId) => request("knowledge.getAdmin", { kbId }),
+  knowledgeCreate: (payload) => request("knowledge.create", payload),
+  knowledgeUpdate: (kbId, patch) => request("knowledge.update", { kbId, patch }),
+  knowledgeDelete: (kbId) => request("knowledge.delete", { kbId }),
+
+  // --- quiz (admin) ---
+  quizQuestionsListAdmin: (category = "") => request("quiz.questions.listAdmin", { category }),
+  quizQuestionsGetAdmin: (questionId) => request("quiz.questions.getAdmin", { questionId }),
+  quizQuestionsCreate: (payload) => request("quiz.questions.create", payload),
+  quizQuestionsUpdate: (questionId, patch) => request("quiz.questions.update", { questionId, patch }),
+  quizQuestionsDelete: (questionId) => request("quiz.questions.delete", { questionId }),
+
+  // --- notifications (admin) ---
+  notificationsList: () => request("notifications.list", {}),
+  notificationsGet: (notificationId) => request("notifications.get", { notificationId }),
+  notificationsCreate: (payload) => request("notifications.create", payload),
+  notificationsUpdate: (notificationId, patch) => request("notifications.update", { notificationId, patch }),
+  notificationsDelete: (notificationId) => request("notifications.delete", { notificationId }),
+  notificationsSend: (notificationId) => request("notifications.send", { notificationId }),
+  notificationLogsLatest: (limit = 20) => request("notification.logs.latest", { limit }),
+
+  // --- settings (admin) ---
+  settingsGet: () => request("settings.get", {}),
+  settingsSet: (patch) => request("settings.set", patch),
+
   // --- content ---
   newsList: () => request("news.list", {}, { withToken: false }),
   newsGet: (newsId) => request("news.get", { newsId }, { withToken: false }),
