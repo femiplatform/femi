@@ -9,7 +9,7 @@
 <body>
 <div id="app">
   <main class="container">
-    <h1 data-i18n="tools.recommendedTitle">เครื่องมือแนะนำ</h1>
+    <h1 data-i18n="page.tools">เครื่องมือ</h1>
     <p class="muted" data-i18n="tools.subtitle">รวมเครื่องมือเพื่อสุขภาพและการดูแลตนเอง</p>
 
     <div class="tiles">
@@ -56,159 +56,18 @@
         </div>
         <span class="badge-soft">›</span>
       </a>
-</div>
 
-    <!-- Section 2: Tools by category -->
-    <section class="toolsCats" style="margin-top:18px">
-      <h2 class="sectionTitle" data-i18n="tools.byCategoryTitle">เครื่องมือดูแลสุขภาพตามหมวดหมู่</h2>
-      <p class="muted" style="margin-top:4px" data-i18n="tools.byCategorySubtitle">เลือกเครื่องมือจากหมวดหลักด้านล่าง</p>
-
-      <div class="catGrid">
-        <!-- Category 1 -->
-        <div class="catCard cat-preventive">
-          <div class="catHead">
-            <div class="catIcon" id="icCat1"></div>
-            <div>
-              <div class="catTitle" data-i18n="tools.cat1Title">การสร้างเสริมสุขภาพและป้องกันโรค</div>
-              <div class="catSub">Preventive Lifestyle</div>
-            </div>
-          </div>
-
-          <div class="catGroup">
-            <div class="catGroupTitle" data-i18n="tools.cat1_1Title">1.1 สุขภาพองค์รวม</div>
-            <div class="catLinks">
-              <a class="chipLink" href="./health_age.html" data-i18n="tools.cat1_1_a">เครื่องคำนวณอายุสุขภาพ: BMR/TDEE + อายุสุขภาพ</a>
-              <a class="chipLink" href="./health_checklist.html" data-i18n="tools.cat1_1_b">ตารางวางแผนตรวจสุขภาพ: To-do รายปี</a>
-              <a class="chipLink" href="./mood_tracker.html" data-i18n="tools.cat1_1_c">Mood Tracker: Emoji + EPDS</a>
-            </div>
-          </div>
-
-          <div class="catGroup">
-            <div class="catGroupTitle" data-i18n="tools.cat1_2Title">1.2 มะเร็งเต้านม</div>
-            <div class="catLinks">
-              <a class="chipLink" href="./breast_risk.html" data-i18n="tools.cat1_2_a">ประเมินความเสี่ยงมะเร็งเต้านม</a>
-              <a class="chipLink" href="./breast_reminder.html" data-i18n="tools.cat1_2_b">เตือนตรวจเต้านมรายเดือน + บันทึกผล</a>
-              <a class="chipLink" href="./breast_self_exam.html" data-i18n="tools.cat1_2_c">ท่าทางตรวจเต้านมด้วยตนเอง</a>
-            </div>
-          </div>
-
-          <div class="catGroup">
-            <div class="catGroupTitle" data-i18n="tools.cat1_3Title">1.3 มะเร็งปากมดลูก</div>
-            <div class="catLinks">
-              <a class="chipLink" href="./cervical_risk.html" data-i18n="tools.cat1_3_a">ประเมินความเสี่ยงมะเร็งปากมดลูก</a>
-              <a class="chipLink" href="./cervical_screening.html" data-i18n="tools.cat1_3_b">เตือน Pap smear / HPV test + บันทึกผล</a>
-            </div>
-          </div>
-
-          <div class="catGroup">
-            <div class="catGroupTitle" data-i18n="tools.cat1_4Title">1.4 วัยทอง</div>
-            <div class="catLinks">
-              <a class="chipLink" href="./menopause_ready.html" data-i18n="tools.cat1_4_a">แบบประเมินความพร้อมก่อนวัยทอง</a>
-              <a class="chipLink" href="./menopause_quiz_basic.html" data-i18n="tools.cat1_4_b1">แบบประเมินความรู้พื้นฐานเกี่ยวกับวัยทอง</a>
-              <a class="chipLink" href="./menopause_symptoms.html" data-i18n="tools.cat1_4_b2">แบบประเมินอาการปัจจุบัน</a>
-              <a class="chipLink" href="./menopause_health_ready.html" data-i18n="tools.cat1_4_b3">แบบประเมินความพร้อมด้านสุขภาพ</a>
-              <a class="chipLink" href="./menopause_psycho_ready.html" data-i18n="tools.cat1_4_b4">แบบประเมินความพร้อมด้านจิตใจและสังคม</a>
-              <a class="chipLink" href="./menopause_tracker.html" data-i18n="tools.cat1_4_c">ระบบติดตามอาการวัยทอง</a>
-            </div>
+      <a class="tile noti" href="./notifications.html">
+        <div class="left">
+          <div class="iconWrap" id="tNt"></div>
+          <div>
+            <div class="title">การแจ้งเตือน</div>
+            <div class="sub">Notifications</div>
           </div>
         </div>
-
-        <!-- Category 2 -->
-        <div class="catCard cat-fp">
-          <div class="catHead">
-            <div class="catIcon" id="icCat2"></div>
-            <div>
-              <div class="catTitle" data-i18n="tools.cat2Title">การวางแผนครอบครัว</div>
-              <div class="catSub">Smart Family Planning</div>
-            </div>
-          </div>
-          <div class="catLinks">
-            <a class="chipLink" href="./contraception_smart.html" data-i18n="tools.cat2_a">เลือกวิธีคุมกำเนิดอัจฉริยะ (Decision Tree)</a>
-            <a class="chipLink" href="./family_planning.html" data-i18n="tools.cat2_b">ติดตามรอบเดือน (Period Tracker)</a>
-            <a class="chipLink" href="./sti_risk_map.html" data-i18n="tools.cat2_c">ประเมินความเสี่ยง STI + แผนที่สถานพยาบาลใกล้เคียง</a>
-            <a class="chipLink" href="./pill_missed_helper.html" data-i18n="tools.cat2_d">ช่วยแก้ปัญหาลืมกินยาคุม (Interactive)</a>
-          </div>
-        </div>
-
-        <!-- Category 3 -->
-        <div class="catCard cat-preg">
-          <div class="catHead">
-            <div class="catIcon" id="icCat3"></div>
-            <div>
-              <div class="catTitle" data-i18n="tools.cat3Title">การดูแลครรภ์</div>
-              <div class="catSub">Active Pregnancy Journey</div>
-            </div>
-          </div>
-          <div class="catLinks">
-            <a class="chipLink" href="./pregnancy.html" data-i18n="tools.cat3_a">แดชบอร์ดติดตามครรภ์</a>
-            <a class="chipLink" href="./pregnancy.html#kicks" data-i18n="tools.cat3_b">บันทึกการนับลูกดิ้น</a>
-            <a class="chipLink" href="./preeclampsia_screen.html" data-i18n="tools.cat3_c">คัดกรองความเสี่ยงครรภ์เป็นพิษ</a>
-          </div>
-        </div>
-
-        <!-- Category 4 -->
-        <div class="catCard cat-engage">
-          <div class="catHead">
-            <div class="catIcon" id="icCat4"></div>
-            <div>
-              <div class="catTitle" data-i18n="tools.cat4Title">การสร้างแรงจูงใจและชุมชน</div>
-              <div class="catSub">Engagement</div>
-            </div>
-          </div>
-          <div class="catLinks">
-            <a class="chipLink" href="./quiz.html" data-i18n="tools.cat4_a">ควิซความรู้สุขภาพรายวัน</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <style>
-      .sectionTitle{ font-size:18px; font-weight:900; margin:0; }
-      .catGrid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:12px; }
-      .catCard{
-        border:1px solid rgba(17,24,39,.08);
-        border-radius:18px;
-        padding:14px;
-        background: rgba(255,255,255,.70);
-        box-shadow: 0 14px 40px rgba(0,0,0,.06);
-        backdrop-filter: blur(8px);
-      }
-      .catHead{ display:flex; gap:10px; align-items:center; margin-bottom:10px; }
-      .catIcon{ width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center;
-        border:1px solid rgba(17,24,39,.08);
-        background: rgba(255,255,255,.65);
-      }
-      .catTitle{ font-weight:900; }
-      .catSub{ font-size:12px; opacity:.7; margin-top:2px; }
-      .catGroup{ margin-top:10px; }
-      .catGroupTitle{ font-weight:800; font-size:13px; margin-bottom:8px; opacity:.85; }
-      .catLinks{ display:flex; flex-direction:column; gap:8px; }
-      .chipLink{
-        display:inline-flex;
-        padding:10px 12px;
-        border-radius:14px;
-        border:1px solid rgba(17,24,39,.08);
-        background: rgba(255,255,255,.75);
-        text-decoration:none;
-        color: inherit;
-        font-weight:700;
-        transition: background .16s ease, border-color .16s ease, transform .06s ease;
-      }
-      .chipLink:hover{ transform: translateY(-1px); }
-      .cat-preventive{ background: linear-gradient(135deg, rgba(187,247,208,.45), rgba(186,230,253,.35)); }
-      .cat-fp{ background: linear-gradient(135deg, rgba(233,213,255,.45), rgba(224,231,255,.35)); }
-      .cat-preg{ background: linear-gradient(135deg, rgba(254,215,170,.45), rgba(253,242,248,.35)); }
-      .cat-engage{ background: linear-gradient(135deg, rgba(191,219,254,.45), rgba(199,210,254,.35)); }
-      .cat-preventive .chipLink:hover{ background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.18); }
-      .cat-fp .chipLink:hover{ background: rgba(168,85,247,.08); border-color: rgba(168,85,247,.18); }
-      .cat-preg .chipLink:hover{ background: rgba(249,115,22,.08); border-color: rgba(249,115,22,.18); }
-      .cat-engage .chipLink:hover{ background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.18); }
-      @media (min-width: 980px){
-        .catGrid{ grid-template-columns: 1fr 1fr; }
-        .cat-preventive{ grid-column: 1 / -1; }
-      }
-    </style>
-
+        <span class="badge-soft" id="bdNoti">-</span>
+      </a>
+    </div>
   </main>
 </div>
 
@@ -225,17 +84,13 @@
   document.getElementById("tFp").innerHTML = Icons.calendar();
   document.getElementById("tKb").innerHTML = Icons.book();
   document.getElementById("tQz").innerHTML = Icons.quiz();
-
-  // Category icons
-  try{
-    document.getElementById("icCat1").innerHTML = Icons.heartShield();
-    document.getElementById("icCat2").innerHTML = Icons.calendar();
-    document.getElementById("icCat3").innerHTML = (Icons.baby ? Icons.baby() : Icons.calendar());
-    document.getElementById("icCat4").innerHTML = Icons.quiz();
-  }catch{}
+  document.getElementById("tNt").innerHTML = Icons.noti();
 
   const bdPv = document.getElementById("bdPv");
-  const bdFp = document.getElementById("bdFp");  try{
+  const bdFp = document.getElementById("bdFp");
+  const bdNoti = document.getElementById("bdNoti");
+
+  try{
     const pv = await api.preventiveList();
     const due = pv?.counts?.dueToday ?? 0;
     bdPv.textContent = due > 0 ? `วันนี้ ${due}` : "พร้อมใช้";
@@ -246,6 +101,12 @@
     const n = (c?.items || []).length;
     bdFp.textContent = n > 0 ? `มีข้อมูล ${n}` : "ยังไม่มี";
   }catch{ bdFp.textContent = "-"; }
+
+  try{
+    const u = await api.userNotificationsUnreadCount();
+    const n = u?.unread ?? 0;
+    bdNoti.textContent = n > 0 ? `ยังไม่อ่าน ${n}` : "0";
+  }catch{ bdNoti.textContent = "-"; }
 </script>
 </body>
 </html>
