@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Preeclampsia Screen</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .peHero{
+      background: linear-gradient(135deg, rgba(186,230,253,.30), rgba(221,214,254,.26));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.05fr .95fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillLow{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillInfo{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 680px){ .kpiRow{ grid-template-columns: 1fr; } }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(139,92,246,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    .warnBox{
+      border: 1px solid rgba(239,68,68,.18);
+      background: rgba(254,226,226,.55);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .infoBox{
+      border: 1px solid rgba(59,130,246,.18);
+      background: rgba(219,234,254,.55);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">คัดกรองความเสี่ยงครรภ์เป็นพิษ</h1>
+      <p class="page-sub muted">คัดกรองเบื้องต้นจากปัจจัยเสี่ยง + อาการเตือน เพื่อช่วยตัดสินใจ “ควรไปพบแพทย์” (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left -->
+        <div class="peHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลเบื้องต้น</div>
+                <div class="muted2">หากมีอาการรุนแรง ให้ไปโรงพยาบาลทันที</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุครรภ์ (สัปดาห์) (ถ้าทราบ)</label>
+                <input id="ga" class="input" type="number" min="1" max="45" placeholder="28" />
+              </div>
+              <div>
+                <label class="muted">ความดันล่าสุด (ถ้าทราบ)</label>
+                <input id="bp" class="input" placeholder="เช่น 140/90" />
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">ครรภ์แรกหรือไม่?</label>
+                <select id="firstPreg" class="input">
+                  <option value="yes">ครรภ์แรก</option>
+                  <option value="no">ไม่ใช่</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">เคยมีครรภ์เป็นพิษมาก่อนหรือไม่?</label>
+                <select id="prevPE" class="input">
+                  <option value="no">ไม่เคย</option>
+                  <option value="yes">เคย</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="riskWrap" style="display:grid;gap:10px;margin-top:12px"></div>
+
+            <div class="infoBox" style="margin-top:12px">
+              <div style="font-weight:900">อาการเตือน (เลือกได้หลายข้อ)</div>
+              <div class="muted2" style="margin-top:6px">ถ้ามีอาการรุนแรง/มากขึ้น ให้ไปพบแพทย์ทันที</div>
+              <div id="symWrap" style="display:grid;gap:8px;margin-top:10px"></div>
+            </div>
+
+            <div style="margin-top:12px">
+              <label class="muted">หมายเหตุ</label>
+              <textarea id="note" class="input" placeholder="เช่น ปวดหัวมาก, บวมมากขึ้น, วัดความดันได้เท่าไร, มีโรคประจำตัว ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปผลคัดกรอง</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลสรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนน (ภายในระบบ)</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">เพื่อจัดระดับต่ำ/ปานกลาง/สูง</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คำแนะนำ</div>
+                  <div style="font-weight:900;margin-top:6px" id="resTitle">-</div>
+                  <div class="muted2" id="resDesc">-</div>
+                </div>
+              </div>
+
+              <div class="warnBox" style="margin-top:10px">
+                <div style="font-weight:900">ควรไปพบแพทย์ทันที หากมี</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7">
+                  • ปวดศีรษะรุนแรง/ตามัว • จุกแน่นลิ้นปี่/ชายโครงขวา • หายใจลำบาก<br>
+                  • ความดันสูงมาก (เช่น ≥ 160/110) • ชัก/หมดสติ • ลูกดิ้นน้อยลงชัดเจน
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">ทำอะไรต่อ</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resNext">-</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติการคัดกรอง</div>
+                <div class="muted2">8 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">ความรู้สั้น ๆ</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ครรภ์เป็นพิษมักพบหลังอายุครรภ์ 20 สัปดาห์ และสัมพันธ์กับความดันสูง/โปรตีนในปัสสาวะ/อวัยวะอื่นผิดปกติ<br>
+              • ปัจจัยเสี่ยง: ครรภ์แรก, เคยครรภ์เป็นพิษ, ความดันสูง, เบาหวาน, โรคไต, ครรภ์แฝด, ภาวะอ้วน ฯลฯ<br>
+              • อาการเตือน: ปวดหัวมาก ตามัว จุกแน่นลิ้นปี่ บวมมากขึ้น หายใจลำบาก
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="font-weight:900;font-size:16px">ทิปการวัดความดัน</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • นั่งพัก 5 นาที ก่อนวัด • แขนวางระดับหัวใจ • วัด 2 ครั้งห่างกัน 1–2 นาที<br>
+              • ถ้าค่าขึ้นสูงมาก ควรไปพบแพทย์ทันที
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Preeclampsia Screen" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_PREECLAMPSIA_SCREEN_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ ga:"", bp:"", firstPreg:"yes", prevPE:"no", note:"" }, risks:{}, symptoms:{}, history:[] };
+      }catch{
+        return { profile:{ ga:"", bp:"", firstPreg:"yes", prevPE:"no", note:"" }, risks:{}, symptoms:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const gaEl = document.getElementById("ga");
+    const bpEl = document.getElementById("bp");
+    const firstPregEl = document.getElementById("firstPreg");
+    const prevPEEl = document.getElementById("prevPE");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const riskWrap = document.getElementById("riskWrap");
+    const symWrap = document.getElementById("symWrap");
+    const recentEl = document.getElementById("recent");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const resNext = document.getElementById("resNext");
+
+    const RISK_FACTORS = [
+      { key:"chronicHT", label:"มีความดันโลหิตสูงก่อนตั้งครรภ์/เรื้อรัง", pts:3 },
+      { key:"diabetes", label:"มีเบาหวาน", pts:2 },
+      { key:"kidney", label:"มีโรคไต/โปรตีนในปัสสาวะมาก่อน", pts:3 },
+      { key:"autoimmune", label:"โรคภูมิคุ้มกัน/ลูปัส/APS", pts:3 },
+      { key:"twins", label:"ครรภ์แฝด/มากกว่า 1 คน", pts:2 },
+      { key:"obesity", label:"น้ำหนักมาก/อ้วน (เช่น BMI ≥ 30) (ถ้าทราบ)", pts:1 },
+      { key:"age35", label:"อายุ ≥ 35 ปี", pts:1 },
+      { key:"family", label:"คนในครอบครัวเคยมีครรภ์เป็นพิษ", pts:1 },
+    ];
+
+    const SYMPTOMS = [
+      { key:"severeHeadache", label:"ปวดศีรษะมาก/ไม่ทุเลา", pts:3 },
+      { key:"vision", label:"ตามัว/เห็นแสงวาบ", pts:3 },
+      { key:"epigastric", label:"จุกแน่นลิ้นปี่/ชายโครงขวา", pts:3 },
+      { key:"swelling", label:"บวมมากขึ้นอย่างรวดเร็ว (หน้า/มือ)", pts:2 },
+      { key:"sob", label:"หายใจลำบาก/แน่นหน้าอก", pts:3 },
+      { key:"reducedFetalMove", label:"ลูกดิ้นน้อยลงชัดเจน", pts:3 },
+      { key:"nausea", label:"คลื่นไส้/อาเจียนมากผิดปกติ", pts:1 },
+    ];
+
+    let state = load();
+    let risks = state.risks || {};
+    let symptoms = state.symptoms || {};
+    let lastResult = null;
+
+    // restore profile
+    gaEl.value = state.profile?.ga ?? "";
+    bpEl.value = state.profile?.bp ?? "";
+    firstPregEl.value = state.profile?.firstPreg ?? "yes";
+    prevPEEl.value = state.profile?.prevPE ?? "no";
+    noteEl.value = state.profile?.note ?? "";
+
+    function persistProfile(){
+      state.profile = {
+        ga: gaEl.value || "",
+        bp: (bpEl.value || "").trim(),
+        firstPreg: firstPregEl.value || "yes",
+        prevPE: prevPEEl.value || "no",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    [gaEl,bpEl,firstPregEl,prevPEEl,noteEl].forEach(el=>{
+      el.addEventListener("input", persistProfile);
+      el.addEventListener("change", persistProfile);
+    });
+
+    function renderRisks(){
+      riskWrap.innerHTML = `
+        <div class="card qCard">
+          <div class="qTitle">ปัจจัยเสี่ยง (เลือกได้หลายข้อ)</div>
+          <div class="muted2">ติ๊กเฉพาะที่เป็นจริง</div>
+          <div style="margin-top:10px;display:grid;gap:8px">
+            ${RISK_FACTORS.map(r=>`
+              <label class="opt" style="margin:0">
+                <input type="checkbox" data-risk="${r.key}" ${risks[r.key] ? "checked":""}/>
+                <div>
+                  <span>${escapeHtml(r.label)}</span>
+                  <div class="muted2">คะแนน: ${r.pts}</div>
+                </div>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      riskWrap.querySelectorAll("[data-risk]").forEach(cb=>{
+        cb.addEventListener("change", ()=>{
+          const k = cb.getAttribute("data-risk");
+          risks[k] = cb.checked;
+          state.risks = risks;
+          save(state);
+        });
+      });
+    }
+
+    function renderSymptoms(){
+      symWrap.innerHTML = SYMPTOMS.map(s=>`
+        <label class="opt" style="margin:0">
+          <input type="checkbox" data-sym="${s.key}" ${symptoms[s.key] ? "checked":""}/>
+          <div>
+            <span>${escapeHtml(s.label)}</span>
+            <div class="muted2">คะแนน: ${s.pts}</div>
+          </div>
+        </label>
+      `).join("");
+
+      symWrap.querySelectorAll("[data-sym]").forEach(cb=>{
+        cb.addEventListener("change", ()=>{
+          const k = cb.getAttribute("data-sym");
+          symptoms[k] = cb.checked;
+          state.symptoms = symptoms;
+          save(state);
+        });
+      });
+    }
+
+    function pill(level){
+      if(level==="high") return { cls:"pill pillHigh", text:"เสี่ยงสูง" };
+      if(level==="mid") return { cls:"pill pillMid", text:"ปานกลาง" };
+      return { cls:"pill pillLow", text:"ต่ำ" };
+    }
+
+    function parseBP(str){
+      const m = String(str||"").match(/(\d+)\s*\/\s*(\d+)/);
+      if(!m) return null;
+      return { sys: Number(m[1]), dia: Number(m[2]) };
+    }
+
+    function compute(){
+      let total = 0;
+
+      // pregnancy history
+      if(firstPregEl.value === "yes") total += 1;
+      if(prevPEEl.value === "yes") total += 4;
+
+      for(const r of RISK_FACTORS){
+        if(risks[r.key]) total += r.pts;
+      }
+      for(const s of SYMPTOMS){
+        if(symptoms[s.key]) total += s.pts;
+      }
+
+      const bp = parseBP(bpEl.value);
+      let severeBP = false;
+      if(bp){
+        if(bp.sys >= 160 || bp.dia >= 110){ total += 5; severeBP = true; }
+        else if(bp.sys >= 140 || bp.dia >= 90){ total += 3; }
+      }
+
+      const ga = Number(gaEl.value || 0);
+      if(ga >= 20) total += 1; // typical onset window, small weight for screening context
+
+      let level = "low";
+      if(total >= 12) level = "high";
+      else if(total >= 6) level = "mid";
+
+      // If any severe symptom, treat as high urgency
+      const severeSym = symptoms["vision"] || symptoms["epigastric"] || symptoms["sob"] || symptoms["reducedFetalMove"] || symptoms["severeHeadache"];
+      const urgent = severeBP || severeSym;
+
+      if(urgent) level = "high";
+
+      const p = pill(level);
+
+      const title =
+        urgent ? "ควรไปพบแพทย์/ฉุกเฉินทันที" :
+        level==="high" ? "แนะนำพบแพทย์โดยเร็ว" :
+        level==="mid"  ? "ควรเฝ้าระวังใกล้ชิด" :
+                         "ความเสี่ยงค่อนข้างต่ำ (แต่ยังควรติดตาม)";
+
+      const desc =
+        urgent ? "มีสัญญาณอันตราย/ความดันสูงมาก หรืออาการเตือนสำคัญ" :
+        level==="high" ? "มีปัจจัยเสี่ยง/อาการหลายข้อ ควรประเมินโดยหน่วยบริการ" :
+        level==="mid"  ? "มีปัจจัยเสี่ยงบางส่วน ควรติดตามความดันและอาการ และปรึกษาหน่วยบริการหากกังวล" :
+                         "ยังไม่พบสัญญาณเด่น แต่ควรตรวจครรภ์ตามนัดและวัดความดันหากทำได้";
+
+      const next = [];
+      if(urgent){
+        next.push("• ไปโรงพยาบาล/ห้องฉุกเฉินทันที หรือโทรขอความช่วยเหลือจากหน่วยบริการใกล้บ้าน");
+        next.push("• หากมีเครื่องวัดความดัน ให้วัดซ้ำและบันทึกค่าไปด้วย");
+      }else{
+        next.push("• วัดความดันซ้ำ (ถ้าทำได้) วันละ 1–2 ครั้ง และบันทึกค่า");
+        next.push("• สังเกตอาการเตือน: ปวดหัวมาก ตามัว จุกแน่นลิ้นปี่ บวมมากขึ้น หายใจลำบาก ลูกดิ้นน้อยลง");
+        if(level !== "low") next.push("• แนะนำปรึกษาหน่วยบริการ/ฝากครรภ์ เพื่อประเมินเพิ่มเติม");
+      }
+      next.push("• หากมีอาการรุนแรงเกิดขึ้นใหม่ ให้ไปพบแพทย์ทันที");
+
+      return {
+        ok:true,
+        date: todayIso(),
+        total,
+        level,
+        urgent,
+        pill: p,
+        title,
+        desc,
+        nextHtml: next.join("<br>"),
+        profile: state.profile,
+        risks: { ...risks },
+        symptoms: { ...symptoms }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resTitle.textContent = r.title;
+      resDesc.textContent = r.desc;
+      resNext.innerHTML = r.nextHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      const rec = { ...out, id: "PE_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างคำตอบทั้งหมดใช่ไหม?")){
+        risks = {};
+        symptoms = {};
+        state.risks = {};
+        state.symptoms = {};
+        gaEl.value = "";
+        bpEl.value = "";
+        firstPregEl.value = "yes";
+        prevPEEl.value = "no";
+        noteEl.value = "";
+        persistProfile();
+        save(state);
+        resWrap.style.display = "none";
+        renderRisks();
+        renderSymptoms();
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const p = pill(h.level);
+        const bp = h.profile?.bp ? ` • BP: ${escapeHtml(h.profile.bp)}` : "";
+        const ga = h.profile?.ga ? ` • GA: ${escapeHtml(h.profile.ga)}w` : "";
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.total}${ga}${bp}</div>
+              </div>
+              <span class="${p.cls}">${p.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x=>x.id===id);
+          if(!rec) return;
+
+          // restore state
+          const p = rec.profile || {};
+          gaEl.value = p.ga || "";
+          bpEl.value = p.bp || "";
+          firstPregEl.value = p.firstPreg || "yes";
+          prevPEEl.value = p.prevPE || "no";
+          noteEl.value = p.note || "";
+          persistProfile();
+
+          risks = rec.risks || {};
+          symptoms = rec.symptoms || {};
+          state.risks = risks;
+          state.symptoms = symptoms;
+          save(state);
+
+          renderRisks();
+          renderSymptoms();
+          showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x=>x.id!==id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดใช่ไหม?")){
+        state.history = [];
+        save(state);
+        renderRecent();
+      }
+    });
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","score","level","urgent","ga","bp","firstPreg","prevPE","note"]
+        .concat(RISK_FACTORS.map(r=> "risk_" + r.key))
+        .concat(SYMPTOMS.map(s=> "sym_" + s.key));
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const p = h.profile || {};
+        const row = [
+          h.date,
+          String(h.total),
+          h.level,
+          h.urgent ? "yes" : "no",
+          p.ga || "",
+          p.bp || "",
+          p.firstPreg || "",
+          p.prevPE || "",
+          (p.note || "").replaceAll("\n"," "),
+        ];
+        for(const r of RISK_FACTORS){
+          row.push((h.risks||{})[r.key] ? "1" : "0");
+        }
+        for(const s of SYMPTOMS){
+          row.push((h.symptoms||{})[s.key] ? "1" : "0");
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "preeclampsia_screen.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderRisks();
+    renderSymptoms();
+    renderRecent();
+  </script>
+</body>
+</html>
