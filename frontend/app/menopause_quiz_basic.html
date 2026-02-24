@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Menopause Basic Quiz</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .mqHero{
+      background: linear-gradient(135deg, rgba(221,214,254,.30), rgba(187,247,208,.28));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillLow{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(139,92,246,.88), rgba(16,185,129,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .review{
+      display:grid; gap: 10px; margin-top: 12px;
+    }
+    .tag{
+      display:inline-flex; align-items:center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .tagOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .tagBad{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">แบบประเมินความรู้พื้นฐานเกี่ยวกับวัยทอง</h1>
+      <p class="page-sub muted">ควิซสั้น ๆ เพื่อทบทวนความรู้เรื่องวัยทองและการดูแลตนเอง (เก็บผลในเครื่องผู้ใช้)</p>
+
+      <div class="grid2">
+        <!-- Left: Quiz -->
+        <div class="mqHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ทำควิซ (10 ข้อ)</div>
+                <div class="muted2">เลือกคำตอบที่ถูกที่สุด</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button id="btnReset" class="btn btn-ghost">เริ่มใหม่</button>
+                <button id="btnSubmit" class="btn btn-ok">ตรวจคำตอบ</button>
+              </div>
+            </div>
+
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:12px"></div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลคะแนน</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนน</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">จาก 10 คะแนน</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คำแนะนำ</div>
+                  <div style="font-weight:900;margin-top:6px" id="resTitle">-</div>
+                  <div class="muted2" id="resDesc">-</div>
+                </div>
+              </div>
+
+              <div class="actions" style="margin-top:10px">
+                <button id="btnSave" class="btn btn-warn">บันทึกผลวันนี้</button>
+                <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+              </div>
+
+              <div class="review" id="review"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Tips + Recent -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">สรุปความรู้ (ย่อ)</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • วัยทองโดยทั่วไปหมายถึง “ขาดประจำเดือน ≥ 12 เดือน” (เมื่อไม่มีสาเหตุอื่น)<br>
+              • อาการพบบ่อย: ร้อนวูบวาบ เหงื่อออกกลางคืน นอนไม่หลับ อารมณ์แปรปรวน ช่องคลอดแห้ง<br>
+              • การดูแล: ออกกำลังกาย โภชนาการดี ลดบุหรี่/แอลกอฮอล์ จัดการความเครียด นอนให้พอ<br>
+              • สุขภาพระยะยาว: กระดูกพรุน โรคหัวใจ‑หลอดเลือด น้ำหนัก/เมตาบอลิก ควรตรวจสุขภาพตามวัย
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติผลควิซ</div>
+                <div class="muted2">8 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Menopause Quiz" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_MENOPAUSE_QUIZ_BASIC_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { answers:{}, history:[] };
+      }catch{
+        return { answers:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Quiz items (general education; not clinical advice)
+    const QUIZ = [
+      { id:"q1", q:"วัยทองโดยทั่วไปหมายถึงอะไร?", a:[
+        "อายุครบ 40 ปี",
+        "ขาดประจำเดือน ≥ 12 เดือน (เมื่อไม่มีสาเหตุอื่น)",
+        "มีอาการร้อนวูบวาบครั้งแรก",
+        "น้ำหนักขึ้น 5 กิโลกรัม"
+      ], correct:1, explain:"นิยามที่ใช้ทั่วไปคือขาดประจำเดือนอย่างน้อย 12 เดือน โดยไม่มีสาเหตุอื่น" },
+
+      { id:"q2", q:"อาการที่พบบ่อยในช่วงเปลี่ยนผ่านสู่วัยทองคือข้อใด?", a:[
+        "ร้อนวูบวาบ/เหงื่อออกกลางคืน",
+        "สายตาสั้นเพิ่มขึ้นเสมอ",
+        "ปวดฟันทุกวัน",
+        "ผมร่วงเฉพาะวันจันทร์"
+      ], correct:0, explain:"ร้อนวูบวาบและเหงื่อออกกลางคืนเป็นอาการพบบ่อย" },
+
+      { id:"q3", q:"เมื่อฮอร์โมนเอสโตรเจนลดลง ระยะยาวควรใส่ใจเรื่องใดมากขึ้น?", a:[
+        "กระดูกพรุน และโรคหัวใจ‑หลอดเลือด",
+        "ความสูงจะเพิ่มขึ้น",
+        "ผิวจะไม่เหี่ยวย่นเลย",
+        "ไม่จำเป็นต้องตรวจสุขภาพอีก"
+      ], correct:0, explain:"ความเสี่ยงกระดูกพรุนและโรคหัวใจ‑หลอดเลือดเพิ่มขึ้นในระยะยาว" },
+
+      { id:"q4", q:"ข้อใดช่วยลดความเสี่ยงกระดูกพรุนได้ดี?", a:[
+        "ออกกำลังแบบแรงต้าน/ลงน้ำหนัก + แคลเซียม/วิตามินดี",
+        "งดเดินตลอดทั้งวัน",
+        "ดื่มน้ำหวานแทนน้ำเปล่า",
+        "นอนกลางวันอย่างเดียว"
+      ], correct:0, explain:"เวท/แรงต้าน + โภชนาการที่เหมาะช่วยเรื่องมวลกระดูก" },
+
+      { id:"q5", q:"ช่องคลอดแห้ง/เจ็บขณะมีเพศสัมพันธ์ในวัยทอง ควรทำอย่างไร?", a:[
+        "ทนไว้ ไม่ต้องทำอะไร",
+        "ใช้สารหล่อลื่น/มอยส์เจอร์ไรเซอร์ และปรึกษาหน่วยบริการถ้าเป็นมาก",
+        "สวนล้างช่องคลอดทุกวัน",
+        "หยุดดื่มน้ำทันที"
+      ], correct:1, explain:"สารหล่อลื่นช่วยได้ และหากรบกวนชีวิตควรปรึกษาหน่วยบริการ" },
+
+      { id:"q6", q:"การนอนและอารมณ์ในวัยทองสามารถได้รับผลกระทบจาก…", a:[
+        "ความเครียด + ร้อนวูบวาบ + การเปลี่ยนแปลงฮอร์โมน",
+        "กินผักมากขึ้นทำให้ซึมเศร้าเสมอ",
+        "การใส่รองเท้าคู่ใหม่",
+        "อ่านหนังสือแล้วทำให้ฮอร์โมนหายไป"
+      ], correct:0, explain:"ฮอร์โมนและอาการร้อนวูบวาบสัมพันธ์กับการนอน/อารมณ์ได้" },
+
+      { id:"q7", q:"ข้อใดเป็นสัญญาณที่ควรปรึกษาแพทย์?", a:[
+        "เลือดออกผิดปกติ/มากผิดปกติ",
+        "หิวบ่อยในตอนเช้า",
+        "อยากฟังเพลง",
+        "ลืมร่ม 1 ครั้ง"
+      ], correct:0, explain:"เลือดออกผิดปกติควรประเมินสาเหตุ" },
+
+      { id:"q8", q:"พฤติกรรมใดช่วยสุขภาพหัวใจ‑หลอดเลือดในวัยทอง?", a:[
+        "ออกกำลังกายสม่ำเสมอ + คุมอาหารหวาน‑มัน‑เค็ม",
+        "สูบบุหรี่เพื่อผ่อนคลาย",
+        "กินเค็มจัดทุกมื้อ",
+        "งดขยับตัวทั้งวัน"
+      ], correct:0, explain:"การออกกำลังและอาหารเหมาะสมช่วยลดความเสี่ยงเมตาบอลิก/หัวใจ" },
+
+      { id:"q9", q:"การตรวจสุขภาพประจำปีในช่วงวัยทองควรเน้นเรื่องใด?", a:[
+        "ความดัน น้ำตาล ไขมัน น้ำหนัก/รอบเอว และคัดกรองตามวัย",
+        "ดูดวงอย่างเดียว",
+        "วัดความสูงทุกวัน",
+        "ไม่ต้องตรวจอะไร"
+      ], correct:0, explain:"เน้นปัจจัยเสี่ยงหลักและการคัดกรองตามวัย" },
+
+      { id:"q10", q:"ข้อใด “ถูกต้อง” เกี่ยวกับการดูแลวัยทองโดยรวม?", a:[
+        "ทุกคนต้องใช้ฮอร์โมนทดแทนเสมอ",
+        "การดูแลขึ้นกับอาการและความเสี่ยง ควรปรึกษาหน่วยบริการเมื่อจำเป็น",
+        "ไม่ควรออกกำลังกายหลังอายุ 40",
+        "วัยทองทำให้สุขภาพดีขึ้นเองทุกอย่าง"
+      ], correct:1, explain:"การดูแลขึ้นกับแต่ละคน ไม่จำเป็นต้องใช้ฮอร์โมนเสมอ และควรปรึกษาผู้เชี่ยวชาญ" },
+    ];
+
+    // elements
+    const qWrap = document.getElementById("qWrap");
+    const btnReset = document.getElementById("btnReset");
+    const btnSubmit = document.getElementById("btnSubmit");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const review = document.getElementById("review");
+
+    const recentEl = document.getElementById("recent");
+
+    let state = load();
+    let answers = state.answers || {};
+    let lastResult = null;
+
+    function renderQuiz(){
+      qWrap.innerHTML = QUIZ.map((item, idx)=>{
+        const current = answers[item.id];
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${idx+1}. ${escapeHtml(item.q)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${item.a.map((opt, i)=>`
+                <label class="opt">
+                  <input type="radio" name="${item.id}" value="${i}" ${String(current)===String(i) ? "checked":""}/>
+                  <span>${escapeHtml(opt)}</span>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = Number(r.value);
+          state.answers = answers;
+          save(state);
+        });
+      });
+    }
+
+    function grade(){
+      // ensure all answered
+      for(const item of QUIZ){
+        if(!(item.id in answers)) return { ok:false, msg:"กรุณาตอบให้ครบทุกข้อก่อนตรวจคำตอบ" };
+      }
+      let score = 0;
+      const details = [];
+      for(const item of QUIZ){
+        const chosen = Number(answers[item.id]);
+        const correct = item.correct;
+        const ok = chosen === correct;
+        if(ok) score += 1;
+        details.push({ id:item.id, ok, chosen, correct, q:item.q, explain:item.explain, chosenText:item.a[chosen], correctText:item.a[correct] });
+      }
+
+      let level = "good";
+      if(score <= 4) level = "low";
+      else if(score <= 7) level = "mid";
+
+      const pill =
+        level==="good" ? { cls:"pill pillOk", text:"ดีมาก" } :
+        level==="mid"  ? { cls:"pill pillMid", text:"พอใช้" } :
+                         { cls:"pill pillLow", text:"ควรทบทวน" };
+
+      const title =
+        level==="good" ? "ความรู้ดีมาก" :
+        level==="mid"  ? "ความรู้ค่อนข้างดี" :
+                         "แนะนำทบทวนพื้นฐาน";
+
+      const desc =
+        level==="good" ? "รักษาความรู้และพฤติกรรมสุขภาพต่อเนื่องได้เลย" :
+        level==="mid"  ? "ลองทบทวนหัวข้อที่ตอบผิด และสอบถามหน่วยบริการเมื่อไม่แน่ใจ" :
+                         "เริ่มจากอ่านสรุปด้านขวา และทำควิซซ้ำเพื่อให้มั่นใจ";
+
+      return { ok:true, date: todayIso(), score, level, pill, title, desc, details };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.score);
+      resTitle.textContent = r.title;
+      resDesc.textContent = r.desc;
+
+      review.innerHTML = r.details.map((d, idx)=>{
+        const tag = d.ok
+          ? `<span class="tag tagOk">ถูก</span>`
+          : `<span class="tag tagBad">ผิด</span>`;
+        return `
+          <div class="card-soft" style="padding:12px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${idx+1}. ${escapeHtml(d.q)}</div>
+                <div class="muted2">ตอบ: ${escapeHtml(d.chosenText)}</div>
+                ${d.ok ? "" : `<div class="muted2">คำตอบที่ถูก: <b>${escapeHtml(d.correctText)}</b></div>`}
+              </div>
+              ${tag}
+            </div>
+            <div class="muted2" style="margin-top:8px">อธิบาย: ${escapeHtml(d.explain)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    btnSubmit.addEventListener("click", ()=>{
+      const out = grade();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      showResult(out);
+      toast("ตรวจคำตอบแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || grade();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      const rec = { ...out, id: "MQ_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 60);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("เริ่มควิซใหม่ใช่ไหม?")){
+        answers = {};
+        state.answers = {};
+        save(state);
+        resWrap.style.display = "none";
+        renderQuiz();
+        toast("เริ่มใหม่แล้ว");
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const pill =
+          h.level==="good" ? { cls:"pill pillOk", text:"ดีมาก" } :
+          h.level==="mid"  ? { cls:"pill pillMid", text:"พอใช้" } :
+                             { cls:"pill pillLow", text:"ควรทบทวน" };
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.score}/10</div>
+              </div>
+              <span class="${pill.cls}">${pill.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x => x.id === id);
+          if(rec) showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x => x.id !== id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดใช่ไหม?")){
+        state.history = [];
+        save(state);
+        renderRecent();
+      }
+    });
+
+    btnExport.addEventListener("click", ()=>{
+      const rows = [["date","score","level","title"]];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        rows.push([h.date, String(h.score), h.level, h.title]);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menopause_quiz_basic.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderQuiz();
+    renderRecent();
+  </script>
+</body>
+</html>
