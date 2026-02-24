@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Breast Cancer Risk</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .brHero{
+      background: linear-gradient(135deg, rgba(254,243,199,.55), rgba(186,230,253,.30));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1fr 1fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 800; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillLow{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(245,158,11,.92));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+    .hist{ display:grid; gap: 10px; margin-top: 12px; }
+    .histItem{ padding: 12px; }
+    .histTop{ display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">ประเมินความเสี่ยงมะเร็งเต้านม</h1>
+      <p class="page-sub muted">แบบประเมินเพื่อ “คัดกรองเบื้องต้น” และช่วยวางแผนการตรวจสุขภาพ (บันทึกในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัยโรค</p>
+
+      <div class="grid2">
+        <!-- Form -->
+        <div class="brHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+              <div>
+                <div style="font-weight:900;font-size:16px;">ข้อมูลเบื้องต้น</div>
+                <div class="muted2">ตอบตามความจริงเพื่อให้การแนะนำเหมาะสม</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            </div>
+
+            <div style="display:grid;gap:10px;margin-top:10px">
+              <div class="grid2">
+                <div>
+                  <label class="muted">อายุ (ปี)</label>
+                  <input id="age" class="input" type="number" min="10" max="120" placeholder="30" />
+                </div>
+                <div>
+                  <label class="muted">ดัชนีมวลกาย (BMI) (ถ้าทราบ)</label>
+                  <input id="bmi" class="input" type="number" min="10" max="60" step="0.1" placeholder="23.5" />
+                </div>
+              </div>
+
+              <div>
+                <label class="muted">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+                <textarea id="note" class="input" placeholder="เช่น เคยผ่าตัดก้อนเต้านม, มีโรคประจำตัว ฯลฯ"></textarea>
+              </div>
+
+              <button id="btnCalc" class="btn btn-ok">คำนวณความเสี่ยง</button>
+            </div>
+          </div>
+
+          <div id="resultCard" class="card" style="padding:14px;margin-top:12px;display:none">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900">ผลการประเมิน</div>
+                <div class="muted2" id="resMeta">-</div>
+              </div>
+              <span id="resPill" class="pill">-</span>
+            </div>
+
+            <div class="kpiRow">
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">คะแนนความเสี่ยง (ภายในระบบ)</div>
+                <div class="big" id="resScore">-</div>
+                <div class="muted2">ใช้เพื่อจัดระดับ “ต่ำ/ปานกลาง/สูง” เท่านั้น</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">คำแนะนำสรุป</div>
+                <div style="font-weight:900;margin-top:6px" id="resTitle">-</div>
+                <div class="muted2" id="resDesc">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:10px">
+              <div style="font-weight:900">แนวทางถัดไป</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7" id="resNext">-</div>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnSave" class="btn btn-warn">บันทึกผลวันนี้</button>
+              <button id="btnPrint" class="btn btn-ghost">พิมพ์/บันทึกเป็น PDF</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Questions + History -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">คำถามความเสี่ยง</div>
+            <div class="muted2" style="margin-top:6px">เลือกคำตอบที่ตรงที่สุด (คะแนนเป็นแบบประเมินภายใน เพื่อการคัดกรองเบื้องต้น)</div>
+
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:10px"></div>
+
+            <div class="muted2" style="margin-top:10px">
+              * หากคุณมีก้อนเต้านมผิดปกติ, เจ็บเต้านมมากผิดปกติ, มีเลือด/น้ำไหลจากหัวนม, หรือผิวหนังบุ๋ม/เปลี่ยนแปลงรวดเร็ว ควรพบแพทย์ทันที ไม่ต้องรอผลแบบประเมิน
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติการประเมิน (ในเครื่อง)</div>
+                <div class="muted2">เก็บไว้เฉพาะอุปกรณ์นี้</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+
+            <div id="hist" class="hist"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Breast Risk" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_BREAST_RISK_V1";
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { history: [] };
+      }catch{
+        return { history: [] };
+      }
+    }
+    function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function isoToday(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function nowTs(){ return Date.now(); }
+
+    // ===== Questions (simple screening heuristic) =====
+    // IMPORTANT: This is NOT a clinical risk calculator (e.g., Gail/Tyrer-Cuzick).
+    // It is an internal FEMI screening checklist to guide "what to do next".
+    const QUESTIONS = [
+      {
+        key: "fam1",
+        title: "ญาติสายตรง (แม่/พี่/น้อง/ลูก) เคยเป็นมะเร็งเต้านม/รังไข่ หรือไม่?",
+        opts: [
+          { v:"no",  label:"ไม่มี/ไม่ทราบ", pts:0 },
+          { v:"one", label:"มี 1 คน (หลังอายุ 50 ปี)", pts:3 },
+          { v:"young",label:"มี 1 คน (ก่อนอายุ 50 ปี)", pts:5 },
+          { v:"many", label:"มีมากกว่า 1 คน หรือหลายรุ่นในครอบครัว", pts:6 },
+        ]
+      },
+      {
+        key: "gene",
+        title: "เคยตรวจพบยีนเสี่ยง (เช่น BRCA) หรือแพทย์บอกว่าเสี่ยงสูงทางพันธุกรรม?",
+        opts: [
+          { v:"no", label:"ไม่เคย/ไม่ทราบ", pts:0 },
+          { v:"sus", label:"สงสัย/แพทย์แนะนำให้ตรวจ", pts:4 },
+          { v:"yes", label:"เคยตรวจพบ/ยืนยันเสี่ยงสูง", pts:8, flag:"high" },
+        ]
+      },
+      {
+        key: "biopsy",
+        title: "เคยตรวจชิ้นเนื้อ/ผ่าตัดก้อนเต้านม และพบความผิดปกติ (เช่น atypical) หรือไม่?",
+        opts: [
+          { v:"no", label:"ไม่เคย/ไม่ทราบ", pts:0 },
+          { v:"benign", label:"เคย แต่ผลไม่รุนแรง (ก้อนธรรมดา)", pts:2 },
+          { v:"atyp", label:"เคย และมีความผิดปกติที่แพทย์ติดตามใกล้ชิด", pts:5 },
+        ]
+      },
+      {
+        key: "radiation",
+        title: "เคยได้รับรังสีรักษาบริเวณทรวงอก (เช่นรักษามะเร็งอื่น) ตอนอายุน้อยหรือไม่?",
+        opts: [
+          { v:"no", label:"ไม่เคย/ไม่ทราบ", pts:0 },
+          { v:"yes", label:"เคย", pts:6, flag:"high" },
+        ]
+      },
+      {
+        key: "menarche",
+        title: "ประจำเดือนครั้งแรก (menarche) มาเร็วหรือไม่?",
+        opts: [
+          { v:"unk", label:"ไม่ทราบ/จำไม่ได้", pts:0 },
+          { v:"ge12", label:"อายุ 12 ปีขึ้นไป", pts:0 },
+          { v:"lt12", label:"ก่อนอายุ 12 ปี", pts:1 },
+        ]
+      },
+      {
+        key: "firstBirth",
+        title: "มีบุตรคนแรกเมื่ออายุเท่าไร (ถ้ามี)?",
+        opts: [
+          { v:"none", label:"ยังไม่มีบุตร", pts:1 },
+          { v:"lt30", label:"มีบุตรก่อนอายุ 30 ปี", pts:0 },
+          { v:"ge30", label:"มีบุตรเมื่ออายุ 30 ปีขึ้นไป", pts:1 },
+        ]
+      },
+      {
+        key: "hormone",
+        title: "เคยใช้ฮอร์โมนทดแทนวัยทอง (HRT) ต่อเนื่องนาน หรือไม่?",
+        opts: [
+          { v:"no", label:"ไม่เคย", pts:0 },
+          { v:"short", label:"เคยใช้ระยะสั้น/ไม่ต่อเนื่อง", pts:1 },
+          { v:"long", label:"ใช้ต่อเนื่องนาน (≈ 5 ปีขึ้นไป)", pts:2 },
+        ]
+      },
+      {
+        key: "alcohol",
+        title: "ดื่มแอลกอฮอล์เป็นประจำหรือไม่?",
+        opts: [
+          { v:"no", label:"ไม่ดื่ม/นาน ๆ ครั้ง", pts:0 },
+          { v:"sometimes", label:"ดื่มบ้าง", pts:1 },
+          { v:"often", label:"ดื่มบ่อย", pts:2 },
+        ]
+      },
+    ];
+
+    // ===== Elements =====
+    const qWrap = document.getElementById("qWrap");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnReset = document.getElementById("btnReset");
+    const btnSave = document.getElementById("btnSave");
+    const btnPrint = document.getElementById("btnPrint");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const ageEl = document.getElementById("age");
+    const bmiEl = document.getElementById("bmi");
+    const noteEl = document.getElementById("note");
+
+    const resultCard = document.getElementById("resultCard");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const resNext = document.getElementById("resNext");
+
+    const histEl = document.getElementById("hist");
+
+    let state = loadState();
+    let answers = {}; // key -> opt.v
+    let lastResult = null;
+
+    // ===== Build questions =====
+    function buildQuestions(){
+      qWrap.innerHTML = QUESTIONS.map(q=>{
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${escapeHtml(q.title)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${q.opts.map((o, idx)=>`
+                <label class="opt">
+                  <input type="radio" name="${q.key}" value="${o.v}" />
+                  <div>
+                    <span>${escapeHtml(o.label)}</span>
+                    <div class="muted2">คะแนน: ${o.pts}</div>
+                  </div>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = r.value;
+        });
+      });
+    }
+
+    // ===== Scoring =====
+    function score(){
+      const age = Number(ageEl.value || 0);
+      const bmi = Number(bmiEl.value || 0);
+
+      let total = 0;
+      let flags = { high: false };
+      const detail = [];
+
+      for(const q of QUESTIONS){
+        const v = answers[q.key];
+        const opt = q.opts.find(o=>o.v===v);
+        if(!opt) return { ok:false, msg:"กรุณาตอบคำถามให้ครบทุกข้อ" };
+        total += opt.pts;
+        if(opt.flag === "high") flags.high = true;
+        detail.push({ key:q.key, v, pts: opt.pts });
+      }
+
+      // Age and BMI adjustments (lightweight)
+      if(age >= 50) total += 2;
+      else if(age >= 40) total += 1;
+
+      if(bmi >= 30) total += 2;
+      else if(bmi >= 25) total += 1;
+
+      // Determine level
+      let level = "low";
+      if(flags.high || total >= 12) level = "high";
+      else if(total >= 7) level = "mid";
+
+      const advice = buildAdvice(level, { age, bmi, flags, total });
+      return { ok:true, level, total, ...advice, detail, age, bmi, note: (noteEl.value||"").trim() };
+    }
+
+    function buildAdvice(level, ctx){
+      const a = ctx.age;
+      const next = [];
+
+      if(level === "high"){
+        next.push("• แนะนำปรึกษาแพทย์/หน่วยบริการเพื่อประเมินความเสี่ยงแบบมาตรฐาน และวางแผนคัดกรองเฉพาะบุคคล");
+        next.push("• พิจารณาตรวจคัดกรองด้วยเครื่องมือที่เหมาะสม (เช่น แมมโมแกรม/อัลตราซาวนด์) ตามแพทย์แนะนำ");
+        next.push("• หากมีอาการผิดปกติของเต้านม ให้พบแพทย์ทันที");
+      }else if(level === "mid"){
+        next.push("• แนะนำติดตามสม่ำเสมอ และปรึกษาหน่วยบริการเพื่อพิจารณาความถี่การตรวจที่เหมาะกับคุณ");
+        next.push("• เริ่ม/คงการตรวจเต้านมด้วยตนเองเป็นประจำ และตรวจโดยบุคลากรปีละครั้ง");
+      }else{
+        next.push("• รักษาพฤติกรรมสุขภาพ และตรวจเต้านมด้วยตนเองเป็นประจำ");
+        next.push("• ตรวจเต้านมโดยบุคลากรอย่างน้อยปีละครั้ง และรับคำแนะนำเรื่องคัดกรองตามช่วงอายุ");
+      }
+
+      // Generic age guidance (soft)
+      if(a){
+        if(a >= 40){
+          next.push("• ช่วงอายุ 40+ ควรปรึกษาหน่วยบริการเรื่องการคัดกรองด้วยแมมโมแกรมตามแนวทางที่เหมาะสม");
+        }else if(a >= 20){
+          next.push("• ช่วงอายุ 20–39 เน้นตรวจเต้านมด้วยตนเองและตรวจโดยบุคลากรตามรอบที่เหมาะสม");
+        }
+      }
+
+      const title =
+        level === "high" ? "เสี่ยงสูง (ควรติดตามใกล้ชิด)" :
+        level === "mid"  ? "ความเสี่ยงปานกลาง" :
+                           "ความเสี่ยงต่ำ";
+
+      const desc =
+        level === "high" ? "มีปัจจัยเสี่ยงสำคัญ/คะแนนสูง แนะนำพบผู้เชี่ยวชาญเพื่อประเมินอย่างละเอียด" :
+        level === "mid"  ? "มีปัจจัยเสี่ยงบางส่วน ควรติดตามและปรับพฤติกรรม พร้อมพิจารณาปรึกษาหน่วยบริการ" :
+                           "ไม่พบปัจจัยเสี่ยงเด่น แต่ยังควรตรวจสุขภาพตามรอบและเฝ้าระวังตนเอง";
+
+      const pill =
+        level === "high" ? { cls:"pill pillHigh", text:"เสี่ยงสูง" } :
+        level === "mid"  ? { cls:"pill pillMid",  text:"ปานกลาง" } :
+                           { cls:"pill pillLow",  text:"ต่ำ" };
+
+      return { title, desc, pill, next: next.join("<br>") };
+    }
+
+    // ===== Render result + history =====
+    function renderHistory(){
+      if(!state.history?.length){
+        histEl.innerHTML = '<div class="muted2">ยังไม่มีประวัติ</div>';
+        return;
+      }
+
+      histEl.innerHTML = state.history.slice(0,10).map(h=>{
+        const pillCls = h.level === "high" ? "pill pillHigh" : (h.level==="mid" ? "pill pillMid" : "pill pillLow");
+        const pillTxt = h.level === "high" ? "เสี่ยงสูง" : (h.level==="mid" ? "ปานกลาง" : "ต่ำ");
+        return `
+          <div class="card histItem">
+            <div class="histTop">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.total} • อายุ: ${h.age || "-"} • BMI: ${h.bmi || "-"}</div>
+              </div>
+              <span class="${pillCls}">${pillTxt}</span>
+            </div>
+            ${h.note ? `<div class="muted2" style="margin-top:6px">โน้ต: ${escapeHtml(h.note)}</div>` : ""}
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดูรายละเอียด</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      histEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = state.history.filter(x=>x.id !== id);
+            saveState(state);
+            renderHistory();
+          }
+        });
+      });
+      histEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const h = state.history.find(x=>x.id===id);
+          if(!h) return;
+          showResult(h);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resultCard.style.display = "block";
+      resMeta.textContent = `วันที่ประเมิน: ${r.date} • ข้อมูลเก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resTitle.textContent = r.title;
+      resDesc.textContent = r.desc;
+      resNext.innerHTML = r.next;
+    }
+
+    // ===== Actions =====
+    btnCalc.addEventListener("click", ()=>{
+      const out = score();
+      if(!out.ok){
+        alert(out.msg || "กรุณาตอบให้ครบ");
+        return;
+      }
+      const rec = {
+        id: "BR_" + String(nowTs()),
+        date: isoToday(),
+        ...out,
+      };
+      showResult(rec);
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      if(!lastResult){
+        alert("กรุณาคำนวณผลก่อน");
+        return;
+      }
+      // save a snapshot
+      const rec = { ...lastResult, id: "BR_" + String(nowTs()), date: isoToday() };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      // keep max 60
+      state.history = state.history.slice(0, 60);
+      saveState(state);
+      renderHistory();
+      toast("บันทึกผลแล้ว");
+    });
+
+    btnPrint.addEventListener("click", ()=> window.print());
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างคำตอบทั้งหมดในหน้านี้ใช่ไหม?")){
+        answers = {};
+        ageEl.value = "";
+        bmiEl.value = "";
+        noteEl.value = "";
+        // uncheck radios
+        qWrap.querySelectorAll('input[type="radio"]').forEach(r=> r.checked = false);
+        resultCard.style.display = "none";
+        lastResult = null;
+      }
+    });
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดในเครื่องใช่ไหม?")){
+        state.history = [];
+        saveState(state);
+        renderHistory();
+      }
+    });
+
+    // ===== Helpers =====
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // tiny toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    buildQuestions();
+    renderHistory();
+  </script>
+</body>
+</html>
