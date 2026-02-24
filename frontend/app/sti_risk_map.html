@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • STI Risk + Nearby Services</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .srHero{
+      background: linear-gradient(135deg, rgba(186,230,253,.30), rgba(254,243,199,.42));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.05fr .95fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillLow{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillInfo{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(245,158,11,.92));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    .mapBox{
+      border-radius: 18px;
+      border: 1px solid rgba(17,24,39,.08);
+      overflow:hidden;
+      background: rgba(255,255,255,.72);
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+    }
+    .mapBox iframe{ width:100%; height: 340px; border:0; display:block; }
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">ประเมินความเสี่ยง STI + แผนที่สถานพยาบาลใกล้เคียง</h1>
+      <p class="page-sub muted">ประเมินความเสี่ยงเบื้องต้น + เปิดแผนที่ค้นหาหน่วยบริการใกล้คุณ (เก็บข้อมูลในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left: assessment -->
+        <div class="srHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">แบบประเมินความเสี่ยง (ย่อ)</div>
+                <div class="muted2">ตอบตามสถานการณ์จริง (ข้อมูลส่วนตัวเก็บในเครื่อง)</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี) (ถ้าต้องการ)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="28" />
+              </div>
+              <div>
+                <label class="muted">มีอาการผิดปกติอยู่ตอนนี้หรือไม่?</label>
+                <select id="symptoms" class="input">
+                  <option value="no">ไม่มี</option>
+                  <option value="yes">มี (เช่น ตกขาวผิดปกติ/แสบขัด/เจ็บ/มีแผล)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:12px"></div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalc" class="btn btn-ok">สรุปความเสี่ยง</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลสรุป</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนนความเสี่ยง (ภายในระบบ)</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">ใช้เพื่อจัดระดับต่ำ/ปานกลาง/สูง</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คำแนะนำ</div>
+                  <div style="font-weight:900;margin-top:6px" id="resTitle">-</div>
+                  <div class="muted2" id="resDesc">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">ทำอะไรต่อ</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resNext">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ข้อควรพบแพทย์</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • มีแผล/ตุ่ม/ปวดแสบมาก • มีไข้/ปวดท้องน้อยรุนแรง • เลือดออกผิดปกติ<br>
+                • ตั้งครรภ์และมีอาการผิดปกติ • อาการไม่ดีขึ้นหรือเป็นซ้ำบ่อย
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติการประเมิน</div>
+                <div class="muted2">8 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right: Map -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ค้นหาหน่วยบริการใกล้คุณ</div>
+                <div class="muted2">กด “ขอพิกัด” เพื่อแสดงแผนที่และลิงก์ค้นหาใกล้เคียง</div>
+              </div>
+              <button id="btnGeo" class="btn btn-ok">ขอพิกัด</button>
+            </div>
+
+            <div class="kpiRow" style="margin-top:10px">
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">พิกัด</div>
+                <div style="font-weight:900" id="geoText">ยังไม่ได้ขอพิกัด</div>
+                <div class="muted2" id="geoHint">ระบบจะถามอนุญาตตำแหน่งในเบราว์เซอร์</div>
+              </div>
+              <div class="card-soft" style="padding:12px">
+                <div class="muted">ค้นหาเร็ว</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+                  <a id="lnkClinic" class="btn btn-ghost" target="_blank" rel="noreferrer">คลินิก/รพ. ใกล้ฉัน</a>
+                  <a id="lnkSTI" class="btn btn-ghost" target="_blank" rel="noreferrer">ค้นหา STI clinic</a>
+                </div>
+                <div class="muted2" style="margin-top:8px">เปิด Google Maps ในแท็บใหม่</div>
+              </div>
+            </div>
+
+            <div class="mapBox" style="margin-top:12px">
+              <iframe id="mapFrame" title="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                src="about:blank"></iframe>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ทิปความปลอดภัย</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • ใช้ถุงยางทุกครั้งช่วยลดความเสี่ยง STI ได้มาก<br>
+                • ถ้ามีความเสี่ยงสูง/มีอาการ: ควรตรวจและรักษาให้ครบ พร้อมแจ้งคู่นอนตามคำแนะนำแพทย์<br>
+                • หลีกเลี่ยงการซื้อยามารักษาเองถ้าไม่แน่ใจ
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "STI Risk Map" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_STI_RISK_MAP_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ age:"", symptoms:"no" }, answers:{}, history:[], geo:null };
+      }catch{
+        return { profile:{ age:"", symptoms:"no" }, answers:{}, history:[], geo:null };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const ageEl = document.getElementById("age");
+    const symptomsEl = document.getElementById("symptoms");
+    const btnReset = document.getElementById("btnReset");
+    const btnCalc = document.getElementById("btnCalc");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const qWrap = document.getElementById("qWrap");
+    const recentEl = document.getElementById("recent");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resTitle = document.getElementById("resTitle");
+    const resDesc = document.getElementById("resDesc");
+    const resNext = document.getElementById("resNext");
+
+    // map
+    const btnGeo = document.getElementById("btnGeo");
+    const geoText = document.getElementById("geoText");
+    const geoHint = document.getElementById("geoHint");
+    const mapFrame = document.getElementById("mapFrame");
+    const lnkClinic = document.getElementById("lnkClinic");
+    const lnkSTI = document.getElementById("lnkSTI");
+
+    // Questions (PG-13; no explicit details)
+    const QUESTIONS = [
+      { key:"newPartner", q:"ช่วง 3 เดือนที่ผ่านมา มีคู่นอนใหม่หรือไม่?", opts:[
+        {v:"no", label:"ไม่มี", pts:0},
+        {v:"yes", label:"มี", pts:2},
+        {v:"prefer", label:"ไม่สะดวกตอบ", pts:1},
+      ]},
+      { key:"condom", q:"ใช้ถุงยางสม่ำเสมอหรือไม่?", opts:[
+        {v:"always", label:"ทุกครั้ง", pts:0},
+        {v:"sometimes", label:"บางครั้ง", pts:2},
+        {v:"never", label:"ไม่ค่อย/ไม่ใช้", pts:3},
+      ]},
+      { key:"partnerRisk", q:"คู่นอนมีความเสี่ยง (เช่น มีหลายคน/ไม่ทราบประวัติ) หรือไม่?", opts:[
+        {v:"no", label:"ไม่น่าจะใช่/ไม่ทราบ", pts:1},
+        {v:"yes", label:"มี/สงสัย", pts:2},
+      ]},
+      { key:"prevSTI", q:"เคยตรวจพบหรือรักษา STI มาก่อนหรือไม่?", opts:[
+        {v:"no", label:"ไม่เคย/ไม่ทราบ", pts:0},
+        {v:"yes", label:"เคย", pts:2},
+      ]},
+      { key:"testRecent", q:"เคยตรวจ STI ใน 12 เดือนที่ผ่านมาไหม?", opts:[
+        {v:"yes", label:"เคย", pts:0},
+        {v:"no", label:"ยังไม่เคย", pts:1},
+      ]},
+    ];
+
+    let state = load();
+    let answers = state.answers || {};
+    let lastResult = null;
+
+    // restore profile
+    ageEl.value = state.profile?.age ?? "";
+    symptomsEl.value = state.profile?.symptoms ?? "no";
+
+    function persistProfile(){
+      state.profile = { age: ageEl.value || "", symptoms: symptomsEl.value || "no" };
+      save(state);
+    }
+    ageEl.addEventListener("input", persistProfile);
+    symptomsEl.addEventListener("change", persistProfile);
+
+    function renderQuestions(){
+      qWrap.innerHTML = QUESTIONS.map((it, idx)=>{
+        const current = answers[it.key];
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${idx+1}. ${escapeHtml(it.q)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${it.opts.map(o=>`
+                <label class="opt">
+                  <input type="radio" name="${it.key}" value="${o.v}" ${current===o.v ? "checked":""}/>
+                  <div>
+                    <span>${escapeHtml(o.label)}</span>
+                    <div class="muted2">คะแนน: ${o.pts}</div>
+                  </div>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = r.value;
+          state.answers = answers;
+          save(state);
+        });
+      });
+    }
+
+    function pill(level){
+      if(level==="high") return { cls:"pill pillHigh", text:"เสี่ยงสูง" };
+      if(level==="mid") return { cls:"pill pillMid", text:"ปานกลาง" };
+      return { cls:"pill pillLow", text:"ต่ำ" };
+    }
+
+    function compute(){
+      // ensure answered
+      for(const q of QUESTIONS){
+        if(!(q.key in answers)) return { ok:false, msg:"กรุณาตอบคำถามให้ครบทุกข้อ" };
+      }
+
+      let total = 0;
+      for(const q of QUESTIONS){
+        const v = answers[q.key];
+        const opt = q.opts.find(o=>o.v===v);
+        total += (opt?.pts || 0);
+      }
+      if(symptomsEl.value === "yes") total += 3;
+
+      let level = "low";
+      if(total >= 8) level = "high";
+      else if(total >= 4) level = "mid";
+
+      const p = pill(level);
+
+      const title =
+        level==="high" ? "แนะนำตรวจและปรึกษาหน่วยบริการ" :
+        level==="mid"  ? "ควรพิจารณาตรวจตามความเหมาะสม" :
+                         "ความเสี่ยงค่อนข้างต่ำ (แต่ยังควรป้องกัน)";
+
+      const desc =
+        level==="high" ? "มีปัจจัยเสี่ยงหลายข้อหรือมีอาการ ควรตรวจ STI และรับคำแนะนำการรักษา/ป้องกัน" :
+        level==="mid"  ? "มีปัจจัยเสี่ยงบางส่วน แนะนำใช้ถุงยางสม่ำเสมอ และพิจารณาตรวจหากกังวล" :
+                         "รักษาพฤติกรรมปลอดภัย ใช้ถุงยาง และตรวจตามรอบที่เหมาะสม";
+
+      const next = [];
+      if(symptomsEl.value === "yes"){
+        next.push("• มีอาการผิดปกติ: ควรพบแพทย์/หน่วยบริการเพื่อประเมิน และหลีกเลี่ยงเพศสัมพันธ์จนกว่าจะตรวจ");
+      }
+      next.push("• ใช้ถุงยางทุกครั้ง ช่วยลดความเสี่ยง STI ได้มาก");
+      next.push("• หากมีความเสี่ยงสูง/ผลตรวจผิดปกติ ให้รักษาให้ครบ และทำตามคำแนะนำแพทย์เรื่องการแจ้งคู่นอน");
+      next.push("• กด “ขอพิกัด” เพื่อเปิดแผนที่ค้นหาหน่วยบริการใกล้คุณ");
+
+      return {
+        ok:true, date: todayIso(),
+        total, level, pill:p, title, desc, nextHtml: next.join("<br>"),
+        profile: { age: ageEl.value||"", symptoms: symptomsEl.value||"no" },
+        answers: { ...answers }
+      };
+    }
+
+    function showResult(r){
+      lastResult = r;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      resPill.className = r.pill.cls;
+      resPill.textContent = r.pill.text;
+      resScore.textContent = String(r.total);
+      resTitle.textContent = r.title;
+      resDesc.textContent = r.desc;
+      resNext.innerHTML = r.nextHtml;
+    }
+
+    btnCalc.addEventListener("click", ()=>{
+      const out = compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      showResult(out);
+      toast("สรุปแล้ว");
+    });
+
+    btnSave.addEventListener("click", ()=>{
+      const out = lastResult || compute();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      const rec = { ...out, id: "STI_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 80);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างคำตอบทั้งหมดใช่ไหม?")){
+        answers = {};
+        state.answers = {};
+        ageEl.value = "";
+        symptomsEl.value = "no";
+        persistProfile();
+        save(state);
+        resWrap.style.display = "none";
+        renderQuestions();
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 8);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const p = pill(h.level);
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">คะแนน: ${h.total} • อาการ: ${escapeHtml(h.profile?.symptoms==="yes"?"มี":"ไม่มี")}</div>
+              </div>
+              <span class="${p.cls}">${p.text}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x=>x.id===id);
+          if(!rec) return;
+          ageEl.value = rec.profile?.age || "";
+          symptomsEl.value = rec.profile?.symptoms || "no";
+          persistProfile();
+          answers = rec.answers || {};
+          state.answers = answers;
+          save(state);
+          renderQuestions();
+          showResult(rec);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x=>x.id!==id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดใช่ไหม?")){
+        state.history = [];
+        save(state);
+        renderRecent();
+      }
+    });
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","score","level","age","symptoms"].concat(QUESTIONS.map(q=>q.key));
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const row = [
+          h.date,
+          String(h.total),
+          h.level,
+          h.profile?.age || "",
+          h.profile?.symptoms || "",
+        ];
+        for(const q of QUESTIONS){
+          row.push(String((h.answers||{})[q.key] ?? ""));
+        }
+        rows.push(row);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sti_risk_map.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    // ===== Map / Geolocation =====
+    function setGeo(lat, lng){
+      state.geo = { lat, lng, updatedAt: nowTs() };
+      save(state);
+
+      geoText.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      geoHint.textContent = "แสดงแผนที่โดยประมาณตามพิกัดที่อนุญาต";
+
+      // embed map
+      const src = `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
+      mapFrame.src = src;
+
+      // quick links
+      lnkClinic.href = `https://www.google.com/maps/search/โรงพยาบาล+คลินิก/@${lat},${lng},14z`;
+      lnkSTI.href = `https://www.google.com/maps/search/ตรวจ+STI+คลินิก+โรคติดต่อ/@${lat},${lng},14z`;
+    }
+
+    function loadGeoFromState(){
+      const g = state.geo;
+      if(g?.lat && g?.lng) setGeo(Number(g.lat), Number(g.lng));
+      else{
+        mapFrame.src = "about:blank";
+        lnkClinic.href = "https://www.google.com/maps/search/โรงพยาบาล+คลินิก";
+        lnkSTI.href = "https://www.google.com/maps/search/ตรวจ+STI+คลินิก+โรคติดต่อ";
+      }
+    }
+
+    btnGeo.addEventListener("click", ()=>{
+      if(!navigator.geolocation){
+        alert("อุปกรณ์นี้ไม่รองรับการขอพิกัด");
+        return;
+      }
+      geoHint.textContent = "กำลังขอพิกัด...";
+      navigator.geolocation.getCurrentPosition(
+        (pos)=>{
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          setGeo(lat, lng);
+          toast("ได้พิกัดแล้ว");
+        },
+        (err)=>{
+          geoHint.textContent = "ไม่ได้รับอนุญาต/ขอพิกัดไม่สำเร็จ";
+          alert("ไม่สามารถขอพิกัดได้ กรุณาอนุญาตตำแหน่งในเบราว์เซอร์ แล้วลองใหม่");
+        },
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderQuestions();
+    renderRecent();
+    loadGeoFromState();
+  </script>
+</body>
+</html>
