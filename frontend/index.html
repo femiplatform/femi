@@ -202,7 +202,7 @@
     try {
       if (getToken()) {
         const role = getRole();
-        window.location.href = (role === 'admin') ? '/admin/index.html' : '/app/dashboard.html';
+        window.location.href = (role === 'admin') ? '/admin/index.html' : '/app/home.html';
       }
     } catch { /* ignore */ }
 
@@ -219,7 +219,7 @@
         const data = await api.login(email, password);
         setSession(data);
         toast('เข้าสู่ระบบสำเร็จ', 'success');
-        window.location.href = (data.role === 'admin') ? '/admin/index.html' : '/app/dashboard.html';
+        window.location.href = (data.role === 'admin') ? '/admin/index.html' : '/app/home.html';
       } catch (err) {
         toast(err?.error?.message || 'เข้าสู่ระบบไม่สำเร็จ', 'danger');
         clearSession();
@@ -250,7 +250,7 @@
         const data = await api.register(payload);
         setSession(data);
         toast('สมัครสมาชิกสำเร็จ', 'success');
-        window.location.href = '/app/dashboard.html';
+        window.location.href = '/app/home.html';
       } catch (err) {
         toast(err?.error?.message || 'สมัครสมาชิกไม่สำเร็จ', 'danger');
         clearSession();
