@@ -1,0 +1,1065 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Cervical Cancer: Risk + Pap/HPV Planner</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .ccHero{
+      background: linear-gradient(135deg, rgba(186,230,253,.34), rgba(221,214,254,.30));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.05fr .95fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillLow{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillHigh{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillPlan{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillWarn{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillBad{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+
+    .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .big{
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(59,130,246,.88), rgba(139,92,246,.88));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      line-height: 1.1;
+    }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    /* Calendar */
+    .calWrap{ display:grid; gap: 10px; }
+    .calHead{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap:wrap;
+    }
+    .calTitle{ font-weight: 900; font-size: 16px; }
+    .calNav{ display:flex; gap: 8px; flex-wrap:wrap; }
+    .cal{
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.72);
+      border-radius: 18px;
+      overflow:hidden;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+    }
+    .dow{
+      padding: 10px 8px;
+      text-align:center;
+      font-weight: 900;
+      font-size: 12px;
+      background: rgba(248,250,252,.9);
+      border-bottom: 1px solid rgba(17,24,39,.06);
+    }
+    .day{
+      min-height: 74px;
+      padding: 10px 8px;
+      border-right: 1px solid rgba(17,24,39,.06);
+      border-bottom: 1px solid rgba(17,24,39,.06);
+      cursor:pointer;
+      background: rgba(255,255,255,.76);
+      transition: background .18s ease, transform .06s ease;
+      position: relative;
+    }
+    .day:hover{ background: rgba(255,255,255,.92); transform: translateY(-1px); }
+    .day:nth-child(7n){ border-right:none; }
+    .day.mutedDay{ background: rgba(248,250,252,.65); cursor: default; }
+    .day.mutedDay:hover{ transform:none; background: rgba(248,250,252,.65); }
+    .dNum{ font-weight: 900; font-size: 12px; opacity:.85; }
+
+    .badge{
+      position:absolute; right:8px; top:8px;
+      width: 12px; height: 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(226,232,240,.9);
+    }
+    .bPlanned{ background: rgba(59,130,246,.30); border-color: rgba(59,130,246,.30); }
+    .bOk{ background: rgba(34,197,94,.35); border-color: rgba(34,197,94,.35); }
+    .bWarn{ background: rgba(245,158,11,.35); border-color: rgba(245,158,11,.35); }
+    .bBad{ background: rgba(239,68,68,.35); border-color: rgba(239,68,68,.35); }
+
+    /* Modal */
+    .ccModal{ position: fixed; inset:0; z-index: 60; display:none; }
+    .ccModal.on{ display:block; }
+    .ccBackdrop{ position:absolute; inset:0; background: rgba(2,6,23,.35); }
+    .ccPanel{
+      position:absolute; left:50%; top:50%;
+      transform: translate(-50%,-50%);
+      width: min(860px, 92vw);
+      max-height: 88vh;
+      overflow:auto;
+      background: rgba(255,255,255,.96);
+      border: 1px solid rgba(17,24,39,.10);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.18);
+      backdrop-filter: blur(10px);
+    }
+    .ccPanelHead{
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+      padding: 14px;
+      border-bottom: 1px solid rgba(17,24,39,.08);
+      background: linear-gradient(135deg, rgba(224,242,254,.55), rgba(221,214,254,.35));
+      position: sticky; top: 0;
+    }
+    .ccPanelTitle{ font-weight: 900; }
+    .ccPanelBody{ padding: 14px; display:grid; gap: 10px; }
+    .ccFoot{
+      padding: 12px 14px;
+      border-top: 1px solid rgba(17,24,39,.08);
+      display:flex; gap: 10px; flex-wrap:wrap; justify-content:flex-end;
+      background: rgba(248,250,252,.9);
+      position: sticky; bottom: 0;
+    }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">มะเร็งปากมดลูก: ประเมินความเสี่ยง + วางแผน Pap/HPV</h1>
+      <p class="page-sub muted">คัดกรองเบื้องต้น + ปฏิทินวางแผน/บันทึกการตรวจ (เก็บในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+
+      <div class="grid2">
+        <!-- Left: Risk + Recommendation -->
+        <div class="ccHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);" id="profileCard">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลเบื้องต้น</div>
+                <div class="muted2">ใช้เพื่อแนะนำรอบการตรวจ และช่วยวางแผนในปฏิทิน</div>
+              </div>
+              <button id="btnResetAll" class="btn btn-ghost">ล้างข้อมูล</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="30" />
+              </div>
+              <div>
+                <label class="muted">เคยมีเพศสัมพันธ์หรือไม่?</label>
+                <select id="sexEver" class="input">
+                  <option value="yes">เคย</option>
+                  <option value="no">ไม่เคย</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น เคยผลตรวจผิดปกติ, เคยรักษาปากมดลูก, ภูมิคุ้มกันต่ำ ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnCalcRisk" class="btn btn-ok">คำนวณความเสี่ยง + แนะนำรอบตรวจ</button>
+              <button id="btnPlanNext" class="btn btn-warn">วางแผน “ตรวจครั้งถัดไป” ลงปฏิทิน</button>
+            </div>
+
+            <div id="resWrap" class="card" style="padding:14px;margin-top:12px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div style="font-weight:900">ผลประเมิน</div>
+                  <div class="muted2" id="resMeta">—</div>
+                </div>
+                <span id="resPill" class="pill">—</span>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">คะแนน (ภายในระบบ)</div>
+                  <div class="big" id="resScore">-</div>
+                  <div class="muted2">เพื่อจัดระดับต่ำ/ปานกลาง/สูง</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">แนะนำรอบตรวจ</div>
+                  <div style="font-weight:900;margin-top:6px" id="resInterval">-</div>
+                  <div class="muted2" id="resIntervalNote">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">คำแนะนำถัดไป</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="resAdvice">-</div>
+              </div>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">สัญญาณอันตราย ควรพบแพทย์ทันที</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • เลือดออกผิดปกติ (หลังมีเพศสัมพันธ์/ระหว่างรอบ/หลังหมดประจำเดือน)<br>
+                • ตกขาวผิดปกติ มีกลิ่น/มีเลือดปน • ปวดท้องน้อยเรื้อรัง • เจ็บขณะมีเพศสัมพันธ์
+              </div>
+              <div class="muted2" style="margin-top:8px">
+                * แบบประเมินนี้เป็นการคัดกรองเพื่อการวางแผน ไม่ใช่การวินิจฉัย
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px" id="questionCard">
+            <div style="font-weight:900;font-size:16px">คำถามความเสี่ยง</div>
+            <div class="muted2" style="margin-top:6px">เลือกคำตอบที่ตรงที่สุด (คะแนนเป็นแบบประเมินภายใน)</div>
+            <div id="qWrap" style="display:grid;gap:10px;margin-top:10px"></div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">รายการล่าสุด</div>
+                <div class="muted2">10 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button class="btn btn-ghost" id="btnExport">Export CSV</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+
+        <!-- Right: Calendar -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div class="calWrap">
+              <div class="calHead">
+                <div>
+                  <div class="calTitle" id="calTitle">-</div>
+                  <div class="muted2">แตะวันที่เพื่อวางแผน/บันทึกผล Pap smear หรือ HPV test</div>
+                </div>
+                <div class="calNav">
+                  <button class="btn btn-ghost" id="btnPrev">◀ เดือนก่อน</button>
+                  <button class="btn btn-ghost" id="btnToday">วันนี้</button>
+                  <button class="btn btn-ghost" id="btnNext">เดือนถัดไป ▶</button>
+                </div>
+              </div>
+
+              <div class="cal">
+                <div class="calGrid" id="dowRow"></div>
+                <div class="calGrid" id="calGrid"></div>
+              </div>
+
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">สถานะเดือนนี้</div>
+                  <div class="big" id="kMonth">-</div>
+                  <div class="muted2" id="kMonthText">-</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">กำหนดถัดไป (คาดการณ์)</div>
+                  <div class="big" id="kNext">-</div>
+                  <div class="muted2" id="kNextText">-</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                  <div style="font-weight:900">สัญลักษณ์</div>
+                  <button class="btn btn-ghost" id="btnClearAll">ล้างปฏิทินทั้งหมด</button>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                  <span class="pill pillPlan"><span class="badge bPlanned" style="position:static"></span> วางแผนตรวจ</span>
+                  <span class="pill pillOk"><span class="badge bOk" style="position:static"></span> ตรวจแล้ว ปกติ</span>
+                  <span class="pill pillWarn"><span class="badge bWarn" style="position:static"></span> ผลไม่ชัด/ติดตาม</span>
+                  <span class="pill pillBad"><span class="badge bBad" style="position:static"></span> ผิดปกติ (พบแพทย์)</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal -->
+      <div id="modal" class="ccModal" aria-hidden="true">
+        <div class="ccBackdrop"></div>
+        <div class="ccPanel" role="dialog" aria-modal="true">
+          <div class="ccPanelHead">
+            <div style="min-width:0">
+              <div class="ccPanelTitle" id="mTitle">-</div>
+              <div class="muted2" id="mSub">-</div>
+            </div>
+            <button class="icon-btn" id="mClose" aria-label="close">✕</button>
+          </div>
+
+          <div class="ccPanelBody">
+            <div class="grid2">
+              <div>
+                <label class="muted">ชนิดการตรวจ</label>
+                <select id="mTest" class="input">
+                  <option value="pap">Pap smear</option>
+                  <option value="hpv">HPV test</option>
+                  <option value="co">Co-test (Pap + HPV)</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">สถานะ</label>
+                <select id="mStatus" class="input">
+                  <option value="planned">วางแผนตรวจ</option>
+                  <option value="ok">ตรวจแล้ว: ปกติ</option>
+                  <option value="watch">ผลไม่ชัด/ควรติดตาม</option>
+                  <option value="abnormal">ผลผิดปกติ (พบแพทย์)</option>
+                  <option value="clear">ลบรายการของวันนี้</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2">
+              <div>
+                <label class="muted">ผล/รายละเอียด (ถ้ามี)</label>
+                <input id="mResult" class="input" placeholder="เช่น NILM, HPV negative, ASC-US, ฯลฯ" />
+              </div>
+              <div>
+                <label class="muted">สถานที่/หน่วยบริการ</label>
+                <input id="mPlace" class="input" placeholder="เช่น รพ.สต., รพ., คลินิก" />
+              </div>
+            </div>
+
+            <div>
+              <label class="muted">หมายเหตุ</label>
+              <textarea id="mNote" class="input" placeholder="เช่น นัดติดตาม, รับผลวันที่..., แพทย์แนะนำอะไรเพิ่มเติม"></textarea>
+            </div>
+
+            <div class="card-soft" style="padding:12px">
+              <div style="font-weight:900">คำเตือน</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                หากผลตรวจ “ผิดปกติ” หรือมีอาการผิดปกติ ควรปรึกษาแพทย์/หน่วยบริการตามนัด ไม่ควรใช้ปฏิทินนี้แทนการดูแลของแพทย์
+              </div>
+            </div>
+          </div>
+
+          <div class="ccFoot">
+            <button id="mCancel" class="btn btn-ghost">ยกเลิก</button>
+            <button id="mSave" class="btn btn-ok">บันทึก</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Cervical Screening" });
+    try{ applyI18n(document); }catch{}
+
+    // ===== Storage =====
+    const LS_KEY = "FEMI_CERVICAL_V1";
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{ age:"", sexEver:"yes", note:"" }, answers:{}, marks:{}, logs:[], lastIntervalMonths: 36 };
+      }catch{
+        return { profile:{ age:"", sexEver:"yes", note:"" }, answers:{}, marks:{}, logs:[], lastIntervalMonths: 36 };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function ymd(y,m,d){
+      const mm = String(m).padStart(2,"0");
+      const dd = String(d).padStart(2,"0");
+      return `${y}-${mm}-${dd}`;
+    }
+    function toDate(iso){ return new Date(iso + "T00:00:00"); }
+    function addMonths(iso, months){
+      const d = toDate(iso);
+      const nd = new Date(d.getFullYear(), d.getMonth()+months, d.getDate());
+      const yyyy = nd.getFullYear();
+      const mm = String(nd.getMonth()+1).padStart(2,"0");
+      const dd = String(nd.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // ===== Risk Questions (simple screening heuristic) =====
+    // Not a clinical tool; used to guide "what to do next".
+    const QUESTIONS = [
+      {
+        key:"hpvHistory",
+        title:"เคยตรวจพบ HPV ชนิดเสี่ยงสูง หรือเคยผล Pap/HPV ผิดปกติหรือไม่?",
+        opts:[
+          { v:"no", label:"ไม่เคย/ไม่ทราบ", pts:0 },
+          { v:"once", label:"เคย 1 ครั้ง (ติดตามแล้วปกติ)", pts:2 },
+          { v:"repeat", label:"เคยหลายครั้ง/ยังติดตามอยู่", pts:4, flag:"high" },
+        ]
+      },
+      {
+        key:"smoke",
+        title:"สูบบุหรี่หรือสัมผัสควันบุหรี่เป็นประจำหรือไม่?",
+        opts:[
+          { v:"no", label:"ไม่", pts:0 },
+          { v:"sometimes", label:"บ้าง", pts:1 },
+          { v:"yes", label:"เป็นประจำ", pts:2 },
+        ]
+      },
+      {
+        key:"partners",
+        title:"มีคู่นอนหลายคน/เปลี่ยนคู่นอนบ่อย (ในอดีตหรือปัจจุบัน) หรือไม่?",
+        opts:[
+          { v:"no", label:"ไม่/ไม่สะดวกตอบ", pts:0 },
+          { v:"yes", label:"มี/เคยมี", pts:2 },
+        ]
+      },
+      {
+        key:"immune",
+        title:"มีภาวะภูมิคุ้มกันต่ำ หรือใช้ยากดภูมิ หรือไม่?",
+        opts:[
+          { v:"no", label:"ไม่มี/ไม่ทราบ", pts:0 },
+          { v:"maybe", label:"อาจมี/ไม่แน่ใจ", pts:2 },
+          { v:"yes", label:"มี", pts:5, flag:"high" },
+        ]
+      },
+      {
+        key:"vax",
+        title:"ได้รับวัคซีน HPV หรือไม่?",
+        opts:[
+          { v:"yes", label:"ได้รับแล้ว", pts:0 },
+          { v:"no", label:"ยังไม่เคย/ไม่ครบ", pts:1 },
+          { v:"unk", label:"ไม่แน่ใจ", pts:1 },
+        ]
+      }
+    ];
+
+    // ===== Elements =====
+    const ageEl = document.getElementById("age");
+    const sexEverEl = document.getElementById("sexEver");
+    const noteEl = document.getElementById("note");
+    const btnCalcRisk = document.getElementById("btnCalcRisk");
+    const btnPlanNext = document.getElementById("btnPlanNext");
+    const btnResetAll = document.getElementById("btnResetAll");
+
+    const resWrap = document.getElementById("resWrap");
+    const resMeta = document.getElementById("resMeta");
+    const resPill = document.getElementById("resPill");
+    const resScore = document.getElementById("resScore");
+    const resInterval = document.getElementById("resInterval");
+    const resIntervalNote = document.getElementById("resIntervalNote");
+    const resAdvice = document.getElementById("resAdvice");
+
+    const qWrap = document.getElementById("qWrap");
+    const recentEl = document.getElementById("recent");
+    const btnExport = document.getElementById("btnExport");
+
+    // calendar
+    const dowRow = document.getElementById("dowRow");
+    const calGrid = document.getElementById("calGrid");
+    const calTitle = document.getElementById("calTitle");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnToday = document.getElementById("btnToday");
+    const btnClearAll = document.getElementById("btnClearAll");
+
+    const kMonth = document.getElementById("kMonth");
+    const kMonthText = document.getElementById("kMonthText");
+    const kNext = document.getElementById("kNext");
+    const kNextText = document.getElementById("kNextText");
+
+    // modal
+    const modal = document.getElementById("modal");
+    const mTitle = document.getElementById("mTitle");
+    const mSub = document.getElementById("mSub");
+    const mClose = document.getElementById("mClose");
+    const mCancel = document.getElementById("mCancel");
+    const mSave = document.getElementById("mSave");
+    const mTest = document.getElementById("mTest");
+    const mStatus = document.getElementById("mStatus");
+    const mResult = document.getElementById("mResult");
+    const mPlace = document.getElementById("mPlace");
+    const mNote = document.getElementById("mNote");
+
+    const DOW = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+
+    let state = load();
+    let answers = state.answers || {};
+    let lastRisk = null;
+
+    let view = (() => {
+      const t = toDate(todayIso());
+      return { y: t.getFullYear(), m: t.getMonth()+1 };
+    })();
+
+    let activeIso = null;
+
+    // restore profile
+    ageEl.value = state.profile?.age ?? "";
+    sexEverEl.value = state.profile?.sexEver ?? "yes";
+    noteEl.value = state.profile?.note ?? "";
+
+    function persistProfile(){
+      state.profile = {
+        age: ageEl.value || "",
+        sexEver: sexEverEl.value || "yes",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    ageEl.addEventListener("input", persistProfile);
+    sexEverEl.addEventListener("change", persistProfile);
+    noteEl.addEventListener("input", persistProfile);
+
+    // ===== Render questions =====
+    function renderQuestions(){
+      qWrap.innerHTML = QUESTIONS.map(q=>{
+        const current = answers[q.key];
+        return `
+          <div class="card qCard">
+            <div class="qTitle">${escapeHtml(q.title)}</div>
+            <div class="muted2">เลือก 1 ข้อ</div>
+            <div style="margin-top:8px">
+              ${q.opts.map(o=>`
+                <label class="opt">
+                  <input type="radio" name="${q.key}" value="${o.v}" ${current===o.v ? "checked":""}/>
+                  <div>
+                    <span>${escapeHtml(o.label)}</span>
+                    <div class="muted2">คะแนน: ${o.pts}</div>
+                  </div>
+                </label>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      qWrap.querySelectorAll('input[type="radio"]').forEach(r=>{
+        r.addEventListener("change", ()=>{
+          answers[r.name] = r.value;
+          state.answers = answers;
+          save(state);
+        });
+      });
+    }
+
+    function riskPill(level){
+      if(level==="high") return { cls:"pill pillHigh", text:"เสี่ยงสูง" };
+      if(level==="mid")  return { cls:"pill pillMid",  text:"ปานกลาง" };
+      return { cls:"pill pillLow", text:"ต่ำ" };
+    }
+
+    function suggestIntervalMonths(age, sexEver, level){
+      // This is intentionally conservative and simple for planning UI.
+      // Real interval depends on guideline + past results; user should follow clinicians.
+      if(sexEver === "no"){
+        return { months: 0, label:"อิงคำแนะนำแพทย์", note:"หากไม่เคยมีเพศสัมพันธ์ การคัดกรองอาจไม่จำเป็นในบางแนวทาง แต่ควรปรึกษาหน่วยบริการ" };
+      }
+      if(age < 21){
+        return { months: 0, label:"ยังไม่เน้นคัดกรอง (ทั่วไป)", note:"อายุต่ำกว่า 21 มักไม่เน้นคัดกรองแบบเป็นกิจวัตร (ขึ้นกับบริบท) — ปรึกษาหน่วยบริการ" };
+      }
+      if(level === "high"){
+        return { months: 12, label:"ติดตามถี่ขึ้น", note:"มีปัจจัยเสี่ยงสูง แนะนำปรึกษาหน่วยบริการเพื่อกำหนดรอบตรวจเฉพาะบุคคล" };
+      }
+      // mid/low: typical planning range
+      if(age >= 30){
+        return { months: 36, label:"ประมาณทุก 3 ปี (แนวทางทั่วไป)", note:"ช่วงอายุ 30+ อาจพิจารณา HPV test/Co-test ตามคำแนะนำหน่วยบริการ" };
+      }
+      return { months: 36, label:"ประมาณทุก 3 ปี (แนวทางทั่วไป)", note:"ช่วงอายุ 21–29 มักใช้ Pap เป็นหลักตามแนวทางที่หน่วยบริการใช้" };
+    }
+
+    function scoreRisk(){
+      const age = Number(ageEl.value || 0);
+      const sexEver = sexEverEl.value || "yes";
+
+      let total = 0;
+      let highFlag = false;
+
+      for(const q of QUESTIONS){
+        const v = answers[q.key];
+        const opt = q.opts.find(o=>o.v===v);
+        if(!opt) return { ok:false, msg:"กรุณาตอบคำถามความเสี่ยงให้ครบทุกข้อ" };
+        total += opt.pts;
+        if(opt.flag === "high") highFlag = true;
+      }
+
+      // light age modifier
+      if(age >= 50) total += 1;
+      if(age >= 65) total += 1;
+
+      let level = "low";
+      if(highFlag || total >= 7) level = "high";
+      else if(total >= 4) level = "mid";
+
+      const interval = suggestIntervalMonths(age, sexEver, level);
+
+      const advice = [];
+      advice.push("• คัดกรองตามรอบที่หน่วยบริการแนะนำ (Pap smear / HPV test / Co-test)");
+      advice.push("• ถ้าเคยผลผิดปกติ ให้ยึดแผนติดตามของแพทย์เป็นหลัก");
+      if(level === "high"){
+        advice.push("• แนะนำปรึกษาแพทย์/หน่วยบริการเพื่อวางแผนเฉพาะบุคคล");
+      }
+      advice.push("• หากมีอาการผิดปกติ ให้พบแพทย์ทันที ไม่ต้องรอรอบคัดกรอง");
+
+      return { ok:true, age, sexEver, total, level, intervalMonths: interval.months, intervalLabel: interval.label, intervalNote: interval.note, adviceHtml: advice.join("<br>") };
+    }
+
+    function showRisk(out){
+      lastRisk = out;
+      resWrap.style.display = "block";
+      resMeta.textContent = `อัปเดต: ${todayIso()} • เก็บในเครื่อง`;
+      const pill = riskPill(out.level);
+      resPill.className = pill.cls;
+      resPill.textContent = pill.text;
+      resScore.textContent = String(out.total);
+
+      if(out.intervalMonths === 0){
+        resInterval.textContent = out.intervalLabel;
+      }else{
+        const years = Math.round((out.intervalMonths/12)*10)/10;
+        resInterval.textContent = `${out.intervalLabel} (${years} ปี)`;
+      }
+      resIntervalNote.textContent = out.intervalNote;
+      resAdvice.innerHTML = out.adviceHtml;
+
+      state.lastIntervalMonths = out.intervalMonths || state.lastIntervalMonths || 36;
+      save(state);
+
+      // also update predicted next due KPI
+      renderKPIs();
+    }
+
+    btnCalcRisk.addEventListener("click", ()=>{
+      const out = scoreRisk();
+      if(!out.ok){ alert(out.msg || "กรุณาตอบให้ครบ"); return; }
+      showRisk(out);
+      toast("คำนวณแล้ว");
+    });
+
+    function latestDoneRecord(){
+      // find latest mark with status ok/watch/abnormal
+      const entries = Object.entries(state.marks || {}).map(([iso, rec])=>({ iso, ...rec }));
+      entries.sort((a,b)=> b.iso.localeCompare(a.iso));
+      return entries.find(e => e.status === "ok" || e.status === "watch" || e.status === "abnormal") || null;
+    }
+
+    btnPlanNext.addEventListener("click", ()=>{
+      // plan next due based on latest done date, else today + interval
+      const interval = (lastRisk?.intervalMonths ?? state.lastIntervalMonths ?? 36);
+      if(interval === 0){
+        alert("ช่วงอายุ/ข้อมูลนี้ควรปรึกษาหน่วยบริการก่อนวางแผนรอบตรวจ");
+        return;
+      }
+      const base = latestDoneRecord()?.iso || todayIso();
+      const next = addMonths(base, interval);
+      // create planned mark on that date
+      state.marks = state.marks || {};
+      state.marks[next] = {
+        status: "planned",
+        test: (Number(ageEl.value||0) >= 30) ? "hpv" : "pap",
+        result: "",
+        place: "",
+        note: "แผนจากการคำนวณในหน้า",
+        updatedAt: nowTs()
+      };
+      // add log
+      pushLog(next, state.marks[next]);
+      save(state);
+
+      // jump calendar to that month
+      const d = toDate(next);
+      view = { y: d.getFullYear(), m: d.getMonth()+1 };
+      renderCalendar();
+      toast("เพิ่มแผนลงปฏิทินแล้ว");
+    });
+
+    // ===== Logs / Recent list =====
+    function pushLog(dateIso, rec){
+      state.logs = state.logs || [];
+      state.logs.unshift({
+        id: "CC_" + String(nowTs()),
+        date: dateIso,
+        status: rec.status,
+        test: rec.test || "pap",
+        result: rec.result || "",
+        place: rec.place || "",
+        note: rec.note || "",
+        updatedAt: rec.updatedAt || nowTs(),
+      });
+      state.logs = state.logs.slice(0, 80);
+    }
+
+    function statusLabel(s){
+      if(s==="planned") return { text:"วางแผน", cls:"pill pillPlan" };
+      if(s==="ok") return { text:"ปกติ", cls:"pill pillOk" };
+      if(s==="watch") return { text:"ติดตาม", cls:"pill pillWarn" };
+      if(s==="abnormal") return { text:"ผิดปกติ", cls:"pill pillBad" };
+      return { text:"-", cls:"pill" };
+    }
+    function testLabel(t){
+      if(t==="hpv") return "HPV";
+      if(t==="co") return "Co-test";
+      return "Pap";
+    }
+
+    function renderRecent(){
+      const logs = (state.logs || []).slice(0, 10);
+      if(!logs.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = logs.map(l=>{
+        const s = statusLabel(l.status);
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${l.date} • ${testLabel(l.test)}</div>
+                <div class="muted2">${l.result ? "ผล: " + escapeHtml(l.result) : "—"} ${l.place ? " • " + escapeHtml(l.place) : ""}</div>
+              </div>
+              <span class="${s.cls}">${s.text}</span>
+            </div>
+            ${l.note ? `<div class="muted2" style="margin-top:6px">โน้ต: ${escapeHtml(l.note)}</div>` : ""}
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-open="${l.date}">เปิด</button>
+              <button class="btn btn-ghost" data-del="${l.date}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-open]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const iso = b.getAttribute("data-open");
+          openModal(iso);
+        });
+      });
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const iso = b.getAttribute("data-del");
+          if(confirm(`ลบรายการวันที่ ${iso} ใช่ไหม?`)){
+            delete state.marks[iso];
+            state.logs = (state.logs || []).filter(x => x.date !== iso);
+            save(state);
+            renderCalendar();
+            renderRecent();
+            toast("ลบแล้ว");
+          }
+        });
+      });
+    }
+
+    btnExport.addEventListener("click", ()=>{
+      const rows = [["date","test","status","result","place","note","updatedAt"]];
+      const logs = (state.logs || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const l of logs){
+        rows.push([
+          l.date, l.test || "", l.status || "",
+          (l.result||"").replaceAll("\n"," "),
+          (l.place||"").replaceAll("\n"," "),
+          (l.note||"").replaceAll("\n"," "),
+          String(l.updatedAt||"")
+        ]);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "cervical_screening.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    // ===== Calendar =====
+    function renderDow(){
+      dowRow.innerHTML = DOW.map(x => `<div class="dow">${x}</div>`).join("");
+    }
+    function monthName(m){
+      const names = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+      return names[m-1] || "";
+    }
+    function badgeClass(status){
+      if(status === "planned") return "badge bPlanned";
+      if(status === "ok") return "badge bOk";
+      if(status === "watch") return "badge bWarn";
+      if(status === "abnormal") return "badge bBad";
+      return "badge";
+    }
+
+    function renderCalendar(){
+      const y = view.y, m = view.m;
+      calTitle.textContent = `${monthName(m)} ${y}`;
+
+      const first = new Date(y, m-1, 1);
+      const startDow = first.getDay(); // 0 sun
+      const daysInMonth = new Date(y, m, 0).getDate();
+
+      const cells = [];
+      for(let i=0;i<startDow;i++) cells.push({ type:"empty" });
+      for(let d=1; d<=daysInMonth; d++){
+        const iso = ymd(y,m,d);
+        const rec = state.marks?.[iso] || null;
+        cells.push({ type:"day", iso, d, rec });
+      }
+      while(cells.length % 7 !== 0) cells.push({ type:"empty" });
+      while(cells.length < 42) cells.push({ type:"empty" });
+
+      calGrid.innerHTML = cells.map(c=>{
+        if(c.type==="empty") return `<div class="day mutedDay"></div>`;
+        const st = c.rec?.status || "";
+        const badge = st ? `<span class="${badgeClass(st)}"></span>` : "";
+        const isToday = c.iso === todayIso();
+        const small = c.rec?.test ? `<div class="muted2" style="margin-top:6px">${testLabel(c.rec.test)}</div>` : "";
+        return `
+          <div class="day" data-iso="${c.iso}" style="${isToday ? 'outline:2px solid rgba(59,130,246,.25);' : ''}">
+            <div class="dNum">${c.d}</div>
+            ${badge}
+            ${small}
+          </div>
+        `;
+      }).join("");
+
+      calGrid.querySelectorAll("[data-iso]").forEach(el=>{
+        el.addEventListener("click", ()=>{
+          const iso = el.getAttribute("data-iso");
+          openModal(iso);
+        });
+      });
+
+      renderKPIs();
+    }
+
+    function renderKPIs(){
+      const y = view.y, m = view.m;
+      const prefix = `${y}-${String(m).padStart(2,"0")}-`;
+      const entries = Object.entries(state.marks || {}).map(([iso, rec])=>({ iso, ...rec }));
+      const monthItems = entries.filter(x => x.iso.startsWith(prefix));
+
+      const planned = monthItems.filter(x => x.status==="planned").length;
+      const doneOk = monthItems.filter(x => x.status==="ok").length;
+      const doneWatch = monthItems.filter(x => x.status==="watch").length;
+      const doneBad = monthItems.filter(x => x.status==="abnormal").length;
+
+      kMonth.textContent = String(doneOk + doneWatch + doneBad);
+      kMonthText.textContent = `วางแผน ${planned} • ปกติ ${doneOk} • ติดตาม ${doneWatch} • ผิดปกติ ${doneBad}`;
+
+      const latestDone = latestDoneRecord();
+      const interval = (lastRisk?.intervalMonths ?? state.lastIntervalMonths ?? 36);
+      if(!latestDone || !interval){
+        kNext.textContent = "-";
+        kNextText.textContent = "คำนวณความเสี่ยงเพื่อแนะนำรอบตรวจ หรือบันทึกผลตรวจครั้งล่าสุด";
+      }else{
+        const next = addMonths(latestDone.iso, interval);
+        kNext.textContent = next;
+        kNextText.textContent = `อ้างอิงรอบประมาณ ${Math.round(interval/12)} ปี (ตามการคำนวณในหน้า)`;
+      }
+    }
+
+    // ===== Modal =====
+    function openModal(iso){
+      activeIso = iso;
+      const rec = state.marks?.[iso] || null;
+
+      mTitle.textContent = `วันที่ ${iso}`;
+      mSub.textContent = rec ? `สถานะเดิม: ${statusLabel(rec.status).text} • ${testLabel(rec.test||"pap")}` : "ยังไม่มีรายการ";
+
+      mTest.value = rec?.test || ((Number(ageEl.value||0) >= 30) ? "hpv" : "pap");
+      mStatus.value = rec?.status || "planned";
+      mResult.value = rec?.result || "";
+      mPlace.value = rec?.place || "";
+      mNote.value = rec?.note || "";
+
+      modal.classList.add("on");
+      modal.setAttribute("aria-hidden","false");
+      document.body.classList.add("no-scroll");
+    }
+    function closeModal(){
+      modal.classList.remove("on");
+      modal.setAttribute("aria-hidden","true");
+      document.body.classList.remove("no-scroll");
+      activeIso = null;
+    }
+
+    mClose.addEventListener("click", closeModal);
+    mCancel.addEventListener("click", closeModal);
+    modal.querySelector(".ccBackdrop").addEventListener("click", closeModal);
+    window.addEventListener("keydown", (e)=>{ if(e.key==="Escape" && modal.classList.contains("on")) closeModal(); });
+
+    mSave.addEventListener("click", ()=>{
+      if(!activeIso) return;
+
+      const st = mStatus.value;
+      if(st === "clear"){
+        if(state.marks?.[activeIso]) delete state.marks[activeIso];
+        state.logs = (state.logs || []).filter(x => x.date !== activeIso);
+        save(state);
+        closeModal();
+        renderCalendar();
+        renderRecent();
+        toast("ลบรายการแล้ว");
+        return;
+      }
+
+      const rec = {
+        status: st,
+        test: mTest.value,
+        result: (mResult.value || "").trim(),
+        place: (mPlace.value || "").trim(),
+        note: (mNote.value || "").trim(),
+        updatedAt: nowTs()
+      };
+
+      state.marks = state.marks || {};
+      state.marks[activeIso] = rec;
+
+      // push to logs as latest snapshot
+      pushLog(activeIso, rec);
+
+      save(state);
+      closeModal();
+      renderCalendar();
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    // ===== Reset =====
+    btnResetAll.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลทั้งหมดในหน้านี้ (โปรไฟล์/คำตอบ/ปฏิทิน) ใช่ไหม?")){
+        state = { profile:{ age:"", sexEver:"yes", note:"" }, answers:{}, marks:{}, logs:[], lastIntervalMonths: 36 };
+        answers = {};
+        lastRisk = null;
+        save(state);
+
+        ageEl.value = "";
+        sexEverEl.value = "yes";
+        noteEl.value = "";
+        resWrap.style.display = "none";
+
+        renderQuestions();
+        renderDow();
+        renderCalendar();
+        renderRecent();
+        toast("ล้างแล้ว");
+      }
+    });
+
+    btnClearAll.addEventListener("click", ()=>{
+      if(confirm("ล้างข้อมูลปฏิทินทั้งหมดใช่ไหม?")){
+        state.marks = {};
+        state.logs = [];
+        save(state);
+        renderCalendar();
+        renderRecent();
+        toast("ล้างปฏิทินแล้ว");
+      }
+    });
+
+    // ===== Nav =====
+    btnPrev.addEventListener("click", ()=>{
+      view.m -= 1;
+      if(view.m < 1){ view.m = 12; view.y -= 1; }
+      renderCalendar();
+    });
+    btnNext.addEventListener("click", ()=>{
+      view.m += 1;
+      if(view.m > 12){ view.m = 1; view.y += 1; }
+      renderCalendar();
+    });
+    btnToday.addEventListener("click", ()=>{
+      const t = toDate(todayIso());
+      view = { y: t.getFullYear(), m: t.getMonth()+1 };
+      renderCalendar();
+    });
+
+    // ===== Helpers =====
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // tiny toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderQuestions();
+    renderDow();
+    renderCalendar();
+    renderRecent();
+  </script>
+</body>
+</html>
