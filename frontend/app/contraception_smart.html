@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FEMI • Contraception Smart Selector</title>
+  <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .csHero{
+      background: linear-gradient(135deg, rgba(187,247,208,.26), rgba(186,230,253,.30));
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+    .grid2{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 980px){ .grid2{ grid-template-columns: 1.1fr .9fr; } }
+
+    .input, select, textarea{
+      width:100%;
+      border: 1px solid rgba(2,6,23,.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+      outline: none;
+    }
+    textarea{ min-height: 90px; resize: vertical; }
+    .muted2{ opacity:.75; font-size: 12px; }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pillOk{ border-color: rgba(34,197,94,.25); background: rgba(220,252,231,.85); }
+    .pillMid{ border-color: rgba(245,158,11,.25); background: rgba(255,237,213,.9); }
+    .pillBad{ border-color: rgba(239,68,68,.25); background: rgba(254,226,226,.85); }
+    .pillInfo{ border-color: rgba(59,130,246,.22); background: rgba(219,234,254,.85); }
+
+    .qCard{ padding: 12px; }
+    .qTitle{ font-weight: 900; margin-bottom: 8px; }
+    .opt{
+      display:flex; align-items:flex-start; gap: 10px;
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.65);
+      cursor:pointer;
+      margin-bottom: 8px;
+    }
+    .opt:hover{ background: rgba(255,255,255,.85); }
+    .opt input{ margin-top: 2px; }
+    .opt span{ font-weight: 900; }
+
+    .cards{ display:grid; gap: 10px; margin-top: 10px; }
+    .methodCard{ padding: 12px; }
+    .methodTop{ display:flex; align-items:flex-start; justify-content:space-between; gap: 10px; flex-wrap:wrap; }
+    .methodName{ font-weight: 900; font-size: 16px; }
+    .chips{ display:flex; gap: 6px; flex-wrap:wrap; margin-top: 8px; }
+    .chip{
+      display:inline-flex; align-items:center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.70);
+      font-weight: 900;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .recent{ display:grid; gap: 10px; margin-top: 10px; }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <main class="container">
+      <h1 class="page-title">เลือกวิธีคุมกำเนิดอัจฉริยะ</h1>
+      <p class="page-sub muted">แบบช่วยตัดสินใจเบื้องต้นเพื่อ “คัดกรองความเหมาะสม” และเสนอทางเลือก (เก็บข้อมูลในเครื่องผู้ใช้) ไม่ใช่คำสั่งแพทย์</p>
+
+      <div class="grid2">
+        <!-- Left: Form -->
+        <div class="csHero">
+          <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อมูลเบื้องต้น</div>
+                <div class="muted2">กรอกเท่าที่ทราบ แล้วกด “ประมวลผล”</div>
+              </div>
+              <button id="btnReset" class="btn btn-ghost">ล้างคำตอบ</button>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">อายุ (ปี)</label>
+                <input id="age" class="input" type="number" min="10" max="120" placeholder="28" />
+              </div>
+              <div>
+                <label class="muted">ต้องการคุมกำเนิดนานแค่ไหน?</label>
+                <select id="horizon" class="input">
+                  <option value="short">ช่วงสั้น (0–1 ปี)</option>
+                  <option value="mid">ช่วงกลาง (1–3 ปี)</option>
+                  <option value="long">ระยะยาว (3 ปีขึ้นไป)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">หลังคลอด/ให้นมบุตรหรือไม่?</label>
+                <select id="postpartum" class="input">
+                  <option value="no">ไม่ใช่</option>
+                  <option value="pp_lt6w">หลังคลอด &lt; 6 สัปดาห์</option>
+                  <option value="pp_ge6w_bf">หลังคลอด ≥ 6 สัปดาห์ และให้นม</option>
+                  <option value="pp_ge6w_nbf">หลังคลอด ≥ 6 สัปดาห์ และไม่ให้นม</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">ต้องการป้องกันโรคติดต่อทางเพศสัมพันธ์ (STI) ด้วยไหม?</label>
+                <select id="sti" class="input">
+                  <option value="yes">ต้องการ (ควรถุงยาง)</option>
+                  <option value="no">ไม่จำเป็น/มีคู่คงที่</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">สูบบุหรี่หรือไม่?</label>
+                <select id="smoke" class="input">
+                  <option value="no">ไม่สูบ</option>
+                  <option value="yes">สูบ</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">มีไมเกรนแบบมีออร่า (migraine with aura) หรือไม่?</label>
+                <select id="aura" class="input">
+                  <option value="no">ไม่แน่ใจ/ไม่มี</option>
+                  <option value="yes">มี</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">มีโรค/ความเสี่ยงต่อหลอดเลือด (ความดันสูง/ลิ่มเลือด/หัวใจ/เส้นเลือดสมอง) หรือไม่?</label>
+                <select id="vascular" class="input">
+                  <option value="no">ไม่ทราบ/ไม่มี</option>
+                  <option value="yes">มี/สงสัย</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">ต้องการ “ไม่ต้องจำทุกวัน” ไหม?</label>
+                <select id="noDaily" class="input">
+                  <option value="yes">ใช่ (ชอบแบบยาว/สะดวก)</option>
+                  <option value="no">ไม่เป็นไร (กิน/ใช้เป็นรอบได้)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin-top:10px">
+              <label class="muted">หมายเหตุเพิ่มเติม (ถ้ามี)</label>
+              <textarea id="note" class="input" placeholder="เช่น เคยแพ้ยา, เคยมีผลข้างเคียง, มีประจำเดือนมาก ฯลฯ"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnRun" class="btn btn-ok">ประมวลผลข้อเสนอ</button>
+              <button id="btnSave" class="btn btn-warn">บันทึกผลวันนี้</button>
+              <button id="btnExport" class="btn btn-ghost">Export CSV</button>
+            </div>
+
+            <div class="card-soft" style="padding:12px;margin-top:12px">
+              <div style="font-weight:900">ข้อควรรู้</div>
+              <div class="muted" style="margin-top:8px;line-height:1.7">
+                • ถุงยางเป็นวิธีเดียวที่ช่วยลดความเสี่ยง STI ได้โดยตรง<br>
+                • ความเหมาะสมของ “ยาคุมฮอร์โมนรวม” ขึ้นกับปัจจัยเสี่ยงหลายอย่าง (เช่น สูบบุหรี่ อายุ ไมเกรนออร่า โรคหลอดเลือด)<br>
+                • หากมีข้อสงสัย/โรคประจำตัว/หลังคลอด ควรปรึกษาหน่วยบริการก่อนเริ่มใช้
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ข้อเสนอแนะนำ</div>
+                <div class="muted2" id="recMeta">กด “ประมวลผลข้อเสนอ” เพื่อดูผล</div>
+              </div>
+              <span id="recPill" class="pill pillInfo">ยังไม่ประมวลผล</span>
+            </div>
+            <div id="cards" class="cards"></div>
+          </div>
+        </div>
+
+        <!-- Right: Help + Recent -->
+        <div>
+          <div class="card" style="padding:14px">
+            <div style="font-weight:900;font-size:16px">วิธีอ่านผล</div>
+            <div class="muted" style="margin-top:8px;line-height:1.7">
+              • ระบบจะแบ่งเป็น “แนะนำมาก / ทางเลือก / ควรปรึกษาก่อน” ตามข้อมูลที่กรอก<br>
+              • ถ้าต้องการป้องกัน STI: ใช้ถุงยางร่วมกับวิธีอื่น (Dual protection)<br>
+              • ถ้าลืมกินยาบ่อย: แนะนำวิธีที่ไม่ต้องจำทุกวัน (ห่วง/ฝัง/ฉีด/แผ่นแปะ/วงแหวน)
+            </div>
+          </div>
+
+          <div class="card" style="padding:14px;margin-top:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div>
+                <div style="font-weight:900;font-size:16px">ประวัติการประมวลผล</div>
+                <div class="muted2">6 รายการล่าสุดในเครื่อง</div>
+              </div>
+              <button id="btnClearHistory" class="btn btn-ghost">ล้างประวัติ</button>
+            </div>
+            <div id="recent" class="recent"></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+
+    await initUserShell({ active: "tools", title: "Contraception Smart" });
+    try{ applyI18n(document); }catch{}
+
+    const LS_KEY = "FEMI_CONTRACEPTION_SMART_V1";
+
+    function load(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { profile:{}, history:[] };
+      }catch{
+        return { profile:{}, history:[] };
+      }
+    }
+    function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    function nowTs(){ return Date.now(); }
+    function todayIso(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    const ageEl = document.getElementById("age");
+    const horizonEl = document.getElementById("horizon");
+    const postpartumEl = document.getElementById("postpartum");
+    const stiEl = document.getElementById("sti");
+    const smokeEl = document.getElementById("smoke");
+    const auraEl = document.getElementById("aura");
+    const vascularEl = document.getElementById("vascular");
+    const noDailyEl = document.getElementById("noDaily");
+    const noteEl = document.getElementById("note");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnRun = document.getElementById("btnRun");
+    const btnSave = document.getElementById("btnSave");
+    const btnExport = document.getElementById("btnExport");
+    const btnClearHistory = document.getElementById("btnClearHistory");
+
+    const recMeta = document.getElementById("recMeta");
+    const recPill = document.getElementById("recPill");
+    const cardsEl = document.getElementById("cards");
+    const recentEl = document.getElementById("recent");
+
+    let state = load();
+    let lastResult = null;
+
+    // restore profile
+    function setVal(el, v){ if(v !== undefined && v !== null && v !== "") el.value = v; }
+    setVal(ageEl, state.profile?.age);
+    setVal(horizonEl, state.profile?.horizon || "mid");
+    setVal(postpartumEl, state.profile?.postpartum || "no");
+    setVal(stiEl, state.profile?.sti || "yes");
+    setVal(smokeEl, state.profile?.smoke || "no");
+    setVal(auraEl, state.profile?.aura || "no");
+    setVal(vascularEl, state.profile?.vascular || "no");
+    setVal(noDailyEl, state.profile?.noDaily || "yes");
+    setVal(noteEl, state.profile?.note || "");
+
+    function persistProfile(){
+      state.profile = {
+        age: ageEl.value || "",
+        horizon: horizonEl.value || "mid",
+        postpartum: postpartumEl.value || "no",
+        sti: stiEl.value || "yes",
+        smoke: smokeEl.value || "no",
+        aura: auraEl.value || "no",
+        vascular: vascularEl.value || "no",
+        noDaily: noDailyEl.value || "yes",
+        note: (noteEl.value || "").trim()
+      };
+      save(state);
+    }
+    [ageEl,horizonEl,postpartumEl,stiEl,smokeEl,auraEl,vascularEl,noDailyEl,noteEl].forEach(el=>{
+      el.addEventListener("change", persistProfile);
+      el.addEventListener("input", persistProfile);
+    });
+
+    // Method library
+    const METHODS = [
+      { id:"condom", name:"ถุงยางอนามัย", tags:["ป้องกัน STI","ใช้ตามครั้ง"], pros:["ป้องกัน STI","เข้าถึงง่าย"], cons:["ต้องใช้ทุกครั้ง"], cat:"barrier" },
+      { id:"coc", name:"ยาคุมฮอร์โมนรวม (เม็ด/แผ่นแปะ/วงแหวน)", tags:["ประสิทธิภาพดี","ต้องใช้สม่ำเสมอ"], pros:["ควบคุมรอบเดือนบางคน","ประสิทธิภาพดีเมื่อใช้ถูก"], cons:["มีข้อห้าม/ข้อควรระวังในบางกลุ่ม"], cat:"combined" },
+      { id:"pop", name:"ยาคุมฮอร์โมนเดี่ยว (โปรเจสติน) / ยาคุมให้นม", tags:["เหมาะบางช่วงหลังคลอด","ต้องกินตรงเวลา"], pros:["ตัวเลือกเมื่อไม่เหมาะกับฮอร์โมนรวม"], cons:["ต้องตรงเวลา"], cat:"progestin" },
+      { id:"inj", name:"ยาฉีดคุมกำเนิด", tags:["ทุก 3 เดือน","ไม่ต้องจำทุกวัน"], pros:["สะดวก"], cons:["อาจมีเลือดออกกะปริบกะปรอย/น้ำหนักขึ้นบางคน"], cat:"progestin" },
+      { id:"implant", name:"ยาฝังคุมกำเนิด", tags:["3–5 ปี","ไม่ต้องจำ"], pros:["ประสิทธิภาพสูงมาก"], cons:["ต้องทำหัตถการ"], cat:"larc" },
+      { id:"iud_cu", name:"ห่วงคุมกำเนิดชนิดทองแดง (Cu-IUD)", tags:["5–10 ปี","ไม่มีฮอร์โมน"], pros:["ยาวนาน","ไม่ต้องจำ"], cons:["ประจำเดือนมาก/ปวดมากขึ้นในบางคน"], cat:"larc" },
+      { id:"iud_h", name:"ห่วงคุมกำเนิดชนิดฮอร์โมน (LNG-IUD)", tags:["3–8 ปี","เลือดออกน้อยลงบางคน"], pros:["ยาวนาน","อาจช่วยลดประจำเดือนมาก"], cons:["ต้องทำหัตถการ"], cat:"larc" },
+      { id:"fertility", name:"วิธีนับระยะปลอดภัย/ติดตามรอบเดือน", tags:["ไม่ใช้ยา","ต้องมีวินัย"], pros:["ไม่ใช้ฮอร์โมน"], cons:["ความแม่นขึ้นกับวินัย/ความสม่ำเสมอ"], cat:"natural" },
+      { id:"ecp", name:"ยาคุมฉุกเฉิน", tags:["ใช้กรณีฉุกเฉิน"], pros:["ช่วยลดโอกาสตั้งครรภ์หลังมีเพศสัมพันธ์"], cons:["ไม่ควรใช้แทนวิธีประจำ"], cat:"emergency" },
+    ];
+
+    function score(){
+      const age = Number(ageEl.value || 0);
+      const horizon = horizonEl.value || "mid";
+      const postpartum = postpartumEl.value || "no";
+      const sti = stiEl.value || "yes";
+      const smoke = smokeEl.value || "no";
+      const aura = auraEl.value || "no";
+      const vascular = vascularEl.value || "no";
+      const noDaily = noDailyEl.value || "yes";
+
+      // rules (simple; not medical eligibility)
+      const cautionCombined = (aura === "yes") || (vascular === "yes") || (smoke === "yes" && age >= 35) || (postpartum === "pp_lt6w");
+      const preferLarc = (horizon === "long") || (noDaily === "yes");
+      const breastfeeding = (postpartum === "pp_ge6w_bf");
+
+      const rec = [];
+      const options = [];
+      const caution = [];
+
+      // Always mention condoms if STI protection desired
+      if(sti === "yes") rec.push({ id:"condom", why:"ต้องการป้องกัน STI — แนะนำใช้ถุงยาง (อาจใช้ร่วมกับวิธีอื่น)" });
+
+      // LARC suggestions
+      if(preferLarc){
+        rec.push({ id:"implant", why:"ต้องการระยะยาว/ไม่ต้องจำทุกวัน — ยาฝังมีประสิทธิภาพสูงมาก" });
+        rec.push({ id:"iud_h", why:"ต้องการระยะยาว — ห่วงฮอร์โมนเป็นตัวเลือกที่สะดวก" });
+        rec.push({ id:"iud_cu", why:"ต้องการระยะยาวและไม่อยากใช้ฮอร์โมน — ห่วงทองแดงเป็นทางเลือก" });
+      }else{
+        options.push({ id:"inj", why:"ไม่ต้องกินทุกวัน — ฉีดทุก 3 เดือน" });
+        options.push({ id:"pop", why:"ตัวเลือกฮอร์โมนเดี่ยว (โดยเฉพาะบางช่วงหลังคลอด/ให้นม)" });
+      }
+
+      // Hormonal combined
+      if(cautionCombined){
+        caution.push({ id:"coc", why:"มีปัจจัยที่ควรระวังสำหรับฮอร์โมนรวม (แนะนำปรึกษาหน่วยบริการก่อน)" });
+      }else{
+        options.push({ id:"coc", why:"หากไม่มีข้อห้ามและต้องการประสิทธิภาพดี — ฮอร์โมนรวมเป็นตัวเลือก" });
+      }
+
+      // Postpartum nuance
+      if(postpartum === "pp_lt6w"){
+        caution.push({ id:"coc", why:"หลังคลอด < 6 สัปดาห์ โดยทั่วไปควรปรึกษาหน่วยบริการก่อนใช้ฮอร์โมนรวม" });
+        options.push({ id:"condom", why:"ช่วงนี้ใช้ถุงยาง/วิธีชั่วคราวได้" });
+      }
+      if(breastfeeding){
+        options.push({ id:"pop", why:"ให้นมบุตร — มักพิจารณาฮอร์โมนเดี่ยวเป็นตัวเลือก (ปรึกษาหน่วยบริการ)" });
+      }
+
+      // Natural method if wants short term and okay with discipline
+      if(horizon === "short"){
+        options.push({ id:"fertility", why:"คุมระยะสั้น และยอมรับการติดตามรอบเดือน — วิธีธรรมชาติเป็นทางเลือก" });
+      }
+
+      // Emergency always as info
+      options.push({ id:"ecp", why:"สำหรับกรณีฉุกเฉิน (ไม่ใช้แทนวิธีประจำ)" });
+
+      // dedupe while preserving priority
+      const seen = new Set();
+      const pick = (arr)=> arr.filter(x=> (seen.has(x.id)? false : (seen.add(x.id), true)));
+
+      const rec2 = pick(rec);
+      const options2 = pick(options);
+      const caution2 = pick(caution);
+
+      const summary = [];
+      if(sti === "yes") summary.push("เน้นป้องกัน STI: ใช้ถุงยางร่วมกับวิธีอื่น");
+      if(preferLarc) summary.push("ชอบแบบไม่ต้องจำทุกวัน: เน้น LARC (ฝัง/ห่วง)");
+      if(cautionCombined) summary.push("มีปัจจัยควรระวังฮอร์โมนรวม: ควรปรึกษาหน่วยบริการ");
+
+      return {
+        ok:true,
+        date: todayIso(),
+        profile: { age: ageEl.value || "", horizon, postpartum, sti, smoke, aura, vascular, noDaily, note:(noteEl.value||"").trim() },
+        summary,
+        rec: rec2,
+        options: options2,
+        caution: caution2
+      };
+    }
+
+    function methodById(id){ return METHODS.find(m=>m.id===id); }
+
+    function renderCards(result){
+      const parts = [];
+      const mk = (title, pillCls, pillText, items)=>{
+        if(!items.length) return;
+        parts.push(`
+          <div class="card-soft" style="padding:12px">
+            <div class="methodTop">
+              <div style="font-weight:900">${title}</div>
+              <span class="pill ${pillCls}">${pillText}</span>
+            </div>
+            <div class="cards">
+              ${items.map(it=>{
+                const m = methodById(it.id);
+                if(!m) return "";
+                return `
+                  <div class="card methodCard">
+                    <div class="methodTop">
+                      <div>
+                        <div class="methodName">${escapeHtml(m.name)}</div>
+                        <div class="muted2">${escapeHtml(it.why)}</div>
+                      </div>
+                      <span class="pill pillInfo">${escapeHtml(m.cat.toUpperCase())}</span>
+                    </div>
+                    <div class="chips">
+                      ${m.tags.map(t=>`<span class="chip">${escapeHtml(t)}</span>`).join("")}
+                    </div>
+                    <div class="muted2" style="margin-top:10px">
+                      <b>ข้อดี:</b> ${escapeHtml(m.pros.join(" • "))}<br>
+                      <b>ข้อจำกัด:</b> ${escapeHtml(m.cons.join(" • "))}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `);
+      };
+
+      mk("แนะนำมาก", "pillOk", "เหมาะ", result.rec);
+      mk("ทางเลือก", "pillMid", "พิจารณา", result.options);
+      mk("ควรปรึกษาก่อน", "pillBad", "ระวัง", result.caution);
+
+      cardsEl.innerHTML = parts.join("") || '<div class="muted2" style="margin-top:10px">ยังไม่มีข้อเสนอ</div>';
+    }
+
+    function run(){
+      const r = score();
+      lastResult = r;
+
+      recMeta.textContent = `อัปเดต: ${r.date} • เก็บในเครื่อง`;
+      const pillText =
+        r.caution.length ? "มีข้อควรปรึกษา" :
+        r.rec.length ? "ได้ข้อเสนอ" : "ลองปรับคำตอบ";
+      recPill.className = "pill " + (r.caution.length ? "pillBad" : (r.rec.length ? "pillOk" : "pillInfo"));
+      recPill.textContent = pillText;
+
+      const summary = r.summary.length ? ("สรุป: " + r.summary.join(" • ")) : "สรุป: —";
+      cardsEl.innerHTML = `<div class="muted2" style="margin-top:6px">${escapeHtml(summary)}</div>`;
+      renderCards(r);
+      toast("ประมวลผลแล้ว");
+    }
+
+    btnRun.addEventListener("click", run);
+
+    btnSave.addEventListener("click", ()=>{
+      const r = lastResult || score();
+      const rec = { ...r, id: "CS_" + String(nowTs()) };
+      state.history = state.history || [];
+      state.history.unshift(rec);
+      state.history = state.history.slice(0, 60);
+      save(state);
+      renderRecent();
+      toast("บันทึกแล้ว");
+    });
+
+    btnReset.addEventListener("click", ()=>{
+      if(confirm("ล้างคำตอบทั้งหมดใช่ไหม?")){
+        state.profile = {};
+        save(state);
+        ageEl.value = "";
+        horizonEl.value = "mid";
+        postpartumEl.value = "no";
+        stiEl.value = "yes";
+        smokeEl.value = "no";
+        auraEl.value = "no";
+        vascularEl.value = "no";
+        noDailyEl.value = "yes";
+        noteEl.value = "";
+        recMeta.textContent = "กด “ประมวลผลข้อเสนอ” เพื่อดูผล";
+        recPill.className = "pill pillInfo";
+        recPill.textContent = "ยังไม่ประมวลผล";
+        cardsEl.innerHTML = "";
+        lastResult = null;
+      }
+    });
+
+    function renderRecent(){
+      const hist = (state.history || []).slice(0, 6);
+      if(!hist.length){
+        recentEl.innerHTML = '<div class="muted2">ยังไม่มีรายการ</div>';
+        return;
+      }
+      recentEl.innerHTML = hist.map(h=>{
+        const hasCaution = (h.caution || []).length > 0;
+        const pillCls = hasCaution ? "pill pillBad" : "pill pillOk";
+        const pillText = hasCaution ? "ควรปรึกษา" : "ได้ข้อเสนอ";
+        return `
+          <div class="card" style="padding:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+              <div style="min-width:0">
+                <div style="font-weight:900">${h.date}</div>
+                <div class="muted2">อายุ: ${escapeHtml(h.profile?.age || "-")} • ระยะ: ${escapeHtml(h.profile?.horizon || "-")} • STI: ${escapeHtml(h.profile?.sti || "-")}</div>
+              </div>
+              <span class="${pillCls}">${pillText}</span>
+            </div>
+            <div class="actions" style="margin-top:10px">
+              <button class="btn btn-ghost" data-view="${h.id}">ดู</button>
+              <button class="btn btn-ghost" data-del="${h.id}">ลบ</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recentEl.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-view");
+          const rec = (state.history || []).find(x=>x.id===id);
+          if(!rec) return;
+          // restore profile
+          const p = rec.profile || {};
+          ageEl.value = p.age || "";
+          horizonEl.value = p.horizon || "mid";
+          postpartumEl.value = p.postpartum || "no";
+          stiEl.value = p.sti || "yes";
+          smokeEl.value = p.smoke || "no";
+          auraEl.value = p.aura || "no";
+          vascularEl.value = p.vascular || "no";
+          noDailyEl.value = p.noDaily || "yes";
+          noteEl.value = p.note || "";
+          persistProfile();
+          lastResult = rec;
+          renderCards(rec);
+          recMeta.textContent = `อัปเดต: ${rec.date} • โหลดจากประวัติ`;
+          recPill.className = "pill " + (rec.caution.length ? "pillBad" : "pillOk");
+          recPill.textContent = rec.caution.length ? "มีข้อควรปรึกษา" : "ได้ข้อเสนอ";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+
+      recentEl.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.getAttribute("data-del");
+          if(confirm("ลบรายการนี้ใช่ไหม?")){
+            state.history = (state.history || []).filter(x=>x.id!==id);
+            save(state);
+            renderRecent();
+          }
+        });
+      });
+    }
+
+    btnClearHistory.addEventListener("click", ()=>{
+      if(confirm("ล้างประวัติทั้งหมดใช่ไหม?")){
+        state.history = [];
+        save(state);
+        renderRecent();
+      }
+    });
+
+    btnExport.addEventListener("click", ()=>{
+      const header = ["date","age","horizon","postpartum","sti","smoke","aura","vascular","noDaily","summary","note"];
+      const rows = [header];
+      const hist = (state.history || []).slice().sort((a,b)=> a.date.localeCompare(b.date));
+      for(const h of hist){
+        const p = h.profile || {};
+        rows.push([
+          h.date,
+          p.age || "",
+          p.horizon || "",
+          p.postpartum || "",
+          p.sti || "",
+          p.smoke || "",
+          p.aura || "",
+          p.vascular || "",
+          p.noDaily || "",
+          (h.summary || []).join(" • "),
+          (p.note || "").replaceAll("\n"," ")
+        ]);
+      }
+      const csv = rows.map(r => r.map(x=>{
+        const s = String(x ?? "");
+        const safe = s.includes(",") || s.includes('"') || s.includes("\n") ? '"' + s.replaceAll('"','""') + '"' : s;
+        return safe;
+      }).join(",")).join("\n");
+
+      const blob = new Blob([csv], { type:"text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "contraception_smart.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 500);
+    });
+
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // toast
+    let toastTimer = null;
+    function toast(msg){
+      clearTimeout(toastTimer);
+      let el = document.getElementById("__toast");
+      if(!el){
+        el = document.createElement("div");
+        el.id = "__toast";
+        el.style.position = "fixed";
+        el.style.left = "50%";
+        el.style.bottom = "18px";
+        el.style.transform = "translateX(-50%)";
+        el.style.padding = "10px 12px";
+        el.style.borderRadius = "999px";
+        el.style.border = "1px solid rgba(17,24,39,.10)";
+        el.style.background = "rgba(255,255,255,.92)";
+        el.style.boxShadow = "0 12px 30px rgba(0,0,0,.14)";
+        el.style.fontWeight = "900";
+        el.style.zIndex = "80";
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = "1";
+      toastTimer = setTimeout(()=>{ el.style.opacity = "0"; }, 1600);
+    }
+
+    // init
+    renderRecent();
+  </script>
+</body>
+</html>
