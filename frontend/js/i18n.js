@@ -383,6 +383,23 @@ const DICT = {
     "preg.vitals.edema.moderate": "Moderate",
     "preg.vitals.edema.severe": "Severe",
     "preg.vitals.validation.date": "Please provide date",
+
+    // Knowledge page
+    "kp.subtitle": "บทความความรู้",
+    "kp.empty": "ยังไม่มีข้อมูล",
+    "kp.loadFailed": "โหลดข้อมูลไม่สำเร็จ",
+
+    // Knowledge (new)
+    "kp.featured": "ความรู้วันนี้",
+    "kp.recommended": "ความรู้แนะนำ",
+    "kp.shuffle": "สุ่มใหม่",
+    "kp.cat.preventive": "การสร้างเสริมสุขภาพและป้องกันโรค",
+    "kp.cat.holistic": "สุขภาพองค์รวม",
+    "kp.cat.breast_ca": "มะเร็งเต้านม",
+    "kp.cat.cervical_ca": "มะเร็งปากมดลูก",
+    "kp.cat.menopause": "วัยทอง",
+    "kp.cat.family_planning": "การวางแผนครอบครัว",
+    "kp.cat.pregnancy": "การดูแลครรภ์",
   }
 };
 

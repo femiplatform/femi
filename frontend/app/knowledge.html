@@ -3,79 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • คลังความรู้</title>
+  <title>FEMI • Knowledge</title>
   <link rel="stylesheet" href="../assets/app.css" />
 </head>
 <body>
   <div id="app">
     <main class="container">
       <h1 class="page-title" data-i18n="page.knowledge">คลังความรู้</h1>
-      <p class="page-sub muted" data-i18n="kp.subtitle">บทความและข่าวสาร</p>
+      <p class="page-sub muted" id="kSub" data-i18n="kp.subtitle">บทความความรู้</p>
 
-      <div class="tabs">
-        <button class="tab active" data-tab="kb" data-i18n="kp.tab.kb">ความรู้</button>
-        <button class="tab" data-tab="news" data-i18n="kp.tab.news">ข่าว</button>
-      </div>
+      <!-- Featured (1 full content) -->
+      <section style="margin-top:12px">
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+          <div style="font-weight:900" data-i18n="kp.featured">ความรู้วันนี้</div>
+          <button class="btn" id="btnShuffle" data-i18n="kp.shuffle">สุ่มใหม่</button>
+        </div>
+        <div id="featured" style="margin-top:10px"></div>
+      </section>
 
-      <div id="loading" class="muted" data-i18n="common.loading">กำลังโหลด…</div>
-      <div id="empty" class="card hidden" style="padding:14px" data-i18n="kp.empty">ยังไม่มีข้อมูล</div>
-      <div id="list" style="display:flex;flex-direction:column;gap:10px"></div>
+      <!-- Recommended (5 titles) -->
+      <section style="margin-top:14px">
+        <div style="font-weight:900" data-i18n="kp.recommended">ความรู้แนะนำ</div>
+        <div id="recommended" style="margin-top:10px"></div>
+      </section>
     </main>
   </div>
 
   <script type="module">
     import { initUserShell } from "../js/shell.js";
-    import { api } from "../js/api.js";
-    import { t, applyI18n } from "../js/i18n.js";
+    import { applyI18n } from "../js/i18n.js";
+    import { initKnowledgePage } from "../js/pages/knowledge.js";
 
-    await initUserShell({ active: "tools", title: t("page.knowledge") });
+    await initUserShell({ active: "tools", title: "Knowledge" });
     applyI18n(document);
-
-    const tabs = Array.from(document.querySelectorAll('.tab'));
-    let tab = 'kb';
-
-    const elLoading = document.getElementById('loading');
-    const elEmpty = document.getElementById('empty');
-    const elList = document.getElementById('list');
-
-    const esc = (s)=> String(s??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-
-    async function load(){
-      elLoading.classList.remove('hidden');
-      elEmpty.classList.add('hidden');
-      elList.innerHTML = '';
-      try {
-        const items = tab === 'kb' ? await api.knowledgeList() : await api.newsList();
-        if (!items || !items.length){
-          elEmpty.classList.remove('hidden');
-          return;
-        }
-        items.forEach(it => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.style.padding = '14px';
-          card.innerHTML = `
-            <div style="font-weight:900">${esc(it.title||'')}</div>
-            ${it.summary ? `<div class="muted" style="margin-top:6px">${esc(it.summary)}</div>` : ''}
-          `;
-          elList.appendChild(card);
-        });
-      } catch(e){
-        console.error(e);
-        alert(e?.error?.message || t("kp.loadFailed"));
-      } finally {
-        elLoading.classList.add('hidden');
-      }
-    }
-
-    tabs.forEach(b => b.addEventListener('click', async () => {
-      tabs.forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-      tab = b.dataset.tab;
-      await load();
-    }));
-
-    await load();
+    initKnowledgePage();
   </script>
 </body>
 </html>

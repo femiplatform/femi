@@ -136,6 +136,17 @@ export const api = {
 
   pregSummaryToday: (payload = {}) => request("preg.summary.today", payload),
 
+  // =========================================================
+  // ✅ Knowledge (random)
+  // =========================================================
+  knowledgeFeaturedRandom: (category = "") =>
+    request("knowledge.featured.random", { category }),
+
+  knowledgeRecommendedRandom: (excludeIds = [], category = "") =>
+    request("knowledge.recommended.random", { excludeIds, category }),
+
+  knowledgeGetById: (knowledgeId) =>
+    request("knowledge.getById", { knowledgeId }),  
 };
 
 // expose for console debugging
