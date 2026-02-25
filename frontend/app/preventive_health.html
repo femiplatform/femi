@@ -43,6 +43,10 @@
 
     .kpiRow{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     @media (max-width: 680px){ .kpiRow{ grid-template-columns: 1fr; } }
+
+    .kpi3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 860px){ .kpi3{ grid-template-columns: 1fr; } }
+
     .big{
       font-size: 28px;
       font-weight: 900;
@@ -53,10 +57,12 @@
       line-height: 1.1;
     }
 
-    .tone-water{ background: linear-gradient(135deg, rgba(219,234,254,.85), rgba(240,253,250,.70)); border:1px solid rgba(59,130,246,.12); }
-    .tone-ex{ background: linear-gradient(135deg, rgba(220,252,231,.85), rgba(254,243,199,.70)); border:1px solid rgba(34,197,94,.14); }
     .tone-bmi{ background: linear-gradient(135deg, rgba(254,226,226,.75), rgba(255,237,213,.70)); border:1px solid rgba(239,68,68,.12); }
+    .tone-ex{ background: linear-gradient(135deg, rgba(220,252,231,.85), rgba(254,243,199,.70)); border:1px solid rgba(34,197,94,.14); }
+    .tone-water{ background: linear-gradient(135deg, rgba(219,234,254,.85), rgba(240,253,250,.70)); border:1px solid rgba(59,130,246,.12); }
     .tone-sleep{ background: linear-gradient(135deg, rgba(221,214,254,.70), rgba(219,234,254,.70)); border:1px solid rgba(139,92,246,.14); }
+    .tone-sweet{ background: linear-gradient(135deg, rgba(254,243,199,.75), rgba(240,253,250,.70)); border:1px solid rgba(245,158,11,.16); }
+    .tone-fat{ background: linear-gradient(135deg, rgba(236,253,245,.78), rgba(219,234,254,.70)); border:1px solid rgba(16,185,129,.14); }
     .tone-salt{ background: linear-gradient(135deg, rgba(254,243,199,.75), rgba(255,255,255,.72)); border:1px solid rgba(245,158,11,.16); }
 
     .pill{
@@ -77,7 +83,7 @@
   <div id="app">
     <main class="container">
       <h1 class="page-title">ดูแลสุขภาพเชิงป้องกัน</h1>
-      <p class="page-sub muted">คำนวณและคำแนะนำแบบเข้าใจง่าย เพื่อดูแลสุขภาพประจำวัน (เก็บข้อมูลในเครื่องผู้ใช้) ไม่ใช่การวินิจฉัย</p>
+      <p class="page-sub muted">คำนวณและคำแนะนำแบบเข้าใจง่าย เพื่อดูแลสุขภาพประจำวัน</p>
 
       <div class="heroBox">
         <div class="card" style="padding:14px;background:rgba(255,255,255,.72);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06);">
@@ -134,16 +140,118 @@
           </div>
 
           <div class="muted2" style="margin-top:10px">
-            *สูตรและเกณฑ์เป็นแนวทางสาธารณสุขทั่วไป อาจต้องปรับตามโรคประจำตัว/ตั้งครรภ์/ให้นม/แพทย์สั่ง
+            *เป็นแนวทางทั่วไป อาจต้องปรับตามโรคประจำตัว/ตั้งครรภ์/ให้นม/แพทย์สั่ง
           </div>
         </div>
 
         <div class="calcGrid">
-          <!-- 1) Water -->
+
+          <!-- 1) BMI + Health age + BMR/TDEE -->
+          <div class="card calcCard tone-bmi">
+            <div class="calcHead">
+              <div>
+                <div class="calcTitle">1) คำนวณดัชนีมวลกาย (น้ำหนักเหมาะสมไหม)</div>
+                <div class="muted2">พร้อมสรุป “อายุสุขภาพโดยประมาณ” และพลังงานที่ร่างกายใช้ต่อวัน</div>
+              </div>
+              <span class="badge">น้ำหนัก</span>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnBMI" class="btn btn-ok">คำนวณ</button>
+            </div>
+
+            <div id="bmiRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div class="muted">BMI</div>
+                  <div class="big" id="bmiVal">-</div>
+                  <div class="muted2" id="bmiText">-</div>
+                </div>
+                <span class="pill" id="bmiPill">-</span>
+              </div>
+              <div class="muted2" style="margin-top:8px" id="bmiRange">-</div>
+
+              <div class="kpi3">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">อายุสุขภาพ (โดยประมาณ)</div>
+                  <div class="big" id="healthAge">-</div>
+                  <div class="muted2" id="healthAgeText">—</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">พลังงานขั้นต่ำ (BMR)</div>
+                  <div class="big" id="bmrVal">-</div>
+                  <div class="muted2">กิโลแคลอรี/วัน</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">พลังงานที่ใช้ทั้งวัน (TDEE)</div>
+                  <div class="big" id="tdeeVal">-</div>
+                  <div class="muted2">กิโลแคลอรี/วัน</div>
+                </div>
+              </div>
+
+              <div class="card-soft" style="padding:12px;margin-top:10px">
+                <div style="font-weight:900">เอาค่า BMR/TDEE ไปใช้ยังไง (ง่าย ๆ)</div>
+                <div class="muted" style="margin-top:8px;line-height:1.7" id="bmrTips">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2) Exercise -->
+          <div class="card calcCard tone-ex">
+            <div class="calcHead">
+              <div>
+                <div class="calcTitle">2) คำนวณเป้าหมายการออกกำลังกายต่อวัน</div>
+                <div class="muted2">แนวทางทั่วไป: ระดับปานกลาง 150–300 นาที/สัปดาห์</div>
+              </div>
+              <span class="badge">ออกกำลัง</span>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">เป้าหมาย</label>
+                <select id="goal" class="input">
+                  <option value="basic" selected>สุขภาพทั่วไป</option>
+                  <option value="weight">ลดน้ำหนัก/ลดพุง</option>
+                  <option value="fit">เพิ่มความฟิต</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">วันต่อสัปดาห์ที่ทำได้</label>
+                <select id="daysPerWeek" class="input">
+                  <option value="3">3 วัน</option>
+                  <option value="4">4 วัน</option>
+                  <option value="5" selected>5 วัน</option>
+                  <option value="6">6 วัน</option>
+                  <option value="7">7 วัน</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnEx" class="btn btn-ok">คำนวณเป้าหมาย</button>
+            </div>
+
+            <div id="exRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
+              <div class="kpiRow">
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">เป้าหมาย/วัน</div>
+                  <div class="big" id="exMinDay">-</div>
+                  <div class="muted2">นาที/วัน (ระดับปานกลาง)</div>
+                </div>
+                <div class="card-soft" style="padding:12px">
+                  <div class="muted">ตัวเลือกที่ทำได้ง่าย</div>
+                  <div style="font-weight:900;margin-top:6px" id="exIdeasTitle">-</div>
+                  <div class="muted2" id="exIdeas">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3) Water -->
           <div class="card calcCard tone-water">
             <div class="calcHead">
               <div>
-                <div class="calcTitle">1) คำนวณปริมาณน้ำที่ควรดื่มต่อวัน</div>
+                <div class="calcTitle">3) คำนวณปริมาณน้ำที่ควรดื่มต่อวัน</div>
                 <div class="muted2">คำนวณจากน้ำหนัก + ระดับกิจกรรม + อากาศร้อน</div>
               </div>
               <span class="badge">น้ำ</span>
@@ -171,90 +279,13 @@
             <div id="waterRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
               <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
                 <div>
-                  <div class="muted">ควรดื่มประมาณ</div>
+                  <div class="muted">ควรดื่มน้ำประมาณ</div>
                   <div class="big" id="waterLiters">-</div>
                   <div class="muted2" id="waterDetail">-</div>
+                  <div class="muted2" id="waterGlasses">-</div>
                 </div>
                 <span class="pill pillOk" id="waterPill">แนะนำ</span>
               </div>
-            </div>
-          </div>
-
-          <!-- 2) Exercise -->
-          <div class="card calcCard tone-ex">
-            <div class="calcHead">
-              <div>
-                <div class="calcTitle">2) คำนวณเป้าหมายการออกกำลังกายต่อวัน</div>
-                <div class="muted2">อ้างอิงคำแนะนำสากล: ออกกำลังระดับปานกลาง 150–300 นาที/สัปดาห์</div>
-              </div>
-              <span class="badge">ออกกำลัง</span>
-            </div>
-
-            <div class="grid2" style="margin-top:10px">
-              <div>
-                <label class="muted">เป้าหมาย</label>
-                <select id="goal" class="input">
-                  <option value="basic" selected>สุขภาพทั่วไป</option>
-                  <option value="weight">ลดน้ำหนัก/ลดพุง</option>
-                  <option value="fit">เพิ่มความฟิต</option>
-                </select>
-              </div>
-              <div>
-                <label class="muted">วันต่อสัปดาห์ที่ทำได้</label>
-                <select id="daysPerWeek" class="input">
-                  <option value="3">3 วัน</option>
-                  <option value="4">4 วัน</option>
-                  <option value="5" selected>5 วัน</option>
-                  <option value="6">6 วัน</option>
-                  <option value="7">7 วัน</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="actions" style="margin-top:10px">
-              <button id="btnEx" class="btn btn-ok">คำนวณเป้าหมายออกกำลัง</button>
-            </div>
-
-            <div id="exRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
-              <div class="kpiRow">
-                <div class="card-soft" style="padding:12px">
-                  <div class="muted">เป้าหมาย/วัน</div>
-                  <div class="big" id="exMinDay">-</div>
-                  <div class="muted2" id="exMinDayText">นาที/วัน (ระดับปานกลาง)</div>
-                </div>
-                <div class="card-soft" style="padding:12px">
-                  <div class="muted">ตัวเลือกที่ทำได้ง่าย</div>
-                  <div style="font-weight:900;margin-top:6px" id="exIdeasTitle">-</div>
-                  <div class="muted2" id="exIdeas">-</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3) BMI -->
-          <div class="card calcCard tone-bmi">
-            <div class="calcHead">
-              <div>
-                <div class="calcTitle">3) คำนวณดัชนีมวลกาย (น้ำหนักเหมาะสมไหม)</div>
-                <div class="muted2">ใช้เกณฑ์เอเชียที่ใช้ในไทย (ประมาณ)</div>
-              </div>
-              <span class="badge">น้ำหนัก</span>
-            </div>
-
-            <div class="actions" style="margin-top:10px">
-              <button id="btnBMI" class="btn btn-ok">คำนวณ BMI</button>
-            </div>
-
-            <div id="bmiRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-                <div>
-                  <div class="muted">BMI</div>
-                  <div class="big" id="bmiVal">-</div>
-                  <div class="muted2" id="bmiText">-</div>
-                </div>
-                <span class="pill" id="bmiPill">-</span>
-              </div>
-              <div class="muted2" style="margin-top:8px" id="bmiRange">-</div>
             </div>
           </div>
 
@@ -263,7 +294,7 @@
             <div class="calcHead">
               <div>
                 <div class="calcTitle">4) แนะนำชั่วโมงนอนที่เหมาะสม</div>
-                <div class="muted2">คำนวณตามช่วงอายุ และช่วยคำนวณเวลานอนจากเวลาตื่น</div>
+                <div class="muted2">ตามช่วงอายุ และช่วยคำนวณเวลาเข้านอนจากเวลาตื่น</div>
               </div>
               <span class="badge">การนอน</span>
             </div>
@@ -288,25 +319,113 @@
                 <div class="card-soft" style="padding:12px">
                   <div class="muted">ควรนอนประมาณ</div>
                   <div class="big" id="sleepRec">-</div>
-                  <div class="muted2" id="sleepRecText">ชั่วโมง/คืน</div>
+                  <div class="muted2">ชั่วโมง/คืน</div>
                 </div>
                 <div class="card-soft" style="padding:12px">
                   <div class="muted">เวลานอนที่แนะนำ</div>
                   <div class="big" id="bedTime">-</div>
-                  <div class="muted2" id="bedTimeText">เพื่อให้ตื่นตามเวลาที่ตั้งไว้</div>
+                  <div class="muted2">เพื่อให้ตื่นตามเวลาที่ตั้งไว้</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- 5) Salt -->
+          <!-- 5) Sweet -->
+          <div class="card calcCard tone-sweet">
+            <div class="calcHead">
+              <div>
+                <div class="calcTitle">5) แนะนำ “กินหวาน” แค่ไหนต่อวัน</div>
+                <div class="muted2">น้ำตาลเติม (เช่น น้ำหวาน/ขนมหวาน) — ไม่รวมหวานจากผลไม้ทั้งลูก</div>
+              </div>
+              <span class="badge">หวาน</span>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">วันนี้ดื่มน้ำหวาน/ชาเย็น/กาแฟหวานไหม?</label>
+                <select id="sweetDrink" class="input">
+                  <option value="no" selected>ไม่มาก</option>
+                  <option value="yes">ค่อนข้างมาก</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">มีเบาหวาน/น้ำตาลสูงหรือไม่?</label>
+                <select id="dm" class="input">
+                  <option value="no" selected>ไม่ทราบ/ไม่มี</option>
+                  <option value="yes">มี/สงสัย</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnSweet" class="btn btn-ok">ดูคำแนะนำหวาน</button>
+            </div>
+
+            <div id="sweetRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div class="muted">น้ำตาลเติมที่ควรจำกัด</div>
+                  <div class="big" id="sweetGrams">-</div>
+                  <div class="muted2" id="sweetText">-</div>
+                </div>
+                <span class="pill pillMid" id="sweetPill">คำแนะนำ</span>
+              </div>
+              <div class="muted2" style="margin-top:8px" id="sweetTips">-</div>
+            </div>
+          </div>
+
+          <!-- 6) Fat -->
+          <div class="card calcCard tone-fat">
+            <div class="calcHead">
+              <div>
+                <div class="calcTitle">6) แนะนำ “กินมัน” แค่ไหนต่อวัน</div>
+                <div class="muted2">คำนวณจากพลังงานที่ใช้ทั้งวัน (TDEE) เพื่อให้เห็น “กรอบคร่าว ๆ”</div>
+              </div>
+              <span class="badge">มัน</span>
+            </div>
+
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="muted">วันนี้กินของทอด/กะทิเยอะไหม?</label>
+                <select id="fried" class="input">
+                  <option value="no" selected>ไม่มาก</option>
+                  <option value="yes">ค่อนข้างมาก</option>
+                </select>
+              </div>
+              <div>
+                <label class="muted">มีไขมันในเลือดสูง/โรคหัวใจหรือไม่?</label>
+                <select id="lipid" class="input">
+                  <option value="no" selected>ไม่ทราบ/ไม่มี</option>
+                  <option value="yes">มี/สงสัย</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions" style="margin-top:10px">
+              <button id="btnFat" class="btn btn-ok">ดูคำแนะนำมัน</button>
+            </div>
+
+            <div id="fatRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div>
+                  <div class="muted">ไขมันรวมต่อวัน (โดยประมาณ)</div>
+                  <div class="big" id="fatGrams">-</div>
+                  <div class="muted2" id="fatText">-</div>
+                </div>
+                <span class="pill pillMid" id="fatPill">คำแนะนำ</span>
+              </div>
+              <div class="muted2" style="margin-top:8px" id="fatTips">-</div>
+            </div>
+          </div>
+
+          <!-- 7) Salt -->
           <div class="card calcCard tone-salt">
             <div class="calcHead">
               <div>
-                <div class="calcTitle">5) แนะนำ “กินเค็ม” แค่ไหนต่อวัน</div>
+                <div class="calcTitle">7) แนะนำ “กินเค็ม” แค่ไหนต่อวัน</div>
                 <div class="muted2">แนวทางทั่วไป: เกลือไม่เกินประมาณ 1 ช้อนชา/วัน (≈ 5 กรัม)</div>
               </div>
-              <span class="badge">ลดเค็ม</span>
+              <span class="badge">เค็ม</span>
             </div>
 
             <div class="grid2" style="margin-top:10px">
@@ -327,7 +446,7 @@
             </div>
 
             <div class="actions" style="margin-top:10px">
-              <button id="btnSalt" class="btn btn-ok">ดูคำแนะนำลดเค็ม</button>
+              <button id="btnSalt" class="btn btn-ok">ดูคำแนะนำเค็ม</button>
             </div>
 
             <div id="saltRes" class="card-soft" style="padding:12px;margin-top:10px;display:none">
@@ -349,7 +468,7 @@
       <div class="card-soft" style="padding:12px;margin-top:12px">
         <div style="font-weight:900">คำเตือน</div>
         <div class="muted" style="margin-top:8px;line-height:1.7">
-          หากมีโรคประจำตัว (เช่น ไต/หัวใจ/ตั้งครรภ์) หรือแพทย์สั่งจำกัดน้ำ/ออกกำลังกาย โปรดยึดคำแนะนำของแพทย์เป็นหลัก
+          หากมีโรคประจำตัว (เช่น ไต/หัวใจ/ตั้งครรภ์) หรือแพทย์สั่งจำกัดน้ำ/อาหาร/ออกกำลังกาย โปรดยึดคำแนะนำของแพทย์เป็นหลัก
         </div>
       </div>
 
@@ -363,7 +482,7 @@
     await initUserShell({ active: "tools", title: "Preventive Health" });
     try{ applyI18n(document); }catch{}
 
-    const LS_KEY = "FEMI_PREVENTIVE_HEALTH_V1";
+    const LS_KEY = "FEMI_PREVENTIVE_HEALTH_V2";
 
     function load(){
       try{
@@ -382,14 +501,20 @@
     const activityEl = document.getElementById("activity");
     const hotEl = document.getElementById("hot");
 
-    const exMinWaterEl = document.getElementById("exMinWater");
-    const pregEl = document.getElementById("preg");
-
     const goalEl = document.getElementById("goal");
     const daysPerWeekEl = document.getElementById("daysPerWeek");
 
+    const exMinWaterEl = document.getElementById("exMinWater");
+    const pregEl = document.getElementById("preg");
+
     const wakeTimeEl = document.getElementById("wakeTime");
     const sleepHoursEl = document.getElementById("sleepHours");
+
+    const sweetDrinkEl = document.getElementById("sweetDrink");
+    const dmEl = document.getElementById("dm");
+
+    const friedEl = document.getElementById("fried");
+    const lipidEl = document.getElementById("lipid");
 
     const htKidneyEl = document.getElementById("htKidney");
     const saltyFoodEl = document.getElementById("saltyFood");
@@ -408,12 +533,16 @@
         hot: hotEl.value
       };
       state.extra = {
-        exMinWater: exMinWaterEl.value,
-        preg: pregEl.value,
         goal: goalEl.value,
         daysPerWeek: daysPerWeekEl.value,
+        exMinWater: exMinWaterEl.value,
+        preg: pregEl.value,
         wakeTime: wakeTimeEl.value,
         sleepHours: sleepHoursEl.value,
+        sweetDrink: sweetDrinkEl.value,
+        dm: dmEl.value,
+        fried: friedEl.value,
+        lipid: lipidEl.value,
         htKidney: htKidneyEl.value,
         saltyFood: saltyFoodEl.value
       };
@@ -430,78 +559,132 @@
       if(b.activity) activityEl.value = b.activity;
       if(b.hot) hotEl.value = b.hot;
 
-      if(x.exMinWater) exMinWaterEl.value = x.exMinWater;
-      if(x.preg) pregEl.value = x.preg;
       if(x.goal) goalEl.value = x.goal;
       if(x.daysPerWeek) daysPerWeekEl.value = x.daysPerWeek;
+      if(x.exMinWater) exMinWaterEl.value = x.exMinWater;
+      if(x.preg) pregEl.value = x.preg;
       if(x.wakeTime) wakeTimeEl.value = x.wakeTime;
       if(x.sleepHours) sleepHoursEl.value = x.sleepHours;
+      if(x.sweetDrink) sweetDrinkEl.value = x.sweetDrink;
+      if(x.dm) dmEl.value = x.dm;
+      if(x.fried) friedEl.value = x.fried;
+      if(x.lipid) lipidEl.value = x.lipid;
       if(x.htKidney) htKidneyEl.value = x.htKidney;
       if(x.saltyFood) saltyFoodEl.value = x.saltyFood;
     }
 
-    [sexEl,ageEl,weightEl,heightEl,activityEl,hotEl,exMinWaterEl,pregEl,goalEl,daysPerWeekEl,wakeTimeEl,sleepHoursEl,htKidneyEl,saltyFoodEl]
-      .forEach(el=>{
-        el.addEventListener("change", persist);
-        el.addEventListener("input", persist);
-      });
+    [
+      sexEl,ageEl,weightEl,heightEl,activityEl,hotEl,
+      goalEl,daysPerWeekEl,
+      exMinWaterEl,pregEl,
+      wakeTimeEl,sleepHoursEl,
+      sweetDrinkEl,dmEl,
+      friedEl,lipidEl,
+      htKidneyEl,saltyFoodEl
+    ].forEach(el=>{
+      el.addEventListener("change", persist);
+      el.addEventListener("input", persist);
+    });
 
     btnResetAll.addEventListener("click", ()=>{
       if(confirm("ล้างข้อมูลทั้งหมดใช่ไหม?")){
         localStorage.removeItem(LS_KEY);
-        state = { base:{}, extra:{} };
         location.reload();
       }
     });
 
-    function getNum(el){
+    function num(el){
       const v = Number(el.value || 0);
       return isFinite(v) ? v : 0;
     }
 
-    // ---------- 1) Water ----------
-    const waterRes = document.getElementById("waterRes");
-    const waterLiters = document.getElementById("waterLiters");
-    const waterDetail = document.getElementById("waterDetail");
-    const waterPill = document.getElementById("waterPill");
+    function activityFactor(v){
+      if(v==="sedentary") return 1.2;
+      if(v==="light") return 1.375;
+      if(v==="moderate") return 1.55;
+      return 1.725;
+    }
 
-    document.getElementById("btnWater").addEventListener("click", ()=>{
-      const w = getNum(weightEl);
-      if(!w){ alert("กรุณากรอกน้ำหนักก่อน"); return; }
+    function calcBMR(sex, w, h, a){
+      // Mifflin-St Jeor
+      const s = (sex === "male") ? 5 : -161;
+      return (10*w) + (6.25*h) - (5*a) + s;
+    }
 
-      const actMin = getNum(exMinWaterEl);
-      const hot = hotEl.value === "yes";
-      const preg = pregEl.value;
+    // ===== 1) BMI + Health age + BMR/TDEE =====
+    const bmiRes = document.getElementById("bmiRes");
+    const bmiVal = document.getElementById("bmiVal");
+    const bmiText = document.getElementById("bmiText");
+    const bmiPill = document.getElementById("bmiPill");
+    const bmiRange = document.getElementById("bmiRange");
+    const healthAge = document.getElementById("healthAge");
+    const healthAgeText = document.getElementById("healthAgeText");
+    const bmrVal = document.getElementById("bmrVal");
+    const tdeeVal = document.getElementById("tdeeVal");
+    const bmrTips = document.getElementById("bmrTips");
 
-      // Base 30 ml/kg (ทั่วไป), active/hot: 35 ml/kg
-      let mlPerKg = 30;
-      if(actMin >= 30 || hot) mlPerKg = 35;
+    document.getElementById("btnBMI").addEventListener("click", ()=>{
+      const w = num(weightEl);
+      const hCm = num(heightEl);
+      const a = num(ageEl);
+      if(!w || !hCm || !a){ alert("กรุณากรอก อายุ น้ำหนัก ส่วนสูง ให้ครบก่อน"); return; }
 
-      let ml = w * mlPerKg;
+      const h = hCm/100;
+      const bmi = w/(h*h);
+      bmiVal.textContent = bmi.toFixed(1);
 
-      // Add for exercise: +350 ml per 30 min (approx)
-      if(actMin > 0){
-        ml += (actMin / 30) * 350;
-      }
+      // Thai/Asian-ish cutoffs
+      let cat="ปกติ", pill="pillOk";
+      if(bmi < 18.5){ cat="ผอม"; pill="pillMid"; }
+      else if(bmi < 23){ cat="ปกติ"; pill="pillOk"; }
+      else if(bmi < 25){ cat="เริ่มอ้วน"; pill="pillMid"; }
+      else if(bmi < 30){ cat="อ้วน"; pill="pillHigh"; }
+      else { cat="อ้วนมาก"; pill="pillHigh"; }
 
-      // Pregnancy/lactation bump (simple)
-      if(preg === "pregnant") ml += 300;
-      if(preg === "breastfeeding") ml += 700;
+      bmiPill.className = "pill " + pill;
+      bmiPill.textContent = cat;
 
-      // Clamp to reasonable range
-      ml = Math.max(1500, Math.min(4500, ml));
-      const liters = ml / 1000;
+      const wMin = 18.5*h*h;
+      const wMax = 22.9*h*h;
+      bmiText.textContent = `อยู่ในกลุ่ม: ${cat}`;
+      bmiRange.textContent = `น้ำหนักที่มักถือว่าเหมาะสม (โดยประมาณ) สำหรับส่วนสูงนี้: ${wMin.toFixed(1)} – ${wMax.toFixed(1)} กก.`;
 
-      waterLiters.textContent = liters.toFixed(1) + " ลิตร";
-      waterDetail.textContent =
-        `สูตรโดยประมาณ: ${mlPerKg} มล./กก. + ปรับตามกิจกรรม/อากาศ • แนะนำจิบทั้งวัน`;
+      // Health age heuristic (ง่ายและอธิบายได้)
+      let adj = 0;
+      if(cat === "ผอม") adj += 1;
+      if(cat === "เริ่มอ้วน") adj += 2;
+      if(cat === "อ้วน") adj += 4;
+      if(cat === "อ้วนมาก") adj += 6;
 
-      waterPill.className = "pill pillOk";
-      waterPill.textContent = (hot || actMin >= 30) ? "วันที่เหงื่อออก/ออกกำลัง" : "ทั่วไป";
-      waterRes.style.display = "block";
+      const act = activityEl.value;
+      if(act === "moderate") adj -= 2;
+      if(act === "very") adj -= 3;
+      if(act === "sedentary") adj += 1;
+
+      const hAge = Math.max(10, Math.round(a + adj));
+      healthAge.textContent = hAge + " ปี";
+      healthAgeText.textContent =
+        (adj <= -2) ? "ดูแลตัวเองดีมาก (โดยประมาณ)" :
+        (adj <= 1) ? "ใกล้เคียงอายุจริง" :
+        "ควรดูแลเรื่องน้ำหนัก/การขยับตัวเพิ่ม";
+
+      // BMR/TDEE
+      const bmr = calcBMR(sexEl.value, w, hCm, a);
+      const tdee = bmr * activityFactor(act);
+      bmrVal.textContent = Math.round(bmr);
+      tdeeVal.textContent = Math.round(tdee);
+
+      bmrTips.innerHTML =
+        "• ถ้าอยาก “คุมน้ำหนัก” ให้กินใกล้เคียง <b>พลังงานที่ใช้ทั้งวัน (TDEE)</b><br>" +
+        "• ถ้าอยาก “ลดน้ำหนัก” ให้กินน้อยกว่า TDEE (เช่น ลดลงวันละ 300–500 กิโลแคลอรี) และขยับตัวเพิ่ม<br>" +
+        "• ถ้าอยาก “เพิ่มน้ำหนัก” ให้กินมากกว่า TDEE (เช่น +200–400 กิโลแคลอรี/วัน)<br>" +
+        "• <b>พลังงานขั้นต่ำ (BMR)</b> คือพลังงานที่ร่างกายต้องใช้แม้ไม่ได้ทำอะไรทั้งวัน";
+
+      bmiRes.style.display = "block";
+      persist();
     });
 
-    // ---------- 2) Exercise ----------
+    // ===== 2) Exercise =====
     const exRes = document.getElementById("exRes");
     const exMinDay = document.getElementById("exMinDay");
     const exIdeasTitle = document.getElementById("exIdeasTitle");
@@ -511,7 +694,6 @@
       const goal = goalEl.value;
       const days = Number(daysPerWeekEl.value || 5);
 
-      // Weekly moderate minutes target
       let weekly = 150;
       if(goal === "weight") weekly = 300;
       if(goal === "fit") weekly = 225;
@@ -530,46 +712,50 @@
       exIdeas.innerHTML = "• " + ideas.join("<br>• ");
 
       exRes.style.display = "block";
+      persist();
     });
 
-    // ---------- 3) BMI ----------
-    const bmiRes = document.getElementById("bmiRes");
-    const bmiVal = document.getElementById("bmiVal");
-    const bmiText = document.getElementById("bmiText");
-    const bmiPill = document.getElementById("bmiPill");
-    const bmiRange = document.getElementById("bmiRange");
+    // ===== 3) Water =====
+    const waterRes = document.getElementById("waterRes");
+    const waterLiters = document.getElementById("waterLiters");
+    const waterDetail = document.getElementById("waterDetail");
+    const waterGlasses = document.getElementById("waterGlasses");
+    const waterPill = document.getElementById("waterPill");
 
-    document.getElementById("btnBMI").addEventListener("click", ()=>{
-      const w = getNum(weightEl);
-      const hCm = getNum(heightEl);
-      if(!w || !hCm){ alert("กรุณากรอกน้ำหนักและส่วนสูงก่อน"); return; }
+    document.getElementById("btnWater").addEventListener("click", ()=>{
+      const w = num(weightEl);
+      if(!w){ alert("กรุณากรอกน้ำหนักก่อน"); return; }
 
-      const h = hCm/100;
-      const bmi = w/(h*h);
-      bmiVal.textContent = bmi.toFixed(1);
+      const actMin = num(exMinWaterEl);
+      const hot = hotEl.value === "yes";
+      const preg = pregEl.value;
 
-      // Thai/Asian-ish cutoffs: <18.5 under, 18.5-22.9 normal, 23-24.9 overweight risk, 25-29.9 obese I, >=30 obese II
-      let cat="ปกติ";
-      let pill="pillOk";
-      if(bmi < 18.5){ cat="ผอม"; pill="pillMid"; }
-      else if(bmi < 23){ cat="ปกติ"; pill="pillOk"; }
-      else if(bmi < 25){ cat="เริ่มอ้วน"; pill="pillMid"; }
-      else if(bmi < 30){ cat="อ้วน"; pill="pillHigh"; }
-      else { cat="อ้วนมาก"; pill="pillHigh"; }
+      let mlPerKg = 30;
+      if(actMin >= 30 || hot) mlPerKg = 35;
 
-      bmiPill.className = "pill " + pill;
-      bmiPill.textContent = cat;
+      let ml = w * mlPerKg;
+      if(actMin > 0) ml += (actMin / 30) * 350;
 
-      // target weight range for BMI 18.5-22.9
-      const wMin = 18.5*h*h;
-      const wMax = 22.9*h*h;
-      bmiText.textContent = `อยู่ในกลุ่ม: ${cat}`;
-      bmiRange.textContent = `น้ำหนักที่มักถือว่าเหมาะสม (โดยประมาณ) สำหรับส่วนสูงนี้: ${wMin.toFixed(1)} – ${wMax.toFixed(1)} กก.`;
+      if(preg === "pregnant") ml += 300;
+      if(preg === "breastfeeding") ml += 700;
 
-      bmiRes.style.display = "block";
+      ml = Math.max(1500, Math.min(4500, ml));
+      const liters = ml / 1000;
+
+      const glassMl = 250;
+      const glasses = Math.round(ml / glassMl);
+
+      waterLiters.textContent = liters.toFixed(1) + " ลิตร";
+      waterDetail.textContent = `สูตรโดยประมาณ: ${mlPerKg} มล./กก. + ปรับตามกิจกรรม/อากาศ • แนะนำจิบทั้งวัน`;
+      waterGlasses.textContent = `หรือประมาณ ${glasses} แก้ว (แก้วละ ~${glassMl} มล.)`;
+
+      waterPill.className = "pill pillOk";
+      waterPill.textContent = (hot || actMin >= 30) ? "วันที่เหงื่อออก/ออกกำลัง" : "ทั่วไป";
+      waterRes.style.display = "block";
+      persist();
     });
 
-    // ---------- 4) Sleep ----------
+    // ===== 4) Sleep =====
     const sleepRes = document.getElementById("sleepRes");
     const sleepRec = document.getElementById("sleepRec");
     const bedTime = document.getElementById("bedTime");
@@ -582,9 +768,8 @@
       if(age <= 64) return { min:7, max:9 };
       return { min:7, max:8 };
     }
-
     function toMinutes(t){
-      const [hh, mm] = t.split(":").map(Number);
+      const [hh, mm] = String(t||"06:00").split(":").map(Number);
       return hh*60 + mm;
     }
     function fromMinutes(m){
@@ -595,24 +780,107 @@
     }
 
     document.getElementById("btnSleep").addEventListener("click", ()=>{
-      const age = getNum(ageEl);
-      const r = sleepRange(age);
+      const a = num(ageEl);
+      const r = sleepRange(a);
       const desired = Number(sleepHoursEl.value || 0);
       const hours = desired ? desired : Math.min(8, r.max);
 
       sleepRec.textContent = `${r.min}–${r.max}`;
       const wake = wakeTimeEl.value || "06:00";
-      const bed = fromMinutes(toMinutes(wake) - Math.round(hours*60));
-      bedTime.textContent = bed;
+      bedTime.textContent = fromMinutes(toMinutes(wake) - Math.round(hours*60));
 
       sleepRes.style.display = "block";
+      persist();
     });
 
-    // ---------- 5) Salt ----------
+    // ===== 5) Sweet =====
+    const sweetRes = document.getElementById("sweetRes");
+    const sweetGrams = document.getElementById("sweetGrams");
+    const sweetText = document.getElementById("sweetText");
+    const sweetTips = document.getElementById("sweetTips");
+    const sweetPill = document.getElementById("sweetPill");
+
+    document.getElementById("btnSweet").addEventListener("click", ()=>{
+      const sex = sexEl.value;
+      const hasDm = dmEl.value === "yes";
+      const drink = sweetDrinkEl.value === "yes";
+
+      // แนวทางแบบง่าย: ชาย ~36g/วัน, หญิง ~24g/วัน (น้ำตาลเติม) / ถ้ามีเบาหวานให้เข้มขึ้น
+      let g = (sex === "male") ? 36 : 24;
+      if(hasDm) g = Math.min(g, 20);
+
+      const tsp = Math.round(g / 4); // 1 ช้อนชา ~ 4g
+      sweetGrams.textContent = `${g} กรัม/วัน`;
+      sweetText.textContent = `หรือประมาณ ${tsp} ช้อนชา (น้ำตาลเติม)`;
+
+      const tips = [
+        "เลือกหวานน้อย/ไม่หวาน (0–25%)",
+        "ลดน้ำอัดลม/ชานม/กาแฟหวาน",
+        "อ่านฉลาก: น้ำตาลรวมยิ่งน้อยยิ่งดี",
+        "ถ้าอยากหวาน: เลือกผลไม้ทั้งลูกแทนขนมหวานบ่อย ๆ"
+      ];
+      if(drink) tips.unshift("วันนี้ดื่มหวาน: แก้วต่อไปเลือกหวานน้อย/ไม่หวาน");
+      if(hasDm) tips.unshift("ถ้ามีเบาหวาน/น้ำตาลสูง: ระวังเครื่องดื่มหวานเป็นพิเศษ และปรึกษาหน่วยบริการ");
+
+      sweetTips.innerHTML = "• " + tips.join("<br>• ");
+      sweetPill.className = hasDm ? "pill pillHigh" : "pill pillMid";
+      sweetPill.textContent = hasDm ? "ควรลดให้มาก" : "คำแนะนำ";
+
+      sweetRes.style.display = "block";
+      persist();
+    });
+
+    // ===== 6) Fat =====
+    const fatRes = document.getElementById("fatRes");
+    const fatGrams = document.getElementById("fatGrams");
+    const fatText = document.getElementById("fatText");
+    const fatTips = document.getElementById("fatTips");
+    const fatPill = document.getElementById("fatPill");
+
+    document.getElementById("btnFat").addEventListener("click", ()=>{
+      const a = num(ageEl), w = num(weightEl), hCm = num(heightEl);
+      if(!a || !w || !hCm){
+        alert("กรุณากรอก อายุ น้ำหนัก ส่วนสูง ให้ครบก่อน (เพื่อคำนวณพลังงาน)");
+        return;
+      }
+
+      const bmr = calcBMR(sexEl.value, w, hCm, a);
+      const tdee = bmr * activityFactor(activityEl.value);
+
+      // ไขมันรวม ~25–35% ของพลังงาน / ไขมันอิ่มตัว <=10%
+      const fatMin = Math.round((tdee * 0.25) / 9);
+      const fatMax = Math.round((tdee * 0.35) / 9);
+      const satMax = Math.round((tdee * 0.10) / 9);
+
+      fatGrams.textContent = `${fatMin}–${fatMax} กรัม/วัน`;
+      fatText.textContent = `ไขมันอิ่มตัวควรไม่เกิน ~${satMax} กรัม/วัน (โดยประมาณ)`;
+
+      const fried = friedEl.value === "yes";
+      const lipid = lipidEl.value === "yes";
+
+      const tips = [
+        "ลดของทอด/กะทิ/หนังไก่/มันหมู",
+        "เลือกต้ม/นึ่ง/ย่าง แทนทอด",
+        "ใช้น้ำมันแต่น้อย และเลือกน้ำมันพืช",
+        "เพิ่มปลา/ถั่ว (ในปริมาณพอดี)"
+      ];
+      if(fried) tips.unshift("วันนี้กินของทอดเยอะ: มื้อถัดไปเน้นต้ม/นึ่ง และลดน้ำจิ้มมัน ๆ");
+      if(lipid) tips.unshift("ถ้าไขมันในเลือดสูง/โรคหัวใจ: ควรลดไขมันอิ่มตัว และปรึกษาหน่วยบริการ");
+
+      fatTips.innerHTML = "• " + tips.join("<br>• ");
+      fatPill.className = lipid ? "pill pillHigh" : "pill pillMid";
+      fatPill.textContent = lipid ? "ควรลดให้มาก" : "คำแนะนำ";
+
+      fatRes.style.display = "block";
+      persist();
+    });
+
+    // ===== 7) Salt =====
     const saltRes = document.getElementById("saltRes");
     const sodiumMg = document.getElementById("sodiumMg");
     const saltText = document.getElementById("saltText");
     const saltTips = document.getElementById("saltTips");
+    const saltPill = document.getElementById("saltPill");
 
     document.getElementById("btnSalt").addEventListener("click", ()=>{
       const has = htKidneyEl.value === "yes";
@@ -628,12 +896,16 @@
         "ชิมก่อนเติมน้ำปลา/ซีอิ๊ว",
         "ลดอาหารสำเร็จรูป/บะหมี่กึ่งสำเร็จรูป/ของดอง",
         "เลือกน้ำจิ้มแยก และจิ้มแต่น้อย",
-        "ถ้าทานรสจัดวันนี้ ให้ดื่มน้ำพอ และปรับมื้อถัดไปให้จืดลง"
+        "ถ้าทานรสจัดวันนี้ ให้ปรับมื้อถัดไปให้จืดลง"
       ];
-      if(salty) tips.unshift("วันนี้กินรสจัด: พยายามงดเติมเค็มเพิ่ม และหลีกเลี่ยงน้ำซุป/น้ำจิ้ม");
+      if(salty) tips.unshift("วันนี้กินรสจัด: งดเติมเค็มเพิ่ม และหลีกเลี่ยงน้ำซุป/น้ำจิ้ม");
 
       saltTips.innerHTML = "• " + tips.join("<br>• ");
+      saltPill.className = has ? "pill pillHigh" : "pill pillMid";
+      saltPill.textContent = has ? "ควรลดให้มาก" : "คำแนะนำ";
+
       saltRes.style.display = "block";
+      persist();
     });
 
     // init
