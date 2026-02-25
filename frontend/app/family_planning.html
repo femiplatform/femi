@@ -3,171 +3,584 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • Family Planning</title>
+  <title>FEMI • บันทึกรอบเดือน</title>
   <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    .container{ max-width: 980px; margin: 0 auto; padding: 18px; }
+    .muted{ opacity: .7; }
+    .card{ background: #fff; border: 1px solid rgba(0,0,0,.08); border-radius: 16px; }
+    .sectionTitle{ font-weight: 1000; font-size: 18px; }
+    .help{ font-size: 12px; opacity: .75; margin-top: 6px; line-height: 1.6; }
+
+    .btn{ border: 0; border-radius: 12px; padding: 10px 12px; font-weight: 900; cursor: pointer; }
+    .btn-primary{ background: #0ea5e9; color: #fff; }
+    .btn-primary:hover{ filter: brightness(.95); }
+    .btn-ghost{ background:#fff; border:1px solid rgba(0,0,0,.12); }
+    .actions{ margin-top: 12px; display:flex; gap: 10px; flex-wrap: wrap; }
+
+    .formGrid{ display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    @media (min-width: 860px){ .formGrid{ grid-template-columns: 1fr 1fr 1fr; } }
+    .formGrid2{ display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    @media (min-width: 860px){ .formGrid2{ grid-template-columns: 1.2fr .8fr; } }
+
+    label{ font-size: 13px; font-weight: 900; display:block; margin-bottom: 6px; }
+    input, select, textarea{ width:100%; padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,.12); }
+    textarea{ resize: vertical; }
+
+    .predCard{
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(14,165,233,.12), rgba(59,130,246,.08));
+      border: 1px solid rgba(14,165,233,.25);
+      box-shadow: 0 18px 55px rgba(2,132,199,.10);
+    }
+    .predMain{ margin-top: 8px; font-weight: 1000; font-size: 22px; line-height: 1.25; }
+    .predMain b{ color: #0369a1; }
+    .pred-detail{ margin-top: 10px; display:flex; flex-direction:column; gap: 6px; }
+    .pred-line{ font-size: 13px; opacity: .95; }
+
+    .cal-head{ display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+    .cal-title{ font-weight: 1000; font-size: 16px; }
+    .legend{ display:flex; flex-wrap:wrap; gap: 12px; margin: 10px 0 6px; }
+    .lg{ display:flex; align-items:center; gap: 6px; font-size: 12px; opacity: .85; }
+    .dot{ width: 10px; height: 10px; border-radius: 999px; display:inline-block; }
+    .dot.period{ background:#ef4444; }
+    .dot.fertile{ background:#f59e0b; }
+    .dot.ovu{ background:#8b5cf6; }
+    .dot.next{ background:#22c55e; }
+    .dot.log{ background:#0ea5e9; }
+
+    .cal-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
+    .dow{ font-size: 12px; font-weight: 1000; opacity: .65; text-align:center; padding: 6px 0; }
+    .day{
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 12px;
+      padding: 10px 8px;
+      min-height: 58px;
+      cursor: pointer;
+      background: #fff;
+    }
+    .day.muted{ opacity: .45; }
+    .day .n{ font-weight: 1000; }
+    .tags{ display:flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+    .tag{ width: 8px; height: 8px; border-radius: 999px; }
+    .tag.period{ background:#ef4444; }
+    .tag.fertile{ background:#f59e0b; }
+    .tag.ovu{ background:#8b5cf6; }
+    .tag.next{ background:#22c55e; }
+    .tag.log{ background:#0ea5e9; }
+
+    .modal{ position: fixed; inset: 0; z-index: 80; display:flex; align-items:flex-end; justify-content:center; }
+    .modal.hidden{ display:none; }
+    .modal-card{
+      width: min(560px, 96vw);
+      background:#fff;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      margin: 12px;
+      overflow:hidden;
+    }
+    .modal-head{ display:flex; justify-content:space-between; align-items:center; padding: 12px 14px; border-bottom: 1px solid rgba(0,0,0,.06); }
+    .modal-title{ font-weight: 1000; }
+    .icon-btn{ border:1px solid rgba(0,0,0,.10); background:#fff; border-radius: 12px; padding: 8px 10px; cursor:pointer; }
+    .modal-body{ padding: 14px; display:flex; flex-direction:column; gap: 10px; }
+    .row2{ display:flex; gap: 12px; align-items:center; flex-wrap: wrap; }
+    .chk{ display:flex; gap: 8px; align-items:center; font-weight: 900; }
+    .modal-foot{ padding: 12px 14px; border-top: 1px solid rgba(0,0,0,.06); }
+    .backdrop{ position: fixed; inset: 0; background: rgba(0,0,0,.25); z-index: -1; }
+  </style>
 </head>
+
 <body>
   <div id="app">
     <main class="container">
       <h1 data-i18n="fp.title">บันทึกรอบเดือน + ดูช่วงวันเสี่ยงท้อง</h1>
-      <p class="muted" data-i18n="fp.subtitle"></p>
+      <p class="muted" data-i18n="fp.subtitle">ใช้สำหรับบันทึกรอบเดือน ดูวันคาดการณ์ และจดบันทึกอาการรายวัน</p>
 
-      <!-- Prediction summary card -->
       <div class="card" style="padding:14px">
-        <div style="font-weight:900" data-i18n="fp.predTitle">คาดการณ์ (ล่าสุด)</div>
+        <div class="sectionTitle">เพิ่มรอบเดือน (กรอกได้เลย)</div>
+        <div class="help">กรอก “วันแรกที่ประจำเดือนมา” เพื่อให้ระบบคาดการณ์รอบถัดไปและช่วงเสี่ยงได้แม่นขึ้น</div>
+
+        <div class="formGrid">
+          <div>
+            <label>วันแรกที่ประจำเดือนมา</label>
+            <input id="cycleStart" type="date" />
+          </div>
+          <div>
+            <label>รอบเดือนเฉลี่ย (วัน)</label>
+            <input id="cycleLen" type="number" min="20" max="45" value="28" />
+          </div>
+          <div>
+            <label>ประจำเดือนมานาน (วัน)</label>
+            <input id="periodLen" type="number" min="2" max="10" value="5" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="btnSaveCycle">บันทึกรอบเดือน</button>
+          <button class="btn btn-ghost" id="btnRecompute">คำนวณใหม่</button>
+          <button class="btn btn-ghost" id="btnClearAll">ล้างข้อมูลหน้านี้</button>
+        </div>
+
+        <div class="help">*ข้อมูลทั้งหมดบันทึกในเครื่องของผู้ใช้ (ไม่ส่งขึ้น Google Sheets)</div>
+      </div>
+
+      <div class="card" style="padding:14px;margin-top:12px">
+        <div class="sectionTitle">เลือกดูข้อมูล</div>
+        <div class="help">เลือกรอบเดือนที่ต้องการให้คำนวณ และเลือกเดือนที่อยากดูในปฏิทิน</div>
+
+        <div class="formGrid2">
+          <div>
+            <label>เลือกรอบเดือน</label>
+            <select id="cyclePicker"></select>
+            <div class="help">ถ้ายังไม่เคยบันทึกรอบเดือน ให้เพิ่มรอบเดือนก่อน แล้วรายการจะขึ้นที่นี่</div>
+          </div>
+          <div>
+            <label>เลือกเดือนในปฏิทิน</label>
+            <input id="monthPicker" type="month" />
+            <div class="help">เลือกเดือนเพื่อเลื่อนไปดูได้เร็ว</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card predCard" style="margin-top:12px">
+        <div class="sectionTitle">คาดการณ์ (ล่าสุด)</div>
+        <div class="predMain" id="predMain">-</div>
         <div class="muted" id="predText" style="margin-top:6px">-</div>
         <div id="predDetail" class="pred-detail"></div>
       </div>
 
-      <!-- Actions -->
-      <div class="actions">
-        <button class="btn btn-primary" id="btnAddCycle" data-i18n="fp.btnAddCycle"></button>
-        <button class="btn btn-ghost" id="btnRecompute" data-i18n="fp.btnRecompute"></button>
-      </div>
-
-      <!-- Calendar -->
       <div class="card" style="padding:14px;margin-top:12px">
         <div class="cal-head">
-          <button class="btn btn-ghost" id="btnPrev">‹</button>
-          <div class="cal-title" id="calTitle">-</div>
-          <div class="muted" id="calHint" style="margin-top:6px"></div>
-          <button class="btn btn-ghost" id="btnNext">›</button>
+          <button class="btn btn-ghost" id="btnPrev" aria-label="prev">‹</button>
+          <div>
+            <div class="cal-title" id="calTitle">-</div>
+            <div class="muted" id="calHint" style="margin-top:6px"></div>
+          </div>
+          <button class="btn btn-ghost" id="btnNext" aria-label="next">›</button>
         </div>
 
         <div class="legend">
-          <span class="lg"><span class="dot period"></span><span data-i18n="fp.legend.period">ประจำเดือน</span></span>
-          <span class="lg"><span class="dot fertile"></span><span data-i18n="fp.legend.fertile">ช่วงเสี่ยง</span></span>
-          <span class="lg"><span class="dot ovu"></span><span data-i18n="fp.legend.ovulation">วันไข่ตก</span></span>
-          <span class="lg"><span class="dot log"></span><span data-i18n="fp.legend.log">มีบันทึก</span></span>
+          <span class="lg"><span class="dot period"></span><span>ประจำเดือน</span></span>
+          <span class="lg"><span class="dot fertile"></span><span>ช่วงเสี่ยง</span></span>
+          <span class="lg"><span class="dot ovu"></span><span>วันไข่ตก</span></span>
+          <span class="lg"><span class="dot next"></span><span>คาดว่ารอบถัดไปจะมา</span></span>
+          <span class="lg"><span class="dot log"></span><span>มีบันทึก (อาการ/กิจกรรมประจำวัน)</span></span>
         </div>
 
         <div class="cal-grid" id="calGrid"></div>
       </div>
 
-      <div id="loading" class="muted" style="margin-top:12px" data-i18n="common.loading">กำลังโหลด…</div>
+      <div id="loading" class="muted" style="margin-top:12px;display:none">กำลังโหลด…</div>
     </main>
 
-    <!-- Daily Log Modal -->
     <div class="modal hidden" id="logModal">
       <div class="modal-card">
         <div class="modal-head">
-          <div class="modal-title" data-i18n="fp.log.title">บันทึกรายวัน</div>
+          <div class="modal-title">บันทึกรายวัน</div>
           <button class="icon-btn" id="btnCloseLog" aria-label="close">✕</button>
         </div>
 
         <div class="modal-body">
+          <div class="help">ใช้จดบันทึกอาการ/กิจกรรมของวันนั้น เพื่อดูย้อนหลัง</div>
+
           <div class="field">
-            <label data-i18n="fp.log.date">วันที่</label>
+            <label>วันที่</label>
             <input id="logDateText" type="text" readonly />
           </div>
 
           <div class="field">
-            <label data-i18n="fp.log.bleeding">เลือดออก</label>
+            <label>เลือดออก</label>
             <select id="bleeding">
-              <option value="None">None (ไม่มี)</option>
-              <option value="Spotting">Spotting (กะปริบกะปรอย)</option>
-              <option value="Light">Light (น้อย)</option>
-              <option value="Medium">Medium (ปานกลาง)</option>
-              <option value="Heavy">Heavy (มาก)</option>
+              <option value="None">ไม่มี</option>
+              <option value="Spotting">กะปริบกะปรอย</option>
+              <option value="Light">น้อย</option>
+              <option value="Medium">ปานกลาง</option>
+              <option value="Heavy">มาก</option>
             </select>
           </div>
 
           <div class="field">
-            <label data-i18n="fp.log.mood">อารมณ์</label>
+            <label>อารมณ์</label>
             <select id="mood">
-              <option value="Good">Good (ดี)</option>
-              <option value="Neutral">Neutral (ปกติ)</option>
-              <option value="Bad">Bad (แย่)</option>
+              <option value="Good">ดี</option>
+              <option value="Neutral">ปกติ</option>
+              <option value="Bad">แย่</option>
             </select>
           </div>
 
           <div class="field">
-            <label data-i18n="fp.log.symptoms">อาการ</label>
-            <textarea id="symptoms" rows="2" data-i18n-placeholder="fp.log.symptomsPh"></textarea>
+            <label>อาการ</label>
+            <textarea id="symptoms" rows="2" placeholder="เช่น ปวดท้อง ปวดหลัง ตกขาว สิว ฯลฯ"></textarea>
           </div>
 
           <div class="field row2">
-            <label class="chk"><input type="checkbox" id="hadSex" /> <span data-i18n="fp.log.hadSex">มีเพศสัมพันธ์</span></label>
-            <label class="chk"><input type="checkbox" id="pillTaken" /> <span data-i18n="fp.log.pillTaken">กินยาคุม</span></label>
+            <label class="chk"><input type="checkbox" id="hadSex" /> <span>มีเพศสัมพันธ์</span></label>
+            <label class="chk"><input type="checkbox" id="pillTaken" /> <span>กินยาคุม</span></label>
           </div>
 
           <div class="field">
-            <label data-i18n="fp.log.sexProtection">การป้องกัน</label>
+            <label>การป้องกัน</label>
             <select id="sexProtection">
-              <option value="None">None</option>
-              <option value="Condom">Condom</option>
-              <option value="Pill">Pill</option>
-              <option value="IUD">IUD</option>
-              <option value="Implant">Implant</option>
-              <option value="Injection">Injection</option>
-              <option value="Other">Other</option>
+              <option value="None">ไม่มี/ไม่ระบุ</option>
+              <option value="Condom">ถุงยาง</option>
+              <option value="Pill">ยาคุม</option>
+              <option value="IUD">ห่วงคุมกำเนิด</option>
+              <option value="Implant">ยาฝัง</option>
+              <option value="Injection">ยาฉีด</option>
+              <option value="Other">อื่น ๆ</option>
             </select>
           </div>
 
           <div class="field">
-            <label data-i18n="fp.log.notes">หมายเหตุ</label>
-            <textarea id="notes" rows="2"></textarea>
+            <label>หมายเหตุ</label>
+            <textarea id="notes" rows="2" placeholder="บันทึกเพิ่มเติม"></textarea>
           </div>
         </div>
 
         <div class="modal-foot">
-          <button class="btn btn-primary" id="btnSaveLog" data-i18n="fp.log.save">บันทึก</button>
+          <button class="btn btn-primary" id="btnSaveLog">บันทึก</button>
         </div>
       </div>
       <div class="backdrop" id="logBackdrop"></div>
     </div>
-
   </div>
 
-  <script type="module" src="../js/pages/family_planning.js"></script>
+  <script type="module">
+    import { initUserShell } from "../js/shell.js";
+    import { applyI18n } from "../js/i18n.js";
+    await initUserShell({ active: "tools", title: "Family Planning" });
+    try{ applyI18n(document); }catch{}
 
-  <style>
-    .container{max-width:900px;margin:0 auto;padding:18px}
-    .muted{opacity:.7}
-    .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
-    .btn{border:0;border-radius:12px;padding:10px 12px;font-weight:900;cursor:pointer}
-    .btn-primary{background:#b91c1c;color:#fff}
-    .btn-ghost{background:#fff;border:1px solid rgba(0,0,0,.12)}
-    .actions{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+    const LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
+    function loadState(){
+      try{
+        const raw = localStorage.getItem(LS_KEY);
+        return raw ? JSON.parse(raw) : { cycles: [], logs: {}, settings: { cycleLen: 28, periodLen: 5 }, ui: { selectedCycleStart: "latest", viewMonth: "" } };
+      }catch{
+        return { cycles: [], logs: {}, settings: { cycleLen: 28, periodLen: 5 }, ui: { selectedCycleStart: "latest", viewMonth: "" } };
+      }
+    }
+    function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+    let state = loadState();
 
-    .cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .cal-title{font-weight:900}
-    .legend{display:flex;flex-wrap:wrap;gap:12px;margin:10px 0 6px}
-    .lg{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.85}
-    .dot{width:10px;height:10px;border-radius:99px;display:inline-block}
-    .dot.period{background:#ef4444}
-    .dot.fertile{background:#f59e0b}
-    .dot.ovu{background:#8b5cf6}
-    .dot.log{background:#0ea5e9}
+    const $ = (id)=>document.getElementById(id);
 
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
-    .day{border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:10px 8px;min-height:54px;cursor:pointer;background:#fff}
-    .day.muted{opacity:.45}
-    .day .n{font-weight:900}
-    .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-    .tag{width:8px;height:8px;border-radius:99px}
-    .tag.period{background:#ef4444}
-    .tag.fertile{background:#f59e0b}
-    .tag.ovu{background:#8b5cf6}
-    .tag.log{background:#0ea5e9}
+    const cycleStartEl = $("cycleStart");
+    const cycleLenEl = $("cycleLen");
+    const periodLenEl = $("periodLen");
 
-    .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-    .pred-line{font-size:13px;opacity:.9}
+    const cyclePickerEl = $("cyclePicker");
+    const monthPickerEl = $("monthPicker");
 
-    /* Modal */
-    .modal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}
-    .modal.hidden{display:none}
-    .modal-card{width:min(540px, 96vw);background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.18);margin:12px;overflow:hidden}
-    .modal-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.06)}
-    .modal-title{font-weight:900}
-    .icon-btn{border:1px solid rgba(0,0,0,.10);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer}
-    .modal-body{padding:14px;display:flex;flex-direction:column;gap:10px}
-    .field label{font-size:13px;font-weight:800;display:block;margin-bottom:6px}
-    input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.12)}
-    .row2{display:flex;gap:12px;align-items:center}
-    .chk{display:flex;gap:8px;align-items:center;font-weight:800}
-    .modal-foot{padding:12px 14px;border-top:1px solid rgba(0,0,0,.06)}
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:-1}
-  </style>
+    const predMainEl = $("predMain");
+    const predTextEl = $("predText");
+    const predDetailEl = $("predDetail");
+
+    const calTitleEl = $("calTitle");
+    const calHintEl = $("calHint");
+    const calGridEl = $("calGrid");
+
+    const btnSaveCycle = $("btnSaveCycle");
+    const btnRecompute = $("btnRecompute");
+    const btnClearAll = $("btnClearAll");
+    const btnPrev = $("btnPrev");
+    const btnNext = $("btnNext");
+
+    const logModal = $("logModal");
+    const btnCloseLog = $("btnCloseLog");
+    const logBackdrop = $("logBackdrop");
+    const btnSaveLog = $("btnSaveLog");
+    const logDateText = $("logDateText");
+    const bleedingEl = $("bleeding");
+    const moodEl = $("mood");
+    const symptomsEl = $("symptoms");
+    const hadSexEl = $("hadSex");
+    const pillTakenEl = $("pillTaken");
+    const sexProtectionEl = $("sexProtection");
+    const notesEl = $("notes");
+
+    function pad(n){ return String(n).padStart(2,"0"); }
+    function toISO(d){
+      const dt = new Date(d);
+      return dt.getFullYear()+"-"+pad(dt.getMonth()+1)+"-"+pad(dt.getDate());
+    }
+    function addDays(iso, days){
+      const d = new Date(iso+"T00:00:00");
+      d.setDate(d.getDate()+days);
+      return toISO(d);
+    }
+    function fmtThai(iso){
+      const d = new Date(iso+"T00:00:00");
+      return d.toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
+    }
+    function monthTitle(d){
+      return d.toLocaleDateString("th-TH", { month:"long", year:"numeric" });
+    }
+    function clampInt(v, min, max, def){
+      if(!Number.isFinite(v)) return def;
+      return Math.max(min, Math.min(max, Math.round(v)));
+    }
+
+    function ensureDefaults(){
+      if(!cycleStartEl.value) cycleStartEl.value = toISO(new Date());
+      cycleLenEl.value = String(state.settings?.cycleLen ?? 28);
+      periodLenEl.value = String(state.settings?.periodLen ?? 5);
+
+      if(!state.ui) state.ui = { selectedCycleStart: "latest", viewMonth: "" };
+      if(!state.ui.viewMonth){
+        const now = new Date();
+        state.ui.viewMonth = now.getFullYear()+"-"+pad(now.getMonth()+1);
+        saveState(state);
+      }
+      monthPickerEl.value = state.ui.viewMonth;
+    }
+
+    function normalizeSettings(){
+      const cycleLen = clampInt(Number(cycleLenEl.value||28), 20, 45, 28);
+      const periodLen = clampInt(Number(periodLenEl.value||5), 2, 10, 5);
+      state.settings = { cycleLen, periodLen };
+      saveState(state);
+      return state.settings;
+    }
+
+    function addCycle(startISO, cycleLen, periodLen){
+      state.cycles = (state.cycles||[]).filter(c => c.start !== startISO);
+      state.cycles.push({ start: startISO, cycleLen, periodLen, createdAt: new Date().toISOString() });
+      state.cycles.sort((a,b)=> b.start.localeCompare(a.start));
+      saveState(state);
+    }
+
+    function getCycleByStart(startISO){
+      return (state.cycles||[]).find(c => c.start === startISO) || null;
+    }
+
+    function getLatestCycle(){
+      const c = (state.cycles||[])[0];
+      if(c) return c;
+      const s = normalizeSettings();
+      return { start: cycleStartEl.value, cycleLen: s.cycleLen, periodLen: s.periodLen };
+    }
+
+    function getSelectedCycle(){
+      const sel = state.ui?.selectedCycleStart ?? "latest";
+      if(sel === "latest") return getLatestCycle();
+      const c = getCycleByStart(sel);
+      return c || getLatestCycle();
+    }
+
+    function computePrediction(){
+      const c = getSelectedCycle();
+      const start = c.start;
+      const cycleLen = clampInt(Number(c.cycleLen||28), 20, 45, 28);
+      const periodLen = clampInt(Number(c.periodLen||5), 2, 10, 5);
+
+      const nextStart = addDays(start, cycleLen);
+      const ovulation = addDays(nextStart, -14);
+      const fertileStart = addDays(ovulation, -5);
+      const fertileEnd = ovulation;
+
+      const periodStart = start;
+      const periodEnd = addDays(start, periodLen-1);
+
+      return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd, periodStart, periodEnd };
+    }
+
+    function renderCyclePicker(){
+      const cycles = state.cycles || [];
+      const selected = state.ui?.selectedCycleStart ?? "latest";
+
+      const options = [];
+      options.push(`<option value="latest">ใช้รอบล่าสุด</option>`);
+      cycles.forEach(c=>{
+        const label = `เริ่ม ${fmtThai(c.start)} • รอบ ${c.cycleLen} วัน • มา ${c.periodLen} วัน`;
+        options.push(`<option value="${c.start}">${label}</option>`);
+      });
+
+      cyclePickerEl.innerHTML = options.join("");
+      cyclePickerEl.value = selected;
+
+      if(cyclePickerEl.value !== selected){
+        cyclePickerEl.value = "latest";
+        state.ui.selectedCycleStart = "latest";
+        saveState(state);
+      }
+    }
+
+    function renderPrediction(){
+      const p = computePrediction();
+      predMainEl.innerHTML = `รอบถัดไปคาดว่าจะมา: <b>${fmtThai(p.nextStart)}</b>`;
+      predTextEl.textContent = `รอบที่ใช้คำนวณเริ่ม: ${fmtThai(p.start)} • รอบเฉลี่ย ${p.cycleLen} วัน • มาประมาณ ${p.periodLen} วัน`;
+      predDetailEl.innerHTML = [
+        `<div class="pred-line"><b>ช่วงเสี่ยงท้อง:</b> ${fmtThai(p.fertileStart)} – ${fmtThai(p.fertileEnd)}</div>`,
+        `<div class="pred-line"><b>วันไข่ตก (โดยประมาณ):</b> ${fmtThai(p.ovulation)}</div>`,
+        `<div class="pred-line"><b>ช่วงประจำเดือน (รอบนี้):</b> ${fmtThai(p.periodStart)} – ${fmtThai(p.periodEnd)}</div>`
+      ].join("");
+      calHintEl.textContent = "แตะวันที่ในปฏิทินเพื่อบันทึกอาการ/กิจกรรมของวันนั้น";
+    }
+
+    function getViewMonthDate(){
+      const v = monthPickerEl.value || state.ui.viewMonth;
+      const parts = String(v).split("-");
+      const yy = Number(parts[0] || new Date().getFullYear());
+      const mm = Number(parts[1] || (new Date().getMonth()+1));
+      return new Date(yy, mm-1, 1);
+    }
+
+    function setViewMonthFromPicker(){
+      if(!monthPickerEl.value) return;
+      state.ui.viewMonth = monthPickerEl.value;
+      saveState(state);
+    }
+
+    function renderCalendar(){
+      const p = computePrediction();
+      const viewMonth = getViewMonthDate();
+
+      calTitleEl.textContent = monthTitle(viewMonth);
+
+      const y = viewMonth.getFullYear();
+      const m = viewMonth.getMonth();
+      const first = new Date(y, m, 1);
+      const startDow = first.getDay();
+      const daysInMonth = new Date(y, m+1, 0).getDate();
+
+      const dows = ["อา","จ","อ","พ","พฤ","ศ","ส"];
+      let html = dows.map(x=>`<div class="dow">${x}</div>`).join("");
+
+      for(let i=0;i<startDow;i++){
+        html += `<div class="day muted" data-empty="1"><div class="n"> </div></div>`;
+      }
+
+      for(let day=1; day<=daysInMonth; day++){
+        const iso = toISO(new Date(y, m, day));
+        const tags = [];
+        if(iso >= p.periodStart && iso <= p.periodEnd) tags.push("period");
+        if(iso >= p.fertileStart && iso <= p.fertileEnd) tags.push("fertile");
+        if(iso === p.ovulation) tags.push("ovu");
+        if(iso === p.nextStart) tags.push("next");
+        if(state.logs && state.logs[iso]) tags.push("log");
+
+        const tagHtml = tags.map(t=>`<span class="tag ${t}"></span>`).join("");
+        html += `
+          <div class="day" data-date="${iso}">
+            <div class="n">${day}</div>
+            <div class="tags">${tagHtml}</div>
+          </div>
+        `;
+      }
+
+      calGridEl.innerHTML = html;
+      calGridEl.querySelectorAll('.day[data-date]').forEach(cell=>{
+        cell.addEventListener('click', ()=> openLog(cell.getAttribute('data-date')));
+      });
+    }
+
+    function openLog(dateISO){
+      logModal.dataset.iso = dateISO;
+      logDateText.value = fmtThai(dateISO);
+
+      const log = (state.logs && state.logs[dateISO]) || null;
+      bleedingEl.value = log?.bleeding || "None";
+      moodEl.value = log?.mood || "Neutral";
+      symptomsEl.value = log?.symptoms || "";
+      hadSexEl.checked = !!log?.hadSex;
+      pillTakenEl.checked = !!log?.pillTaken;
+      sexProtectionEl.value = log?.sexProtection || "None";
+      notesEl.value = log?.notes || "";
+
+      logModal.classList.remove('hidden');
+    }
+    function closeLog(){
+      logModal.classList.add('hidden');
+      logModal.dataset.iso = "";
+    }
+
+    btnCloseLog.addEventListener('click', closeLog);
+    logBackdrop.addEventListener('click', closeLog);
+
+    btnSaveLog.addEventListener('click', ()=>{
+      const iso = logModal.dataset.iso;
+      if(!iso) return;
+
+      state.logs = state.logs || {};
+      state.logs[iso] = {
+        logDate: iso,
+        bleeding: bleedingEl.value,
+        mood: moodEl.value,
+        symptoms: String(symptomsEl.value||"").trim(),
+        hadSex: hadSexEl.checked,
+        pillTaken: pillTakenEl.checked,
+        sexProtection: sexProtectionEl.value,
+        notes: String(notesEl.value||"").trim(),
+        updatedAt: new Date().toISOString()
+      };
+      saveState(state);
+      closeLog();
+      renderCalendar();
+    });
+
+    btnSaveCycle.addEventListener('click', ()=>{
+      const start = cycleStartEl.value;
+      if(!start){ alert('กรุณาเลือกวันแรกที่ประจำเดือนมา'); return; }
+      const s = normalizeSettings();
+      addCycle(start, s.cycleLen, s.periodLen);
+
+      state.ui.selectedCycleStart = start;
+      saveState(state);
+
+      renderAll();
+      alert('บันทึกรอบเดือนแล้ว');
+    });
+
+    btnRecompute.addEventListener('click', ()=>{
+      normalizeSettings();
+      renderAll();
+    });
+
+    btnClearAll.addEventListener('click', ()=>{
+      if(confirm('ล้างข้อมูลรอบเดือน/บันทึกรายวันของหน้านี้ในเครื่อง ใช่ไหม?')){
+        localStorage.removeItem(LS_KEY);
+        state = loadState();
+        ensureDefaults();
+        renderAll();
+      }
+    });
+
+    btnPrev.addEventListener('click', ()=>{
+      const v = getViewMonthDate();
+      const prev = new Date(v.getFullYear(), v.getMonth()-1, 1);
+      monthPickerEl.value = prev.getFullYear()+"-"+pad(prev.getMonth()+1);
+      setViewMonthFromPicker();
+      renderCalendar();
+    });
+
+    btnNext.addEventListener('click', ()=>{
+      const v = getViewMonthDate();
+      const nxt = new Date(v.getFullYear(), v.getMonth()+1, 1);
+      monthPickerEl.value = nxt.getFullYear()+"-"+pad(nxt.getMonth()+1);
+      setViewMonthFromPicker();
+      renderCalendar();
+    });
+
+    cyclePickerEl.addEventListener("change", ()=>{
+      state.ui.selectedCycleStart = cyclePickerEl.value;
+      saveState(state);
+      renderAll();
+    });
+
+    monthPickerEl.addEventListener("change", ()=>{
+      setViewMonthFromPicker();
+      renderCalendar();
+    });
+
+    function renderAll(){
+      renderCyclePicker();
+      renderPrediction();
+      renderCalendar();
+    }
+
+    ensureDefaults();
+    renderAll();
+  </script>
 </body>
 </html>

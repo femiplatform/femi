@@ -98,53 +98,75 @@
     return new Date(isoStr).toLocaleDateString("th-TH",{dateStyle:"long"});
   }
 
-  // FP cycles count
-  let cyclesLen = 0;
-  try{
-    const c = await api.fpCyclesList();
-    const cycles = c?.items || [];
-    cyclesLen = cycles.length;
-    fpCycles.textContent = cyclesLen;
-  }catch{ fpCycles.textContent = "-"; }
+  // FP summary (อ่านจากข้อมูลที่บันทึกในเครื่องผู้ใช้)
+  const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2"; // ต้องตรงกับหน้า family_planning.html เวอร์ชันใหม่
 
-  // FP daily logs count this month
+  const pad2 = (n)=>String(n).padStart(2,"0");
+  const iso = (d)=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const addDays = (isoStr, days)=>{
+    const d = new Date(isoStr + "T00:00:00");
+    d.setDate(d.getDate()+days);
+    return iso(d);
+  };
+  const readFpLocal = ()=>{
+    try{
+      const raw = localStorage.getItem(FP_LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch{ return null; }
+  };
+  const fpCompute = (st)=>{
+    const cycles = Array.isArray(st?.cycles) ? st.cycles : [];
+    if(!cycles.length) return null;
+    const latest = cycles.slice().sort((a,b)=>String(b.start||"").localeCompare(String(a.start||"")))[0];
+    const start = latest.start;
+    const cycleLen = Number(latest.cycleLen||latest.cycleLengthDays||st?.settings?.cycleLen||28) || 28;
+    const periodLen = Number(latest.periodLen||latest.periodLengthDays||st?.settings?.periodLen||5) || 5;
+    const nextStart = addDays(start, Math.round(cycleLen));
+    const ovulation = addDays(nextStart, -14);
+    const fertileStart = addDays(ovulation, -5);
+    const fertileEnd = ovulation;
+    return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd };
+  };
+  const countLogsInRange = (logs, fromIso, toIso)=>{
+    if(!logs) return 0;
+    const keys = Object.keys(logs);
+    return keys.filter(k => k >= fromIso && k <= toIso).length;
+  };
+
   try{
+    const st = readFpLocal();
+    const cycles = Array.isArray(st?.cycles) ? st.cycles : [];
+    fpCycles.textContent = cycles.length;
+
+    // logs this month
     const now = new Date();
     const from = iso(new Date(now.getFullYear(), now.getMonth(), 1));
     const to = iso(new Date(now.getFullYear(), now.getMonth()+1, 0));
-    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
-    fpLogs.textContent = (r?.items || []).length;
-  }catch{ fpLogs.textContent = "-"; }
+    fpLogs.textContent = countLogsInRange(st?.logs, from, to);
 
-  // FP latest prediction
-  try{
-    const p = await api.fpPredLatest();
-    const item = p?.item || null;
-    if(!item){
+    // latest prediction
+    const p = st ? fpCompute(st) : null;
+    if(!p){
       fpPredText.textContent = t("dash.fpNoPred");
       fpPredDetail.innerHTML = "";
     } else {
       fpPredText.textContent = "✅ " + t("dash.fpPredTitle");
       fpPredDetail.innerHTML =
-        `<div class="pred-line">${t("dash.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b></div>` +
-        `<div class="pred-line">${t("dash.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b></div>` +
-        `<div class="pred-line">${t("dash.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b></div>`;
+        `<div class="pred-line">${t("dash.fpNextPeriod")} <b>${fmtThai(p.nextStart)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpOvulation")} <b>${fmtThai(p.ovulation)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpFertile")} <b>${fmtThai(p.fertileStart)} – ${fmtThai(p.fertileEnd)}</b></div>`;
     }
+
+    // 7-day streak (distinct logDate in last 7 days)
+    const to7 = iso(now);
+    const from7 = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+    const n7 = countLogsInRange(st?.logs, from7, to7);
+    streak7.textContent = t("dash.days", { n: n7 });
   }catch{
+    fpCycles.textContent = "-";
+    fpLogs.textContent = "-";
     fpPredText.textContent = t("dash.fpNoPred");
     fpPredDetail.innerHTML = "";
-  }
-
-  // 7-day streak (count distinct logDate in last 7 days)
-  try{
-    const now = new Date();
-    const to = iso(now);
-    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
-    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
-    const items = r?.items || [];
-    const set = new Set(items.map(x => x.logDate));
-    streak7.textContent = t("dash.days", { n: set.size });
-  }catch{
     streak7.textContent = "-";
   }
 

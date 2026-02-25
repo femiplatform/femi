@@ -149,19 +149,48 @@
 
     const fmtThai = (iso) => iso ? new Date(iso).toLocaleDateString("th-TH",{dateStyle:"long"}) : "-";
 
-    // FP latest prediction
+    // FP summary (อ่านจากข้อมูลที่บันทึกในเครื่องผู้ใช้)
+    const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2"; // ต้องตรงกับหน้า family_planning.html เวอร์ชันใหม่
+    const pad2 = (n)=>String(n).padStart(2,"0");
+    const iso = (d)=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+    const addDays = (isoStr, days)=>{
+      const d = new Date(isoStr + "T00:00:00");
+      d.setDate(d.getDate()+days);
+      return iso(d);
+    };
+    const readFpLocal = ()=>{
+      try{
+        const raw = localStorage.getItem(FP_LS_KEY);
+        return raw ? JSON.parse(raw) : null;
+      }catch{ return null; }
+    };
+    const fpCompute = (st)=>{
+      const cycles = Array.isArray(st?.cycles) ? st.cycles : [];
+      if(!cycles.length) return null;
+      // latest by start date desc
+      const latest = cycles.slice().sort((a,b)=>String(b.start||"").localeCompare(String(a.start||"")))[0];
+      const start = latest.start;
+      const cycleLen = Number(latest.cycleLen||latest.cycleLengthDays||st?.settings?.cycleLen||28) || 28;
+      const periodLen = Number(latest.periodLen||latest.periodLengthDays||st?.settings?.periodLen||5) || 5;
+      const nextStart = addDays(start, Math.round(cycleLen));
+      const ovulation = addDays(nextStart, -14);
+      const fertileStart = addDays(ovulation, -5);
+      const fertileEnd = ovulation;
+      return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd };
+    };
+
     try{
-      const pred = await api.fpPredLatest();
-      const item = pred?.item || null;
-      if(!item){
+      const st = readFpLocal();
+      const p = st ? fpCompute(st) : null;
+      if(!p){
         fpSummary.textContent = t("home.fpNoData");
         fpDetail.textContent = "";
       } else {
         fpSummary.textContent = "✅ " + t("home.fpCardTitle");
         fpDetail.innerHTML =
-          `${t("home.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b><br/>` +
-          `${t("home.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b><br/>` +
-          `${t("home.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b>`;
+          `${t("home.fpNextPeriod")} <b>${fmtThai(p.nextStart)}</b><br/>` +
+          `${t("home.fpOvulation")} <b>${fmtThai(p.ovulation)}</b><br/>` +
+          `${t("home.fpFertile")} <b>${fmtThai(p.fertileStart)} – ${fmtThai(p.fertileEnd)}</b>`;
       }
     }catch{
       fpSummary.textContent = t("home.fpNoData");
