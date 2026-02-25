@@ -5,12 +5,39 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>FEMI • Home</title>
   <link rel="stylesheet" href="../assets/app.css"/>
+
+  <style>
+    /* News ticker */
+    #tickerBox{ border:1px solid rgba(17,24,39,.08); background: rgba(255,255,255,.72); }
+    .femiTickerTrack{
+      display:inline-block;
+      white-space:nowrap;
+      will-change: transform;
+      animation: femiTicker 28s linear infinite;
+      padding-left: 100%;
+    }
+    @keyframes femiTicker{
+      0%{ transform: translateX(0); }
+      100%{ transform: translateX(-100%); }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .femiTickerTrack{ animation:none; padding-left:0; }
+    }
+  </style>
+
 </head>
 <body>
   <div id="app">
-    <main class="container">
-      <h1 class="page-title" data-i18n="page.home">หน้าแรก</h1>
-      <p class="page-sub muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋</p>
+    <main class="container">      <p class="page-sub muted"><span data-i18n="home.welcome">ยินดีต้อนรับ</span> 👋 <span id="welcomeName" style="font-weight:900"></span></p>
+
+      <div class="card-soft" id="tickerBox" style="padding:10px 12px;margin-top:10px;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge-soft" style="white-space:nowrap">ข่าว/ประกาศ</span>
+          <div style="position:relative;flex:1;overflow:hidden">
+            <div id="newsTicker" class="femiTickerTrack">กำลังโหลดข่าว...</div>
+          </div>
+        </div>
+      </div>
 
       <!-- Summary card -->
       <div class="card" style="padding:14px">
@@ -68,83 +95,12 @@
         </div>
       </div>
 
-      <!-- Quick tiles -->
-      <div class="card" style="padding:14px;margin-top:12px">
-        <div style="font-weight:900" data-i18n="home.quickActions">เมนูทางลัด</div>
-
-        <div class="tiles">
-          <a class="tile pv" href="./preventive.html">
-            <div class="left">
-              <div class="iconWrap" id="icPv"></div>
-              <div style="min-width:0">
-                <div class="title">ดูแลสุขภาพ</div>
-                <div class="sub">Preventive</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-
-          <a class="tile fp" href="./family_planning.html">
-            <div class="left">
-              <div class="iconWrap" id="icFp"></div>
-              <div style="min-width:0">
-                <div class="title">วางแผนครอบครัว</div>
-                <div class="sub">Family Planning</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-
-          <a class="tile kb" href="./knowledge.html">
-            <div class="left">
-              <div class="iconWrap" id="icKb"></div>
-              <div style="min-width:0">
-                <div class="title">คลังความรู้</div>
-                <div class="sub">Knowledge</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-
-          <a class="tile qz" href="./quiz.html">
-            <div class="left">
-              <div class="iconWrap" id="icQz"></div>
-              <div style="min-width:0">
-                <div class="title">แบบทดสอบ</div>
-                <div class="sub">Quiz</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-
-          <a class="tile noti" href="./notifications.html">
-            <div class="left">
-              <div class="iconWrap" id="icNt"></div>
-              <div style="min-width:0">
-                <div class="title">การแจ้งเตือน</div>
-                <div class="sub">Notifications</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-
-          <a class="tile" href="./dashboard.html">
-            <div class="left">
-              <div class="iconWrap" id="icDb"></div>
-              <div style="min-width:0">
-                <div class="title">แดชบอร์ด</div>
-                <div class="sub">Dashboard</div>
-              </div>
-            </div>
-            <span class="badge-soft">›</span>
-          </a>
-        </div>
-      </div>
-    </main>
+      </main>
   </div>
 
   <script type="module">
     import { initUserShell } from "../js/shell.js";
+    import { getSession } from "../js/auth.js";
     import { api } from "../js/api.js";
     import { t, applyI18n } from "../js/i18n.js";
     import { Icons } from "../js/icons.js";
@@ -152,13 +108,35 @@
     await initUserShell({ active: "home", title: t("page.home") });
     applyI18n(document);
 
-    // icons (tiles)
-    document.getElementById("icPv").innerHTML = Icons.heartShield();
-    document.getElementById("icFp").innerHTML = Icons.calendar();
-    document.getElementById("icKb").innerHTML = Icons.book();
-    document.getElementById("icQz").innerHTML = Icons.quiz();
-    document.getElementById("icNt").innerHTML = Icons.noti();
-    document.getElementById("icDb").innerHTML = Icons.dashboard();
+    // Welcome name (First + Last)
+    try{
+      const s = getSession();
+      const u = s?.user || {};
+      const fullName = [u.firstName, u.lastName].filter(Boolean).join(" ").trim();
+      const el = document.getElementById("welcomeName");
+      if(el) el.textContent = fullName ? fullName : "";
+    }catch{}
+
+    // News ticker
+    async function loadTicker(){
+      const box = document.getElementById("newsTicker");
+      if(!box) return;
+      try{
+        const list = await api.newsList();
+        const items = Array.isArray(list) ? list : (Array.isArray(list?.items) ? list.items : []);
+        const titles = items
+          .filter(x => (x?.title || "").trim())
+          .slice(0, 12)
+          .map(x => String(x.title).trim());
+        const text = titles.length ? titles.join(" • ") : "ยังไม่มีข่าว/ประกาศ";
+        // duplicate for seamless loop
+        const dup = titles.length ? (text + "    •    " + text) : text;
+        box.textContent = dup;
+      }catch{
+        box.textContent = "ไม่สามารถโหลดข่าว/ประกาศได้";
+      }
+    }
+    loadTicker();
 
     // summary data
     const fpSummary = document.getElementById("fpSummary");
