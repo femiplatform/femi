@@ -3,40 +3,359 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>FEMI • Knowledge</title>
+  <title>FEMI • คลังความรู้</title>
   <link rel="stylesheet" href="../assets/app.css" />
+  <style>
+    /* keep consistent with FEMI pastel tone */
+    .kb-hero{
+      margin-top: 10px;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: linear-gradient(135deg, rgba(186,230,253,.30), rgba(254,243,199,.35));
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+    }
+    .kb-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+    .kb-title{ font-weight: 1000; font-size: 18px; }
+    .kb-meta{ font-size: 12px; opacity: .7; margin-top: 6px; line-height: 1.6; }
+    .kb-chip{
+      display:inline-flex; align-items:center;
+      padding: 4px 10px; border-radius: 999px;
+      border: 1px solid rgba(17,24,39,.10);
+      background: rgba(255,255,255,.78);
+      font-weight: 900; font-size: 12px;
+      white-space: nowrap;
+    }
+    .kb-content{ margin-top: 10px; line-height: 1.85; }
+    .kb-actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .kb-grid{ display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    @media (min-width: 960px){ .kb-grid{ grid-template-columns: 1fr 1fr; } }
+
+    .kb-item{
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.80);
+      box-shadow: 0 12px 34px rgba(0,0,0,.05);
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .kb-item:hover{ transform: translateY(-1px); box-shadow: 0 18px 45px rgba(0,0,0,.08); }
+    .kb-item-title{ font-weight: 1000; }
+    .kb-item-sub{ font-size: 12px; opacity: .7; margin-top: 4px; }
+
+    /* modal */
+    .kb-modal{ position: fixed; inset: 0; z-index: 80; display:flex; align-items:flex-end; justify-content:center; }
+    .kb-modal.hidden{ display:none; }
+    .kb-modal-card{
+      width: min(720px, 96vw);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      margin: 12px;
+      overflow: hidden;
+    }
+    .kb-modal-head{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+      gap: 12px;
+    }
+    .kb-close{
+      border: 1px solid rgba(0,0,0,.10);
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .kb-modal-body{ padding: 14px; }
+    .kb-backdrop{ position: fixed; inset: 0; background: rgba(0,0,0,.25); z-index: -1; }
+  </style>
 </head>
+
 <body>
   <div id="app">
     <main class="container">
       <h1 class="page-title" data-i18n="page.knowledge">คลังความรู้</h1>
       <p class="page-sub muted" id="kSub" data-i18n="kp.subtitle">บทความความรู้</p>
 
-      <!-- Featured (1 full content) -->
-      <section style="margin-top:12px">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
-          <div style="font-weight:900" data-i18n="kp.featured">ความรู้วันนี้</div>
-          <button class="btn" id="btnShuffle" data-i18n="kp.shuffle">สุ่มใหม่</button>
+      <!-- Featured -->
+      <section class="kb-hero">
+        <div class="kb-row">
+          <div>
+            <div style="font-weight:1000" data-i18n="kp.featured">ความรู้วันนี้</div>
+            <div class="kb-meta" id="featuredMeta">แนะนำแบบอ่านง่าย ใช้ได้ในชีวิตประจำวัน</div>
+          </div>
+          <div class="kb-actions">
+            <button class="btn" id="btnShuffle" data-i18n="kp.shuffle">สุ่มใหม่</button>
+          </div>
         </div>
+
         <div id="featured" style="margin-top:10px"></div>
       </section>
 
-      <!-- Recommended (5 titles) -->
+      <!-- Recommended -->
       <section style="margin-top:14px">
-        <div style="font-weight:900" data-i18n="kp.recommended">ความรู้แนะนำ</div>
-        <div id="recommended" style="margin-top:10px"></div>
+        <div style="font-weight:1000" data-i18n="kp.recommended">ความรู้แนะนำ</div>
+        <div id="recommended" class="kb-grid"></div>
       </section>
     </main>
+
+    <!-- modal -->
+    <div class="kb-modal hidden" id="kbModal" aria-hidden="true">
+      <div class="kb-modal-card" role="dialog" aria-modal="true" aria-label="บทความ">
+        <div class="kb-modal-head">
+          <div>
+            <div class="kb-title" id="mTitle">-</div>
+            <div class="kb-meta" id="mMeta">-</div>
+          </div>
+          <button class="kb-close" id="mClose" aria-label="close">✕</button>
+        </div>
+        <div class="kb-modal-body">
+          <div class="kb-content" id="mContent"></div>
+        </div>
+      </div>
+      <div class="kb-backdrop" id="mBackdrop"></div>
+    </div>
   </div>
 
   <script type="module">
     import { initUserShell } from "../js/shell.js";
     import { applyI18n } from "../js/i18n.js";
-    import { initKnowledgePage } from "../js/pages/knowledge.js";
 
     await initUserShell({ active: "tools", title: "Knowledge" });
-    applyI18n(document);
-    initKnowledgePage();
+    try{ applyI18n(document); }catch{}
+
+    // ------------------------------------------------------------------
+    // NOTE: เวอร์ชันนี้ "ไม่เรียก api.knowledgeFeaturedRandom" และไม่พึ่ง knowledge.js
+    // เพื่อแก้ปัญหา: api.knowledgeFeaturedRandom is not a function
+    // ------------------------------------------------------------------
+
+    const KB_LS_KEY = "FEMI_KNOWLEDGE_V1";
+    const state = (() => {
+      try{
+        const raw = localStorage.getItem(KB_LS_KEY);
+        return raw ? JSON.parse(raw) : { featuredId: null };
+      }catch{
+        return { featuredId: null };
+      }
+    })();
+
+    // ตัวอย่างข้อมูล (คุณสามารถเพิ่ม/แก้ได้ภายหลัง หรือจะเปลี่ยนไปอ่านจากไฟล์ JSON ก็ได้)
+    const items = [
+      {
+        id: "kb_sleep_01",
+        title: "นอนให้พอ ทำไมถึงสำคัญ",
+        category: "การนอน",
+        updatedAt: "2026-02-01",
+        content: [
+          "การนอนช่วยให้ร่างกายซ่อมแซมตัวเองและช่วยเรื่องอารมณ์ ความจำ และภูมิคุ้มกัน",
+          "ผู้ใหญ่ส่วนใหญ่มักเหมาะกับการนอนประมาณ 7–9 ชั่วโมงต่อคืน",
+          "ถ้านอนไม่พอเป็นประจำ อาจทำให้หิวบ่อย สมาธิลดลง และป่วยง่ายขึ้น",
+          "",
+          "เคล็ดลับง่าย ๆ:",
+          "• พยายามนอนและตื่นให้ใกล้เวลาเดิมทุกวัน",
+          "• ก่อนนอน 1 ชั่วโมง ลดจอ/แสงจ้า และเลี่ยงชา กาแฟ",
+          "• ถ้าง่วงตอนบ่าย ให้ลองงีบ 10–20 นาที (ไม่ยาวเกินไป)"
+        ].join("\n")
+      },
+      {
+        id: "kb_water_01",
+        title: "ดื่มน้ำยังไงให้พอดี",
+        category: "การดื่มน้ำ",
+        updatedAt: "2026-02-01",
+        content: [
+          "ร่างกายต้องการน้ำเพื่อการไหลเวียนเลือด คุมอุณหภูมิ และช่วยขับของเสีย",
+          "หลักง่าย ๆ คือจิบน้ำสม่ำเสมอทั้งวัน และดูสีปัสสาวะ (ไม่เข้มมาก)",
+          "",
+          "เทคนิคจำง่าย:",
+          "• ตื่นนอน: 1 แก้ว",
+          "• ก่อนอาหารแต่ละมื้อ: 1 แก้ว",
+          "• ระหว่างวัน: จิบเพิ่มเมื่ออากาศร้อน/เหงื่อออก",
+          "",
+          "ข้อควรระวัง: ถ้ามีโรคไต/หัวใจ หรือแพทย์จำกัดน้ำ ให้ยึดตามคำแนะนำแพทย์"
+        ].join("\n")
+      },
+      {
+        id: "kb_salt_01",
+        title: "ลดเค็มแบบไม่ทรมาน",
+        category: "โภชนาการ",
+        updatedAt: "2026-02-01",
+        content: [
+          "การกินเค็มมากสัมพันธ์กับความดันโลหิตสูงและโรคไต",
+          "",
+          "ทำได้ง่าย ๆ:",
+          "• ชิมก่อนเติมน้ำปลา/ซีอิ๊ว",
+          "• ลดอาหารสำเร็จรูป บะหมี่กึ่งสำเร็จรูป ของดอง",
+          "• แยกน้ำจิ้ม และจิ้มแต่น้อย",
+          "• เพิ่มรสชาติด้วยสมุนไพร/มะนาว/พริก แทนการเติมเค็ม"
+        ].join("\n")
+      },
+      {
+        id: "kb_move_01",
+        title: "ขยับวันละนิด ดีกว่าไม่ขยับเลย",
+        category: "การออกกำลัง",
+        updatedAt: "2026-02-01",
+        content: [
+          "ไม่จำเป็นต้องออกกำลังหนักเสมอไป แค่เดินเร็ว ทำงานบ้าน หรือยืดเหยียดก็ช่วยได้",
+          "",
+          "ตัวอย่างที่ทำได้จริง:",
+          "• เดินเร็ว 20–30 นาที",
+          "• เต้น/แอโรบิกที่บ้าน 15–20 นาที",
+          "• ทำสวน/ถูบ้านแบบต่อเนื่อง 20–30 นาที",
+          "",
+          "เริ่มจากน้อย ๆ แล้วค่อยเพิ่มเวลา จะทำได้ยาวกว่า"
+        ].join("\n")
+      },
+      {
+        id: "kb_sugar_01",
+        title: "อยากลดหวาน เริ่มตรงไหนก่อน",
+        category: "โภชนาการ",
+        updatedAt: "2026-02-01",
+        content: [
+          "น้ำตาลเติม (เช่นในชานม น้ำอัดลม ขนมหวาน) เป็นจุดที่ลดได้ง่ายที่สุด",
+          "",
+          "เริ่มแบบไม่ฝืน:",
+          "• เลือกหวานน้อย/ไม่หวาน (0–25%)",
+          "• ลดความถี่: จากทุกวัน → เหลือสัปดาห์ละ 2–3 วัน",
+          "• เปลี่ยนเป็นน้ำเปล่าหรือชาไม่หวานบ้าง",
+          "• ถ้าอยากของหวาน: เลือกผลไม้ทั้งลูกแทนบางมื้อ"
+        ].join("\n")
+      },
+      {
+        id: "kb_bp_01",
+        title: "สัญญาณเตือนความดันสูงที่ควรรู้",
+        category: "ความดันโลหิต",
+        updatedAt: "2026-02-01",
+        content: [
+          "ความดันสูงหลายคนไม่มีอาการ แต่ถ้ามีอาจพบได้ เช่น ปวดหัว มึนงง แน่นหน้าอก",
+          "",
+          "ควรไปพบเจ้าหน้าที่สาธารณสุข/แพทย์ ถ้า:",
+          "• ปวดหัวรุนแรงผิดปกติ",
+          "• แน่นหน้าอก หายใจลำบาก",
+          "• ชาหรืออ่อนแรงครึ่งซีก พูดไม่ชัด (อาจเป็นฉุกเฉิน)"
+        ].join("\n")
+      },
+    ];
+
+    const el = (id)=>document.getElementById(id);
+
+    function pickRandom(arr){
+      return arr[Math.floor(Math.random()*arr.length)];
+    }
+    function uniqRandom(arr, n, excludeId){
+      const pool = arr.filter(x => x.id !== excludeId);
+      const out = [];
+      const used = new Set();
+      while(out.length < Math.min(n, pool.length)){
+        const it = pool[Math.floor(Math.random()*pool.length)];
+        if(used.has(it.id)) continue;
+        used.add(it.id);
+        out.push(it);
+      }
+      return out;
+    }
+
+    function formatDate(iso){
+      try{
+        const d = new Date(iso+"T00:00:00");
+        return d.toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
+      }catch{ return iso; }
+    }
+
+    function saveState(){
+      localStorage.setItem(KB_LS_KEY, JSON.stringify(state));
+    }
+
+    function renderFeatured(item){
+      const featured = el("featured");
+      featured.innerHTML = `
+        <div class="card" style="padding:14px;background:rgba(255,255,255,.82);border:1px solid rgba(17,24,39,.08);box-shadow:0 14px 40px rgba(0,0,0,.06)">
+          <div class="kb-row">
+            <div>
+              <div class="kb-title">${escapeHtml(item.title)}</div>
+              <div class="kb-meta">
+                <span class="kb-chip">${escapeHtml(item.category)}</span>
+                <span style="margin-left:8px">อัปเดต: ${escapeHtml(formatDate(item.updatedAt))}</span>
+              </div>
+            </div>
+            <button class="btn" id="btnOpenFeatured">อ่านเต็ม</button>
+          </div>
+          <div class="kb-content" style="margin-top:10px">
+            ${renderPreview(item.content)}
+          </div>
+        </div>
+      `;
+      el("btnOpenFeatured").addEventListener("click", ()=> openModal(item));
+    }
+
+    function renderRecommended(list){
+      const rec = el("recommended");
+      rec.innerHTML = list.map(it => `
+        <div class="kb-item" data-id="${it.id}">
+          <div class="kb-item-title">${escapeHtml(it.title)}</div>
+          <div class="kb-item-sub">${escapeHtml(it.category)} • อัปเดต ${escapeHtml(formatDate(it.updatedAt))}</div>
+        </div>
+      `).join("");
+
+      rec.querySelectorAll(".kb-item").forEach(card=>{
+        card.addEventListener("click", ()=>{
+          const id = card.getAttribute("data-id");
+          const it = items.find(x=>x.id===id);
+          if(it) openModal(it);
+        });
+      });
+    }
+
+    function renderPreview(text){
+      const lines = String(text||"").split("\n").filter(Boolean);
+      const preview = lines.slice(0, 5).join("\n");
+      return `<pre style="white-space:pre-wrap;margin:0;font-family:inherit">${escapeHtml(preview)}${lines.length>5 ? "\n…" : ""}</pre>`;
+    }
+
+    function escapeHtml(s){
+      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+
+    function openModal(item){
+      el("mTitle").textContent = item.title;
+      el("mMeta").textContent = `${item.category} • อัปเดต ${formatDate(item.updatedAt)}`;
+      el("mContent").innerHTML = `<pre style="white-space:pre-wrap;margin:0;font-family:inherit;line-height:1.85">${escapeHtml(item.content)}</pre>`;
+      el("kbModal").classList.remove("hidden");
+      el("kbModal").setAttribute("aria-hidden","false");
+    }
+    function closeModal(){
+      el("kbModal").classList.add("hidden");
+      el("kbModal").setAttribute("aria-hidden","true");
+    }
+
+    el("mClose").addEventListener("click", closeModal);
+    el("mBackdrop").addEventListener("click", closeModal);
+
+    function shuffle(){
+      const current = state.featuredId ? items.find(x=>x.id===state.featuredId) : null;
+      const featured = current || pickRandom(items);
+      state.featuredId = featured.id;
+      saveState();
+
+      renderFeatured(featured);
+      renderRecommended(uniqRandom(items, 6, featured.id));
+    }
+
+    // Shuffle button
+    el("btnShuffle").addEventListener("click", ()=>{
+      // force new featured if possible
+      const pool = items.filter(x=>x.id !== state.featuredId);
+      const featured = pool.length ? pickRandom(pool) : pickRandom(items);
+      state.featuredId = featured.id;
+      saveState();
+      renderFeatured(featured);
+      renderRecommended(uniqRandom(items, 6, featured.id));
+    });
+
+    // init
+    shuffle();
   </script>
 </body>
 </html>
