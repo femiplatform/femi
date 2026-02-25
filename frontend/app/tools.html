@@ -9,59 +9,10 @@
 <body>
 <div id="app">
   <main class="container">
-    <h1 data-i18n="tools.recommendedTitle">เครื่องมือแนะนำ</h1>
-    <p class="muted" data-i18n="tools.subtitle">รวมเครื่องมือเพื่อสุขภาพและการดูแลตนเอง</p>
-
-    <div class="tiles">
-      <a class="tile pv" href="./preventive.html">
-        <div class="left">
-          <div class="iconWrap" id="tPv"></div>
-          <div>
-            <div class="title">ดูแลสุขภาพ</div>
-            <div class="sub">Preventive</div>
-          </div>
-        </div>
-        <span class="badge-soft" id="bdPv">-</span>
-      </a>
-
-      <a class="tile fp" href="./family_planning.html">
-        <div class="left">
-          <div class="iconWrap" id="tFp"></div>
-          <div>
-            <div class="title">วางแผนครอบครัว</div>
-            <div class="sub">Family Planning</div>
-          </div>
-        </div>
-        <span class="badge-soft" id="bdFp">-</span>
-      </a>
-
-      <a class="tile kb" href="./knowledge.html">
-        <div class="left">
-          <div class="iconWrap" id="tKb"></div>
-          <div>
-            <div class="title">คลังความรู้</div>
-            <div class="sub">Knowledge</div>
-          </div>
-        </div>
-        <span class="badge-soft">›</span>
-      </a>
-
-      <a class="tile qz" href="./quiz.html">
-        <div class="left">
-          <div class="iconWrap" id="tQz"></div>
-          <div>
-            <div class="title">แบบทดสอบ</div>
-            <div class="sub">Quiz</div>
-          </div>
-        </div>
-        <span class="badge-soft">›</span>
-      </a>
-</div>
-
     <!-- Section 2: Tools by category -->
-    <section class="toolsCats" style="margin-top:18px">
-      <h2 class="sectionTitle" data-i18n="tools.byCategoryTitle">เครื่องมือดูแลสุขภาพตามหมวดหมู่</h2>
-      <p class="muted" style="margin-top:4px" data-i18n="tools.byCategorySubtitle">เลือกเครื่องมือจากหมวดหลักด้านล่าง</p>
+<section class="toolsCats" style="margin-top:18px">
+      <h1 class="page-title" data-i18n="tools.byCategoryTitle">เครื่องมือดูแลสุขภาพ</h1>
+      <p class="muted" style="margin-top:4px" data-i18n="tools.byCategorySubtitle">เลือกเรื่องที่ต้องการ แล้วกดเข้าใช้งานได้เลย</p>
 
       <div class="catGrid">
         <!-- Category 1 -->
@@ -70,14 +21,14 @@
             <div class="catIcon" id="icCat1"></div>
             <div>
               <div class="catTitle" data-i18n="tools.cat1Title">การสร้างเสริมสุขภาพและป้องกันโรค</div>
-              <div class="catSub">Preventive Lifestyle</div>
-            </div>
+</div>
           </div>
 
           <div class="catGroup">
             <div class="catGroupTitle" data-i18n="tools.cat1_1Title">1.1 สุขภาพองค์รวม</div>
             <div class="catLinks">
               <a class="chipLink" href="./health_age.html" data-i18n="tools.cat1_1_a">เครื่องคำนวณอายุสุขภาพ: BMR/TDEE + อายุสุขภาพ</a>
+              <a class="chipLink" href="./preventive_health.html" data-i18n="tools.cat1_1_d">ดูแลสุขภาพเชิงป้องกัน</a>
               <a class="chipLink" href="./health_checklist.html" data-i18n="tools.cat1_1_b">ตารางวางแผนตรวจสุขภาพ: To-do รายปี</a>
               <a class="chipLink" href="./mood_tracker.html" data-i18n="tools.cat1_1_c">Mood Tracker: Emoji + EPDS</a>
             </div>
@@ -119,8 +70,7 @@
             <div class="catIcon" id="icCat2"></div>
             <div>
               <div class="catTitle" data-i18n="tools.cat2Title">การวางแผนครอบครัว</div>
-              <div class="catSub">Smart Family Planning</div>
-            </div>
+</div>
           </div>
           <div class="catLinks">
             <a class="chipLink" href="./contraception_smart.html" data-i18n="tools.cat2_a">เลือกวิธีคุมกำเนิดอัจฉริยะ (Decision Tree)</a>
@@ -136,8 +86,7 @@
             <div class="catIcon" id="icCat3"></div>
             <div>
               <div class="catTitle" data-i18n="tools.cat3Title">การดูแลครรภ์</div>
-              <div class="catSub">Active Pregnancy Journey</div>
-            </div>
+</div>
           </div>
           <div class="catLinks">
             <a class="chipLink" href="./pregnancy.html" data-i18n="tools.cat3_a">แดชบอร์ดติดตามครรภ์</a>
@@ -152,8 +101,7 @@
             <div class="catIcon" id="icCat4"></div>
             <div>
               <div class="catTitle" data-i18n="tools.cat4Title">การสร้างแรงจูงใจและชุมชน</div>
-              <div class="catSub">Engagement</div>
-            </div>
+</div>
           </div>
           <div class="catLinks">
             <a class="chipLink" href="./quiz.html" data-i18n="tools.cat4_a">ควิซความรู้สุขภาพรายวัน</a>
@@ -221,14 +169,12 @@
   await initUserShell({ active: "tools", title: t("page.tools") });
   applyI18n(document);
 
-    // (legacy) quick tool icons may not exist in this layout
-  try{
-    const a=document.getElementById("tPv"); if(a) a.innerHTML = Icons.heartShield();
-    const b=document.getElementById("tFp"); if(b) b.innerHTML = Icons.calendar();
-    const c=document.getElementById("tKb"); if(c) c.innerHTML = Icons.book();
-    const d=document.getElementById("tQz"); if(d) d.innerHTML = Icons.quiz();
-  }catch{}
-// Category icons
+  document.getElementById("tPv").innerHTML = Icons.heartShield();
+  document.getElementById("tFp").innerHTML = Icons.calendar();
+  document.getElementById("tKb").innerHTML = Icons.book();
+  document.getElementById("tQz").innerHTML = Icons.quiz();
+
+  // Category icons
   try{
     document.getElementById("icCat1").innerHTML = Icons.heartShield();
     document.getElementById("icCat2").innerHTML = Icons.calendar();
