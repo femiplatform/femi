@@ -146,7 +146,7 @@
           <div class="kpiHint" id="kpiFpHint">-</div>
         </div>
         <div class="kpi" id="kpiPv">
-          <div class="kpiTitle">งานดูแลสุขภาพที่ค้าง</div>
+          <div class="kpiTitle">ตารางตรวจสุขภาพรายปี</div>
           <div class="kpiVal"><span id="kpiOver">-</span></div>
           <div class="kpiHint" id="kpiPvHint">-</div>
         </div>
@@ -512,26 +512,115 @@
     drawLogChart();
   });
 
-  // ---------------- Preventive counts (API, guard) ----------------
-  let pvDueToday = 0, pvOverdue = 0;
+  
+// ---------------- Health Checklist counts (localStorage, same logic as health_checklist.html) ----------------
+  let pvDueCount = 0, pvDoneCount = 0, pvOverCount = 0, pvTotalCount = 0;
   try{
-    if(api && typeof api.preventiveList === "function"){
-      const pv = await api.preventiveList();
-      pvDueToday = Number(pv?.counts?.dueToday ?? 0) || 0;
-      pvOverdue  = Number(pv?.counts?.overdue ?? 0) || 0;
+    const HC_LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
+    const hcRaw = localStorage.getItem(HC_LS_KEY);
+    const hcState = hcRaw ? JSON.parse(hcRaw) : null;
+
+const CHECKS = [
+      // BASIC
+      { id:"bp", title:"วัดความดันโลหิต", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง หรือถ้ามีความเสี่ยงตรวจบ่อยขึ้น" },
+      { id:"bmi_waist", title:"ชั่งน้ำหนัก/วัดส่วนสูง + รอบเอว", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"ติดตาม BMI และรอบเอวเพื่อประเมินความเสี่ยงเมตาบอลิก" },
+
+      // METABOLIC
+      { id:"fbs_hba1c", title:"น้ำตาลในเลือด (FBS หรือ HbA1c)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีประวัติครอบครัว/น้ำหนักเกิน/ความดันสูง อาจเริ่มตรวจเร็วกว่านี้" },
+      { id:"lipid", title:"ไขมันในเลือด (Cholesterol profile)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีปัจจัยเสี่ยง แนะนำตรวจตามแพทย์/หน่วยบริการ" },
+
+      // WOMEN / CANCER
+      { id:"cervical", title:"คัดกรองมะเร็งปากมดลูก (Pap smear / HPV test)", scope:["women","cancer"], minAge:21, intervalMonths:36, hint:"แนวทางขึ้นกับอายุและวิธีตรวจ (Pap/HPV) ให้ยึดคำแนะนำหน่วยบริการ" },
+      { id:"breast_clinical", title:"ตรวจเต้านมโดยบุคลากร (Clinical breast exam)", scope:["women","cancer"], minAge:20, intervalMonths:12, hint:"ควรทำร่วมกับการตรวจเต้านมด้วยตนเองเป็นประจำ" },
+
+      // WOMEN / LIFE
+      { id:"dental", title:"ตรวจสุขภาพช่องปาก/ฟัน", scope:["basic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง" },
+      { id:"eye", title:"ตรวจสายตา/สุขภาพตา", scope:["basic"], minAge:18, intervalMonths:24, hint:"หากมีอาการหรือมีโรคประจำตัวควรตรวจถี่ขึ้น" },
+
+      // MENTAL
+      { id:"mental", title:"ประเมินสุขภาพใจ/ความเครียด", scope:["mental"], minAge:15, intervalMonths:12, hint:"ประเมินตนเองและปรึกษาหน่วยบริการเมื่อมีสัญญาณเสี่ยง" },
+
+      // VACCINE (as yearly plan reminders)
+      { id:"flu", title:"วัคซีนไข้หวัดใหญ่ (ตามความเหมาะสม)", scope:["basic"], minAge:15, intervalMonths:12, hint:"กลุ่มเสี่ยงควรรับวัคซีนทุกปี (ขึ้นกับนโยบาย/สิทธิ)" },
+    ];
+
+function ymToday(){
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return { yyyy, mm, dd, iso: `${yyyy}-${mm}-${dd}` };
     }
+    function addMonths(dateIso, months){
+      const d = new Date(dateIso + "T00:00:00");
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const day = d.getDate();
+      const nd = new Date(y, m + months, day);
+      const yyyy = nd.getFullYear();
+      const mm = String(nd.getMonth()+1).padStart(2,"0");
+      const dd = String(nd.getDate()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+    function isBefore(aIso, bIso){
+      return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
+    }
+function getItemStatus(item, rec, planYear){
+      // rec: { status, date, result, note, place }
+      // planYear: used for simple year planning view
+      const today = ymToday().iso;
+
+      if(!rec || !rec.status || rec.status === "todo"){
+        return { state:"todo", pillClass:"pill-due", pillText:"ถึงกำหนด", due:true };
+      }
+function inAge(item, age){
+      const a = Number(age);
+      if(!Number.isFinite(a) || !age) return true; // if age empty, show all
+      if(item.minAge != null && a < item.minAge) return false;
+      if(item.maxAge != null && a > item.maxAge) return false;
+      return true;
+    }
+function inScope(item, scope){
+      if(scope === "all") return true;
+      return (item.scope || []).includes(scope);
+    }
+
+    const nowYear = new Date().getFullYear();
+    const age = hcState?.age ?? "";
+    const scope = hcState?.scope ?? "all";
+    const planYear = String(hcState?.year || nowYear);
+
+    const filtered = CHECKS
+      .filter(it => inAge(it, age))
+      .filter(it => inScope(it, scope))
+      .map(it => {
+        const rec = hcState?.items?.[it.id];
+        const st = getItemStatus(it, rec, planYear);
+        return { it, rec, st };
+      });
+
+    pvTotalCount = filtered.length;
+    pvDueCount = filtered.filter(x => x.st.due).length;                 // ต้องทำ (ถึงกำหนด + เกินกำหนด)
+    pvDoneCount = filtered.filter(x => x.st.state === "done").length;   // ทำแล้ว
+    pvOverCount = filtered.filter(x => x.st.pillClass === "pill-over").length; // เกินกำหนด
   }catch{}
 
-  el("kpiOver").textContent = pvOverdue ? String(pvOverdue) : "0";
-  el("kpiPvHint").textContent = pvOverdue
-    ? `เลยกำหนด ${pvOverdue} รายการ • ครบกำหนดวันนี้ ${pvDueToday} รายการ`
-    : `ครบกำหนดวันนี้ ${pvDueToday} รายการ`;
+  el("kpiOver").textContent = pvDueCount ? String(pvDueCount) : "0";
 
-  if(pvOverdue > 0){
-    primaryAction = { label:"ดูรายการที่ค้าง", href:"./health_checklist.html" };
+  if(pvTotalCount){
+    let hint = "ต้องทำ " + pvDueCount + " รายการ • ทำแล้ว " + pvDoneCount + " รายการ";
+    if(pvOverCount) hint += " • เกินกำหนด " + pvOverCount + " รายการ";
+    el("kpiPvHint").textContent = hint;
+  }else{
+    el("kpiPvHint").textContent = "ยังไม่มีรายการตรวจสุขภาพ";
   }
 
-  // ---------------- Quiz last score (API, guard) ----------------
+  if(pvOverCount > 0 || pvDueCount > 0){
+    primaryAction = { label:"ดูตารางตรวจสุขภาพ", href:"./health_checklist.html" };
+  }
+
+// ---------------- Quiz last score (API, guard) ----------------
+ last score (API, guard) ----------------
   try{
     if(api && typeof api.quizMyResults === "function"){
       const res = await api.quizMyResults();
@@ -684,50 +773,67 @@
     roundRect(ctx, 0,0,w,h, 16*devicePixelRatio); ctx.fill();
 
     const pad = 14*devicePixelRatio;
-    const total = Math.max(1, pvDueToday + pvOverdue);
-    const duePct = pvDueToday / total;
-    const overPct = pvOverdue / total;
+
+    const overdue = pvOverCount || 0;
+    const dueAll = pvDueCount || 0;
+    const due = Math.max(0, dueAll - overdue);
+    const done = pvDoneCount || 0;
+
+    const total = Math.max(1, overdue + due + done);
+
+    const overduePct = overdue / total;
+    const duePct = due / total;
+    const donePct = done / total;
 
     const cx = pad + 58*devicePixelRatio;
     const cy = h/2;
     const r  = 34*devicePixelRatio;
     const lw = 10*devicePixelRatio;
 
-    // base ring
     ctx.lineWidth = lw;
     ctx.strokeStyle = "rgba(2,6,23,.10)";
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, Math.PI*2);
     ctx.stroke();
 
-    // overdue (red)
     let start = -Math.PI/2;
-    ctx.strokeStyle = "rgba(239,68,68,.90)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*overPct);
-    ctx.stroke();
 
-    // due today (amber/blue)
-    start = start + Math.PI*2*overPct;
-    ctx.strokeStyle = "rgba(245,158,11,.90)";
+    ctx.strokeStyle = "rgba(239,68,68,.92)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, start + Math.PI*2*overduePct);
+    ctx.stroke();
+    start += Math.PI*2*overduePct;
+
+    ctx.strokeStyle = "rgba(245,158,11,.92)";
     ctx.beginPath();
     ctx.arc(cx, cy, r, start, start + Math.PI*2*duePct);
     ctx.stroke();
+    start += Math.PI*2*duePct;
 
-    // text block
-    ctx.fillStyle = "rgba(2,6,23,.90)";
-    ctx.font = `${14*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("เลยกำหนด", cx + r + 18*devicePixelRatio, cy - 12*devicePixelRatio);
-    ctx.fillStyle = "rgba(239,68,68,.92)";
-    ctx.font = `${18*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(pvOverdue), cx + r + 18*devicePixelRatio, cy + 10*devicePixelRatio);
+    ctx.strokeStyle = "rgba(34,197,94,.92)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, start + Math.PI*2*donePct);
+    ctx.stroke();
+
+    const tx = cx + r + 18*devicePixelRatio;
 
     ctx.fillStyle = "rgba(2,6,23,.90)";
-    ctx.font = `${14*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("ครบกำหนดวันนี้", cx + r + 110*devicePixelRatio, cy - 12*devicePixelRatio);
+    ctx.font = `${13*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.fillText("ต้องทำ", tx, cy - 22*devicePixelRatio);
     ctx.fillStyle = "rgba(245,158,11,.92)";
     ctx.font = `${18*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(pvDueToday), cx + r + 110*devicePixelRatio, cy + 10*devicePixelRatio);
+    ctx.fillText(String(dueAll), tx, cy - 2*devicePixelRatio);
+
+    ctx.fillStyle = "rgba(2,6,23,.90)";
+    ctx.font = `${13*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.fillText("ทำแล้ว", tx + 110*devicePixelRatio, cy - 22*devicePixelRatio);
+    ctx.fillStyle = "rgba(34,197,94,.92)";
+    ctx.font = `${18*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.fillText(String(done), tx + 110*devicePixelRatio, cy - 2*devicePixelRatio);
+
+    ctx.fillStyle = "rgba(2,6,23,.90)";
+    ctx.font = `${12*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
+    ctx.fillText("เกินกำหนด " + String(overdue), tx, cy + 22*devicePixelRatio);
   }
 
   function roundRect(ctx, x, y, w, h, r){
