@@ -4,6 +4,12 @@ import { api } from "./api.js";
 import { t, applyI18n } from "./i18n.js";
 import { Icons } from "./icons.js";
 
+/**
+ * Drawer menu:
+ * - แสดงเฉพาะ “หัวข้อหลัก” (จาก tools.html)
+ * - คลิกหัวข้อหลักเพื่อแสดงหัวข้อย่อย (Accordion: เปิดได้ทีละหัวข้อ)
+ * - ปุ่มออกจากระบบเป็นสีแดง (ธีมหลัก) ตัวอักษรสีขาว
+ */
 export async function initUserShell({ active = "home", title = "" } = {}) {
   requireAuth("../login.html");
 
@@ -25,12 +31,97 @@ export async function initUserShell({ active = "home", title = "" } = {}) {
     const tEl = document.getElementById("shellTitle");
     if (tEl) tEl.textContent = title || t("app.name");
     setActiveBottomNav_(active);
+
+    // refresh drawer menu text (เผื่อมีเปลี่ยนภาษา)
+    const drawerNav = document.getElementById("drawerNav");
+    if (drawerNav) drawerNav.innerHTML = renderDrawerMenu_();
+    bindDrawerAccordion_();
   }
 
   applyI18n(document);
   await refreshNotificationBadge_();
   startBadgePolling_();
 }
+
+/** โครงสร้างเมนู: ยึดตาม tools.html */
+const TOOLS_MENU = [
+  {
+    id: "cat1",
+    titleKey: "tools.cat1Title",
+    sections: [
+      {
+        titleKey: "tools.cat1_1Title",
+        items: [
+          { href: "./health_age.html", labelKey: "tools.cat1_1_a" },
+          { href: "./preventive_health.html", labelKey: "tools.cat1_1_d" },
+          { href: "./health_checklist.html", labelKey: "tools.cat1_1_b" },
+          { href: "./mood_tracker.html", labelKey: "tools.cat1_1_c" },
+        ],
+      },
+      {
+        titleKey: "tools.cat1_2Title",
+        items: [
+          { href: "./breast_risk.html", labelKey: "tools.cat1_2_a" },
+          { href: "./breast_reminder.html", labelKey: "tools.cat1_2_b" },
+          { href: "./breast_self_exam.html", labelKey: "tools.cat1_2_c" },
+        ],
+      },
+      {
+        titleKey: "tools.cat1_3Title",
+        items: [{ href: "./cervical_risk.html", labelKey: "tools.cat1_3_a" }],
+      },
+      {
+        titleKey: "tools.cat1_4Title",
+        items: [
+          { href: "./menopause_ready.html", labelKey: "tools.cat1_4_a" },
+          { href: "./menopause_quiz_basic.html", labelKey: "tools.cat1_4_b1" },
+          { href: "./menopause_symptoms.html", labelKey: "tools.cat1_4_b2" },
+          { href: "./menopause_health_ready.html", labelKey: "tools.cat1_4_b3" },
+          { href: "./menopause_psycho_ready.html", labelKey: "tools.cat1_4_b4" },
+          { href: "./menopause_tracker.html", labelKey: "tools.cat1_4_c" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cat2",
+    titleKey: "tools.cat2Title",
+    sections: [
+      {
+        titleKey: null,
+        items: [
+          { href: "./contraception_smart.html", labelKey: "tools.cat2_a" },
+          { href: "./family_planning.html", labelKey: "tools.cat2_b" },
+          { href: "./sti_risk_map.html", labelKey: "tools.cat2_c" },
+          { href: "./pill_missed_helper.html", labelKey: "tools.cat2_d" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cat3",
+    titleKey: "tools.cat3Title",
+    sections: [
+      {
+        titleKey: null,
+        items: [
+          { href: "./pregnancy.html", labelKey: "tools.cat3_a" },
+          { href: "./preeclampsia_screen.html", labelKey: "tools.cat3_c" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "cat4",
+    titleKey: "tools.cat4Title",
+    sections: [
+      {
+        titleKey: null,
+        items: [{ href: "./quiz.html", labelKey: "tools.cat4_a" }],
+      },
+    ],
+  },
+];
 
 function renderShell_(title, active) {
   return `
@@ -66,20 +157,14 @@ function renderShell_(title, active) {
           </button>
         </div>
 
-        <nav class="drawer-nav">
-          <a href="./home.html" data-i18n="nav.home">${t("nav.home")}</a>
-          <a href="./tools.html" data-i18n="nav.tools">${t("nav.tools")}</a>
-          <a href="./preventive.html" data-i18n="nav.preventive">${t("nav.preventive")}</a>
-          <a href="./family_planning.html" data-i18n="nav.familyPlanning">${t("nav.familyPlanning")}</a>
-          <a href="./pregnancy.html" data-i18n="nav.pregnancy">${t("nav.pregnancy")}</a>
-          <a href="./knowledge.html" data-i18n="nav.knowledge">${t("nav.knowledge")}</a>
-          <a href="./quiz.html" data-i18n="nav.quiz">${t("nav.quiz")}</a>
-          <a href="./notifications.html" data-i18n="nav.notifications">${t("nav.notifications")}</a>
-          <a href="./profile.html" data-i18n="nav.profile">${t("nav.profile")}</a>
+        <!-- ✅ เมนูใหม่แบบ Accordion -->
+        <nav class="drawer-nav drawer-acc" id="drawerNav">
+          ${renderDrawerMenu_()}
         </nav>
 
         <div class="drawer-foot">
-          <button class="btn btn-primary" id="btnLogout" data-i18n="nav.logout">${t("nav.logout")}</button>
+          <!-- ✅ ปุ่มออกจากระบบ สีแดง/ตัวหนังสือขาว -->
+          <button class="btn btn-danger" id="btnLogout" data-i18n="nav.logout">${t("nav.logout")}</button>
         </div>
       </div>
     </aside>
@@ -147,7 +232,7 @@ function renderShell_(title, active) {
     .drawer-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.25); z-index:0; }
     .drawer-panel{
       position:absolute; top:0; right:0; height:100%;
-      width:min(340px, 88vw);
+      width:min(360px, 92vw);
       background:#fff;
       box-shadow:-16px 0 40px rgba(0,0,0,.16);
       display:flex; flex-direction:column;
@@ -155,10 +240,64 @@ function renderShell_(title, active) {
     }
     .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid rgba(0,0,0,.06)}
     .drawer-title{font-weight:900}
-    .drawer-nav{display:flex;flex-direction:column;padding:8px 14px;gap:2px;overflow:auto}
-    .drawer-nav a{padding:10px 8px;border-radius:12px;text-decoration:none;color:#111}
-    .drawer-nav a:hover{background:rgba(0,0,0,.04)}
+
+    /* ✅ Accordion menu */
+    .drawer-acc{ padding: 10px 14px; gap: 10px; }
+    .drawer-section{
+      border:1px solid rgba(17,24,39,.08);
+      border-radius:16px;
+      overflow:hidden;
+      background: rgba(255,255,255,.90);
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    }
+    .drawer-section-btn{
+      width:100%;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:10px;
+      padding: 12px 12px;
+      border:0;
+      background: transparent;
+      cursor:pointer;
+      font-weight: 900;
+      text-align:left;
+    }
+    .drawer-section-btn:hover{ background: rgba(0,0,0,.04); }
+    .drawer-section-btn .left{display:flex;align-items:center;gap:10px;min-width:0}
+    .drawer-section-btn .ic{
+      width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
+      border:1px solid rgba(17,24,39,.08);background: rgba(255,255,255,.7);
+    }
+    .drawer-section-btn .label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width: 240px;}
+    .drawer-section-btn .chev{opacity:.7}
+    .drawer-sub{
+      display:none;
+      padding: 8px 10px 12px;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+    .drawer-section.open .drawer-sub{ display:block; }
+
+    .drawer-group-title{
+      font-size: 12px;
+      font-weight: 900;
+      opacity: .75;
+      margin: 10px 6px 6px;
+    }
+    .drawer-link{
+      display:block;
+      padding: 10px 10px;
+      margin: 6px 4px;
+      border-radius: 14px;
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,255,255,.78);
+      color:#111;
+      text-decoration:none;
+      font-weight: 800;
+    }
+    .drawer-link:hover{ background: rgba(185,28,28,.08); border-color: rgba(185,28,28,.16); }
+
     .drawer-foot{padding:14px;border-top:1px solid rgba(0,0,0,.06)}
+    /* ใช้สีธีมแดง */
+    .btn.btn-danger{ background: #b91c1c; color:#fff; }
 
     .femi-bottomnav{
       position:fixed;left:0;right:0;bottom:0;z-index:55;
@@ -178,6 +317,45 @@ function renderShell_(title, active) {
     .bn-item.active{background:rgba(185,28,28,.10);color:#b91c1c}
   </style>
   `;
+}
+
+function renderDrawerMenu_() {
+  const iconFor = (id) => {
+    if (id === "cat1") return Icons.heartShield ? Icons.heartShield() : Icons.tools();
+    if (id === "cat2") return Icons.calendar ? Icons.calendar() : Icons.tools();
+    if (id === "cat3") return Icons.baby ? Icons.baby() : (Icons.calendar ? Icons.calendar() : Icons.tools());
+    if (id === "cat4") return Icons.quiz ? Icons.quiz() : (Icons.book ? Icons.book() : Icons.tools());
+    return Icons.tools();
+  };
+
+  return TOOLS_MENU.map((cat) => {
+    const title = t(cat.titleKey);
+
+    const subHtml = cat.sections.map(sec => {
+      const groupTitle = sec.titleKey
+        ? `<div class="drawer-group-title" data-i18n="${sec.titleKey}">${t(sec.titleKey)}</div>`
+        : "";
+      const links = sec.items.map(it =>
+        `<a class="drawer-link" href="${it.href}" data-i18n="${it.labelKey}">${t(it.labelKey)}</a>`
+      ).join("");
+      return `${groupTitle}${links}`;
+    }).join("");
+
+    return `
+      <div class="drawer-section" data-acc="${escapeHtml_(cat.id)}">
+        <button class="drawer-section-btn" type="button" data-acc-btn="${escapeHtml_(cat.id)}" aria-expanded="false">
+          <span class="left">
+            <span class="ic">${iconFor(cat.id)}</span>
+            <span class="label" data-i18n="${cat.titleKey}">${escapeHtml_(title)}</span>
+          </span>
+          <span class="chev">${Icons.chevronDown ? Icons.chevronDown() : "▾"}</span>
+        </button>
+        <div class="drawer-sub" data-acc-panel="${escapeHtml_(cat.id)}">
+          ${subHtml}
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function bindShellEvents_() {
@@ -216,7 +394,11 @@ function bindShellEvents_() {
     if (e.key === "Escape") close();
   });
 
-  drawer?.querySelectorAll("a").forEach(a => a.addEventListener("click", close));
+  // คลิกลิงก์ใน drawer แล้วปิด drawer
+  drawer?.addEventListener("click", (e) => {
+    const a = e.target?.closest?.("a");
+    if (a) close();
+  });
 
   btnLogout?.addEventListener("click", async () => {
     try { await authLogout("../login.html"); } catch { location.href = "../login.html"; }
@@ -224,6 +406,30 @@ function bindShellEvents_() {
 
   btnBell?.addEventListener("click", () => {
     location.href = "./notifications.html";
+  });
+
+  bindDrawerAccordion_();
+}
+
+/** ✅ Accordion: เปิดได้ทีละหัวข้อหลัก */
+function bindDrawerAccordion_(){
+  const drawerNav = document.getElementById("drawerNav");
+  if (!drawerNav) return;
+
+  drawerNav.querySelectorAll("[data-acc-btn]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-acc-btn");
+      if (!id) return;
+
+      drawerNav.querySelectorAll(".drawer-section").forEach(sec => {
+        const sid = sec.getAttribute("data-acc");
+        const shouldOpen = sid === id && !sec.classList.contains("open");
+        sec.classList.toggle("open", shouldOpen);
+
+        const b = sec.querySelector("[data-acc-btn]");
+        if (b) b.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+      });
+    });
   });
 }
 
