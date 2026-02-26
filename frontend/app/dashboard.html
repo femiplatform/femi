@@ -31,7 +31,7 @@
   <main class="container">
     <div class="card hero">
       <h1 style="margin:0" data-i18n="page.dashboard">แดชบอร์ด</h1>
-      <p class="muted" style="margin:6px 0 0" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
+      <p class="muted" style="margin:6px 0 0">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
     </div>
 
     <!-- 1) ผลการบันทึกรอบเดือน -->
@@ -49,14 +49,14 @@
       </div>
     </div>
 
-    <!-- คาดการณ์ -->
+    <!-- FP prediction summary -->
     <div class="card" style="padding:14px;margin-top:12px">
       <div style="font-weight:1000">คาดการณ์ (ล่าสุด)</div>
       <div class="muted" id="fpPredText" style="margin-top:6px">-</div>
       <div id="fpPredDetail" class="pred-detail"></div>
     </div>
 
-    <!-- ความสม่ำเสมอ -->
+    <!-- 7-day streak -->
     <div class="card" style="padding:14px;margin-top:12px">
       <div style="font-weight:1000">ความสม่ำเสมอการบันทึก</div>
       <div class="row">
@@ -121,6 +121,7 @@
   const quizLast = document.getElementById("quizLast");
   const quizHint = document.getElementById("quizHint");
 
+  // ---------------- helpers ----------------
   function iso(d){
     const y=d.getFullYear();
     const m=String(d.getMonth()+1).padStart(2,"0");
@@ -136,20 +137,22 @@
     if(!isoStr) return "-";
     return new Date(isoStr + "T00:00:00").toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
   }
+  function clampInt(v, min, max, def){
+    if(!Number.isFinite(v)) return def;
+    return Math.max(min, Math.min(max, Math.round(v)));
+  }
 
-  // ================= A) รอบเดือน: localStorage (เหมือน family_planning.html) =================
+  // ==================================================
+  // A) Family Planning (localStorage) — ต้องตรงกับ family_planning.html
+  // ==================================================
   const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
-
   function readFp(){
     try{
       const raw = localStorage.getItem(FP_LS_KEY);
       return raw ? JSON.parse(raw) : null;
     }catch{ return null; }
   }
-  function clampInt(v, min, max, def){
-    if(!Number.isFinite(v)) return def;
-    return Math.max(min, Math.min(max, Math.round(v)));
-  }
+
   function computeFpPrediction(state){
     const cycles = Array.isArray(state?.cycles) ? state.cycles.slice() : [];
     if(!cycles.length) return null;
@@ -169,6 +172,7 @@
 
     return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd, periodStart, periodEnd };
   }
+
   function countLogsThisMonth(logs){
     const now = new Date();
     const from = iso(new Date(now.getFullYear(), now.getMonth(), 1));
@@ -208,10 +212,12 @@
     streak7.textContent = `${set.size} วัน`;
   }
 
-  // ================= B) แผนตรวจสุขภาพ: localStorage (เหมือน health_checklist.html) =================
+  // ==================================================
+  // B) Health checklist (localStorage) — ให้ตรงกับ health_checklist.html
+  // ==================================================
   const HC_LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
 
-  // CHECKS (ชุดเดียวกับ health_checklist.html)
+  // ✅ CHECKS และ logic เหมือนหน้า health_checklist.html
   const CHECKS = [
     { id:"bp", title:"วัดความดันโลหิต", scope:["basic","metabolic"], minAge:15, intervalMonths:12 },
     { id:"bmi_waist", title:"ชั่งน้ำหนัก/วัดส่วนสูง + รอบเอว", scope:["basic","metabolic"], minAge:15, intervalMonths:12 },
@@ -251,7 +257,6 @@
   function isBefore(aIso, bIso){
     return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
   }
-  // getItemStatus = เหมือน health_checklist.html
   function getItemStatus(item, rec){
     const today = ymToday().iso;
 
@@ -305,7 +310,9 @@
     ? `เกินกำหนด ${overCount} รายการ • ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`
     : `ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`;
 
-  // ================= C) แบบทดสอบ: ใช้ API (เดิม) =================
+  // ==================================================
+  // C) Quiz last score (API, guard)
+  // ==================================================
   try{
     if(api && typeof api.quizMyResults === "function"){
       const res = await api.quizMyResults();
