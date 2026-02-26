@@ -108,6 +108,7 @@
       color:var(--ink);
       line-height:1.05;
     }
+    .value small{font-size:16px;font-weight:1000;opacity:.75}
     .hint{margin-top:8px;font-size:12px;line-height:1.65;color:rgba(15,23,42,.72)}
 
     .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
@@ -127,23 +128,6 @@
     .block.blue{ background: linear-gradient(135deg, var(--blueA), rgba(255,255,255,.70)); }
     .block.green{ background: linear-gradient(135deg, var(--greenA), rgba(255,255,255,.70)); }
     .block.purple{ background: linear-gradient(135deg, var(--purpleA), rgba(255,255,255,.70)); }
-
-    /* Charts */
-    .chartWrap{
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:12px;
-      background: rgba(255,255,255,.86);
-      box-shadow: 0 14px 40px rgba(2,6,23,.05);
-    }
-    .chartTitle{font-size:12px;font-weight:1000;color:rgba(15,23,42,.70);margin-bottom:8px}
-    canvas{width:100%;height:auto;display:block}
-    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px;font-weight:900;color:rgba(15,23,42,.75)}
-    .lg{display:inline-flex;align-items:center;gap:6px}
-    .dot{width:10px;height:10px;border-radius:999px;display:inline-block}
-    .dot.ok{background:rgba(34,197,94,.90)}
-    .dot.due{background:rgba(245,158,11,.90)}
-    .dot.over{background:rgba(239,68,68,.90)}
   </style>
 </head>
 <body>
@@ -189,14 +173,6 @@
         <span class="muted">7 วันล่าสุด บันทึกแล้ว</span>
         <span class="badgePill"><b id="streak7">-</b></span>
       </div>
-
-      <div style="margin-top:12px" class="chartWrap">
-        <div class="chartTitle">กราฟแท่ง: การบันทึกรายวัน 14 วันล่าสุด</div>
-        <canvas id="chartFp14" height="140"></canvas>
-        <div class="muted" style="font-size:12px;margin-top:8px;line-height:1.6">
-          แท่งสูง = มีบันทึกในวันนั้น • จุดแดงด้านล่าง = วันนี้
-        </div>
-      </div>
     </div>
 
     <!-- 2) แผนตรวจสุขภาพ -->
@@ -221,16 +197,6 @@
         </div>
       </div>
       <div class="hint" id="hcHint"></div>
-
-      <div style="margin-top:12px" class="chartWrap">
-        <div class="chartTitle">แผนภูมิโดนัท: ครบแล้ว / ถึงกำหนด / เกินกำหนด</div>
-        <canvas id="chartHcDonut" height="160"></canvas>
-        <div class="legend">
-          <span class="lg"><span class="dot ok"></span>ครบแล้ว</span>
-          <span class="lg"><span class="dot due"></span>ถึงกำหนด</span>
-          <span class="lg"><span class="dot over"></span>เกินกำหนด</span>
-        </div>
-      </div>
     </div>
 
     <!-- 3) แบบทดสอบ -->
@@ -294,7 +260,7 @@
     return Math.max(min, Math.min(max, Math.round(v)));
   }
 
-  // ---------------- A) Family Planning (localStorage) ----------------
+  // A) Family Planning (localStorage)
   const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
   function readFp(){
     try{
@@ -328,10 +294,6 @@
     return Object.keys(logs||{}).filter(d => d >= from && d <= to).length;
   }
 
-  const today = new Date();
-  let fp14 = []; // {k, has}
-  let fpLogsObj = {};
-
   const fp = readFp();
   if(!fp || !Array.isArray(fp.cycles) || fp.cycles.length === 0){
     fpCyclesEl.textContent = "0";
@@ -339,11 +301,9 @@
     fpPredText.textContent = "ยังไม่มีข้อมูลคาดการณ์ • ไปเพิ่มรอบเดือนก่อน";
     fpPredDetail.innerHTML = "";
     streak7.textContent = "0 วัน";
-    fpLogsObj = {};
   }else{
     fpCyclesEl.textContent = String(fp.cycles.length);
     fpLogsEl.textContent = String(countLogsThisMonth(fp.logs));
-    fpLogsObj = fp.logs || {};
 
     const pred = computeFpPrediction(fp);
     if(!pred){
@@ -359,20 +319,14 @@
         `<div class="pred-line"><b>ช่วงประจำเดือน (รอบนี้):</b> ${fmtThai(pred.periodStart)} – ${fmtThai(pred.periodEnd)}</div>`;
     }
 
-    const to = iso(today);
-    const from = iso(new Date(today.getFullYear(), today.getMonth(), today.getDate()-6));
-    const set = new Set(Object.keys(fpLogsObj).filter(d => d >= from && d <= to));
+    const now = new Date();
+    const to = iso(now);
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate()-6));
+    const set = new Set(Object.keys(fp.logs||{}).filter(d => d >= from && d <= to));
     streak7.textContent = `${set.size} วัน`;
   }
 
-  // build last 14 days for chart
-  for(let i=13;i>=0;i--){
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()-i);
-    const k = iso(d);
-    fp14.push({ k, has: !!fpLogsObj[k] });
-  }
-
-  // ---------------- B) Health checklist (localStorage) ----------------
+  // B) Health checklist (localStorage)
   const HC_LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
   const CHECKS = [
     { id:"bp", scope:["basic","metabolic"], minAge:15, intervalMonths:12 },
@@ -413,7 +367,7 @@
     return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
   }
   function getItemStatus(item, rec){
-    const todayIso = ymToday().iso;
+    const today = ymToday().iso;
     if(!rec || !rec.status || rec.status === "todo"){
       return { state:"todo", pillText:"ถึงกำหนด", due:true };
     }
@@ -422,9 +376,9 @@
       return { state:"done", pillText:"ครบแล้ว", due:false };
     }
     const nextDue = addMonths(last, item.intervalMonths || 12);
-    if(isBefore(nextDue, todayIso)){
+    if(isBefore(nextDue, today)){
       const overMark = addMonths(nextDue, 3);
-      const isOver = isBefore(overMark, todayIso);
+      const isOver = isBefore(overMark, today);
       return { state:"done", pillText: isOver ? "เกินกำหนด" : "ถึงกำหนด", due:true };
     }
     return { state:"done", pillText:"ครบแล้ว", due:false };
@@ -448,14 +402,8 @@
 
   const total = filtered.length;
   const dueCount = filtered.filter(x => x.st.due).length;
-  const overCount = filtered.filter(x => x.st.pillText === "เกินกำหนด").length;
-
-  // สำหรับโดนัท: แยกเป็น ครบแล้ว/ถึงกำหนด/เกินกำหนด (ไม่ซ้อนกัน)
-  const okCount = Math.max(0, total - dueCount);
-  const dueOnlyCount = Math.max(0, dueCount - overCount);
-
-  // สำหรับ KPI “ทำแล้ว” ให้เป็นสถานะ state done (ตามเดิมของหน้า checklist)
   const doneCount = filtered.filter(x => x.st.state === "done").length;
+  const overCount = filtered.filter(x => x.st.pillText === "เกินกำหนด").length;
 
   hcAllEl.textContent = String(total);
   hcDueEl.textContent = String(dueCount);
@@ -464,7 +412,7 @@
     ? `เกินกำหนด ${overCount} รายการ • ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`
     : `ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`;
 
-  // ---------------- C) Quiz (API, guard) ----------------
+  // C) Quiz (API, guard)
   try{
     if(api && typeof api.quizMyResults === "function"){
       const res = await api.quizMyResults();
@@ -482,183 +430,6 @@
     quizLast.textContent = "-";
     quizHint.textContent = "ยังไม่มีคะแนน";
   }
-
-  // ---------------- Charts (Canvas) ----------------
-  function dpr(){
-    return Math.max(1, Math.floor(window.devicePixelRatio || 1));
-  }
-  function roundRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
-
-  function drawFpBar(){
-    const canvas = document.getElementById("chartFp14");
-    const ctx = canvas.getContext("2d");
-    const ratio = dpr();
-
-    const cssW = canvas.clientWidth;
-    const cssH = 140;
-    canvas.width = Math.floor(cssW * ratio);
-    canvas.height = Math.floor(cssH * ratio);
-
-    const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0,0,w,h);
-
-    // bg
-    ctx.fillStyle = "rgba(2,6,23,.04)";
-    roundRect(ctx, 0, 0, w, h, 16*ratio);
-    ctx.fill();
-
-    const pad = 14*ratio;
-    const bars = fp14.length;
-    const bw = (w - pad*2) / bars;
-    const maxBar = h - pad*2 - 18*ratio;
-
-    // baseline
-    ctx.strokeStyle = "rgba(2,6,23,.10)";
-    ctx.lineWidth = 1*ratio;
-    ctx.beginPath();
-    ctx.moveTo(pad, h-pad);
-    ctx.lineTo(w-pad, h-pad);
-    ctx.stroke();
-
-    const todayIso = iso(new Date());
-
-    fp14.forEach((d, i)=>{
-      const x = pad + i*bw + bw*0.18;
-      const barW = bw*0.64;
-      const barH = d.has ? maxBar : maxBar*0.18;
-      const y = h - pad - barH;
-
-      const grad = ctx.createLinearGradient(0,y,0,y+barH);
-      grad.addColorStop(0, d.has ? "rgba(14,165,233,.90)" : "rgba(148,163,184,.55)");
-      grad.addColorStop(1, d.has ? "rgba(59,130,246,.55)" : "rgba(148,163,184,.28)");
-      ctx.fillStyle = grad;
-      roundRect(ctx, x, y, barW, barH, 10*ratio);
-      ctx.fill();
-
-      if(d.k === todayIso){
-        ctx.fillStyle = "rgba(185,28,28,.90)";
-        ctx.beginPath();
-        ctx.arc(x + barW/2, h - pad + 7*ratio, 3.5*ratio, 0, Math.PI*2);
-        ctx.fill();
-      }
-    });
-  }
-
-  function drawHcDonut(){
-    const canvas = document.getElementById("chartHcDonut");
-    const ctx = canvas.getContext("2d");
-    const ratio = dpr();
-
-    const cssW = canvas.clientWidth;
-    const cssH = 160;
-    canvas.width = Math.floor(cssW * ratio);
-    canvas.height = Math.floor(cssH * ratio);
-
-    const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0,0,w,h);
-
-    // bg
-    ctx.fillStyle = "rgba(2,6,23,.04)";
-    roundRect(ctx, 0, 0, w, h, 16*ratio);
-    ctx.fill();
-
-    const pad = 16*ratio;
-    const cx = pad + 62*ratio;
-    const cy = h/2;
-    const r = 42*ratio;
-    const lw = 12*ratio;
-
-    const totalSeg = Math.max(1, okCount + dueOnlyCount + overCount);
-    const okPct = okCount / totalSeg;
-    const duePct = dueOnlyCount / totalSeg;
-    const overPct = overCount / totalSeg;
-
-    // base ring
-    ctx.lineWidth = lw;
-    ctx.strokeStyle = "rgba(2,6,23,.10)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.stroke();
-
-    let start = -Math.PI/2;
-
-    // over (red)
-    ctx.strokeStyle = "rgba(239,68,68,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*overPct);
-    ctx.stroke();
-    start += Math.PI*2*overPct;
-
-    // due (amber)
-    ctx.strokeStyle = "rgba(245,158,11,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*duePct);
-    ctx.stroke();
-    start += Math.PI*2*duePct;
-
-    // ok (green)
-    ctx.strokeStyle = "rgba(34,197,94,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*okPct);
-    ctx.stroke();
-
-    // center text
-    ctx.fillStyle = "rgba(15,23,42,.92)";
-    ctx.font = `${16*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.fillText(String(total), cx, cy + 6*ratio);
-    ctx.font = `${11*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillStyle = "rgba(15,23,42,.65)";
-    ctx.fillText("รายการ", cx, cy + 24*ratio);
-    ctx.textAlign = "left";
-
-    // side numbers
-    const tx = cx + r + 18*ratio;
-    const ty = cy - 28*ratio;
-
-    ctx.font = `${12*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillStyle = "rgba(15,23,42,.80)";
-    ctx.fillText("ครบแล้ว", tx, ty);
-    ctx.fillStyle = "rgba(34,197,94,.95)";
-    ctx.font = `${18*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(okCount), tx, ty + 20*ratio);
-
-    ctx.fillStyle = "rgba(15,23,42,.80)";
-    ctx.font = `${12*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("ถึงกำหนด", tx + 120*ratio, ty);
-    ctx.fillStyle = "rgba(245,158,11,.95)";
-    ctx.font = `${18*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(dueOnlyCount), tx + 120*ratio, ty + 20*ratio);
-
-    ctx.fillStyle = "rgba(15,23,42,.80)";
-    ctx.font = `${12*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("เกินกำหนด", tx, ty + 56*ratio);
-    ctx.fillStyle = "rgba(239,68,68,.95)";
-    ctx.font = `${18*ratio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(overCount), tx, ty + 76*ratio);
-  }
-
-  function drawAll(){
-    drawFpBar();
-    drawHcDonut();
-  }
-  drawAll();
-
-  // redraw on resize
-  let timer = null;
-  window.addEventListener("resize", ()=>{
-    clearTimeout(timer);
-    timer = setTimeout(drawAll, 120);
-  });
 </script>
 </body>
 </html>
