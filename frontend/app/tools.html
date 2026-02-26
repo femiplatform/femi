@@ -153,6 +153,10 @@
         .catGrid{ grid-template-columns: 1fr 1fr; }
         .cat-preventive{ grid-column: 1 / -1; }
       }
+    
+      /* Ensure icons are visible (modern line icons use currentColor) */
+      .catIcon { color: rgba(15, 23, 42, 0.92); }
+      .catIcon .svg-ic { width: 22px; height: 22px; }
     </style>
 
   </main>
@@ -161,39 +165,21 @@
 <script type="module">
   import { initUserShell } from "../js/shell.js";
   import { t, applyI18n } from "../js/i18n.js";
-  import { api } from "../js/api.js";
   import { Icons } from "../js/icons.js";
 
   await initUserShell({ active: "tools", title: t("page.tools") });
   applyI18n(document);
 
-  document.getElementById("tPv").innerHTML = Icons.heartShield();
-  document.getElementById("tFp").innerHTML = Icons.calendar();
-  document.getElementById("tKb").innerHTML = Icons.book();
-  document.getElementById("tQz").innerHTML = Icons.quiz();
+  // ✅ Category icons (modern line icons). Guard every element to prevent JS from stopping.
+  const setIcon = (id, svg) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = svg;
+  };
 
-  // Category icons
-  try{
-    document.getElementById("icCat1").innerHTML = Icons.heartShield();
-    document.getElementById("icCat2").innerHTML = Icons.calendar();
-    document.getElementById("icCat3").innerHTML = (Icons.baby ? Icons.baby() : Icons.calendar());
-    document.getElementById("icCat4").innerHTML = Icons.quiz();
-  }catch{}
-
-  const bdPv = document.getElementById("bdPv");
-  const bdFp = document.getElementById("bdFp");  try{
-    const pv = await api.preventiveList();
-    const due = pv?.counts?.dueToday ?? 0;
-    bdPv.textContent = due > 0 ? `วันนี้ ${due}` : "พร้อมใช้";
-  }catch{ bdPv.textContent = "-"; }
-
-  try{
-    const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
-    const raw = localStorage.getItem(FP_LS_KEY);
-    const st = raw ? JSON.parse(raw) : null;
-    const n = Array.isArray(st?.cycles) ? st.cycles.length : 0;
-    bdFp.textContent = n > 0 ? `มีข้อมูล ${n}` : "ยังไม่มี";
-  }catch{ bdFp.textContent = "-"; }
+  setIcon("icCat1", Icons.heartShield ? Icons.heartShield() : Icons.tools());
+  setIcon("icCat2", Icons.calendar ? Icons.calendar() : Icons.tools());
+  setIcon("icCat3", Icons.baby ? Icons.baby() : (Icons.calendar ? Icons.calendar() : Icons.tools()));
+  setIcon("icCat4", Icons.quiz ? Icons.quiz() : (Icons.book ? Icons.book() : Icons.tools()));
 </script>
 </body>
 </html>
