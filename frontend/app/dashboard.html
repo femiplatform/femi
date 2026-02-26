@@ -5,62 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>FEMI • Dashboard</title>
   <link rel="stylesheet" href="../assets/app.css"/>
+  <style>
+    .container{max-width:900px;margin:0 auto;padding:18px}
+    .muted{opacity:.72}
+    .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .stat{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px;background:rgba(255,255,255,.8)}
+    .value{font-size:28px;font-weight:1000;margin-top:6px}
+    .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+    .pred-line{font-size:13px;opacity:.92;line-height:1.55}
+    .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+    @media (max-width:760px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
+    .hero{
+      padding:14px;
+      background: linear-gradient(135deg, rgba(186,230,253,.42), rgba(254,243,199,.35));
+      border: 1px solid rgba(17,24,39,.08);
+      box-shadow: 0 14px 40px rgba(0,0,0,.06);
+      backdrop-filter: blur(8px);
+    }
+  </style>
 </head>
 <body>
 <div id="app">
   <main class="container">
-    <h1 data-i18n="page.dashboard">แดชบอร์ด</h1>
-    <p class="muted" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
+    <div class="card hero">
+      <h1 style="margin:0" data-i18n="page.dashboard">แดชบอร์ด</h1>
+      <p class="muted" style="margin:6px 0 0" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
+    </div>
 
-    <div class="card" style="padding:14px;margin-top:10px">
-      <div style="font-weight:900" data-i18n="dash.fpTitle">วางแผนครอบครัว</div>
+    <!-- 1) ผลการบันทึกรอบเดือน -->
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:1000">ผลการบันทึกรอบเดือน</div>
       <div class="grid2" style="margin-top:10px">
         <div class="stat">
-          <div class="muted" data-i18n="dash.fpCycles">จำนวนรอบเดือนที่บันทึก</div>
+          <div class="muted">จำนวนรอบเดือนที่บันทึก</div>
           <div class="value" id="fpCycles">-</div>
         </div>
         <div class="stat">
-          <div class="muted" data-i18n="dash.fpLogsMonth">บันทึกรายวันเดือนนี้</div>
+          <div class="muted">บันทึกรายวันเดือนนี้</div>
           <div class="value" id="fpLogs">-</div>
         </div>
       </div>
     </div>
 
-    <!-- FP prediction summary -->
+    <!-- คาดการณ์ -->
     <div class="card" style="padding:14px;margin-top:12px">
-      <div style="font-weight:900" data-i18n="dash.fpPredTitle">คาดการณ์ล่าสุด</div>
+      <div style="font-weight:1000">คาดการณ์ (ล่าสุด)</div>
       <div class="muted" id="fpPredText" style="margin-top:6px">-</div>
       <div id="fpPredDetail" class="pred-detail"></div>
     </div>
 
-    <!-- 7-day streak -->
+    <!-- ความสม่ำเสมอ -->
     <div class="card" style="padding:14px;margin-top:12px">
-      <div style="font-weight:900" data-i18n="dash.streakTitle">ความสม่ำเสมอการบันทึก</div>
+      <div style="font-weight:1000">ความสม่ำเสมอการบันทึก</div>
       <div class="row">
-        <span class="muted" data-i18n="dash.streak7">7 วันล่าสุด บันทึกแล้ว</span>
+        <span class="muted">7 วันล่าสุด บันทึกแล้ว</span>
         <b id="streak7">-</b>
       </div>
     </div>
 
+    <!-- 2) แผนตรวจสุขภาพ -->
     <div class="card" style="padding:14px;margin-top:12px">
-      <div style="font-weight:900" data-i18n="dash.pvTitle">Preventive</div>
-      <div class="grid2" style="margin-top:10px">
+      <div style="font-weight:1000">แผนตรวจสุขภาพ</div>
+      <div class="grid3" style="margin-top:10px">
         <div class="stat">
-          <div class="muted" data-i18n="dash.pvDueToday">ครบกำหนดวันนี้</div>
-          <div class="value" id="pvDue">-</div>
+          <div class="muted">ทั้งหมด</div>
+          <div class="value" id="hcAll">-</div>
         </div>
         <div class="stat">
-          <div class="muted" data-i18n="dash.pvOverdue">เลยกำหนด</div>
-          <div class="value" id="pvOver">-</div>
+          <div class="muted">ต้องทำ</div>
+          <div class="value" id="hcDue">-</div>
+        </div>
+        <div class="stat">
+          <div class="muted">ทำแล้ว</div>
+          <div class="value" id="hcDone">-</div>
         </div>
       </div>
+      <div class="muted" id="hcHint" style="margin-top:8px;font-size:12px;line-height:1.6"></div>
     </div>
 
+    <!-- 3) แบบทดสอบ -->
     <div class="card" style="padding:14px;margin-top:12px">
-      <div style="font-weight:900" data-i18n="dash.quizTitle">แบบทดสอบ</div>
+      <div style="font-weight:1000">แบบทดสอบความรู้สุขภาพ</div>
       <div class="grid2" style="margin-top:10px">
         <div class="stat">
-          <div class="muted" data-i18n="dash.quizLastScore">คะแนนล่าสุด</div>
+          <div class="muted">คะแนนล่าสุด</div>
           <div class="value" id="quizLast">-</div>
           <div class="muted" id="quizHint" style="font-size:12px"></div>
         </div>
@@ -75,17 +105,21 @@
   import { t, applyI18n } from "../js/i18n.js";
 
   await initUserShell({ active: "dashboard", title: t("page.dashboard") });
-  applyI18n(document);
+  try{ applyI18n(document); }catch{}
 
-  const fpCycles = document.getElementById("fpCycles");
-  const fpLogs = document.getElementById("fpLogs");
-  const pvDue = document.getElementById("pvDue");
-  const pvOver = document.getElementById("pvOver");
-  const quizLast = document.getElementById("quizLast");
-  const quizHint = document.getElementById("quizHint");
+  const fpCyclesEl = document.getElementById("fpCycles");
+  const fpLogsEl = document.getElementById("fpLogs");
   const fpPredText = document.getElementById("fpPredText");
   const fpPredDetail = document.getElementById("fpPredDetail");
   const streak7 = document.getElementById("streak7");
+
+  const hcAllEl = document.getElementById("hcAll");
+  const hcDueEl = document.getElementById("hcDue");
+  const hcDoneEl = document.getElementById("hcDone");
+  const hcHintEl = document.getElementById("hcHint");
+
+  const quizLast = document.getElementById("quizLast");
+  const quizHint = document.getElementById("quizHint");
 
   function iso(d){
     const y=d.getFullYear();
@@ -93,97 +127,202 @@
     const dd=String(d.getDate()).padStart(2,"0");
     return `${y}-${m}-${dd}`;
   }
+  function addDays(isoStr, days){
+    const d = new Date(isoStr + "T00:00:00");
+    d.setDate(d.getDate() + days);
+    return iso(d);
+  }
   function fmtThai(isoStr){
     if(!isoStr) return "-";
-    return new Date(isoStr).toLocaleDateString("th-TH",{dateStyle:"long"});
+    return new Date(isoStr + "T00:00:00").toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
   }
 
-  // FP cycles count
-  let cyclesLen = 0;
-  try{
-    const c = await api.fpCyclesList();
-    const cycles = c?.items || [];
-    cyclesLen = cycles.length;
-    fpCycles.textContent = cyclesLen;
-  }catch{ fpCycles.textContent = "-"; }
+  // ================= A) รอบเดือน: localStorage (เหมือน family_planning.html) =================
+  const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
 
-  // FP daily logs count this month
-  try{
+  function readFp(){
+    try{
+      const raw = localStorage.getItem(FP_LS_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch{ return null; }
+  }
+  function clampInt(v, min, max, def){
+    if(!Number.isFinite(v)) return def;
+    return Math.max(min, Math.min(max, Math.round(v)));
+  }
+  function computeFpPrediction(state){
+    const cycles = Array.isArray(state?.cycles) ? state.cycles.slice() : [];
+    if(!cycles.length) return null;
+    cycles.sort((a,b)=> String(b.start||"").localeCompare(String(a.start||"")));
+    const latest = cycles[0];
+
+    const start = latest.start;
+    const cycleLen = clampInt(Number(latest.cycleLen || state?.settings?.cycleLen || 28), 20, 45, 28);
+    const periodLen = clampInt(Number(latest.periodLen || state?.settings?.periodLen || 5), 2, 10, 5);
+
+    const nextStart = addDays(start, cycleLen);
+    const ovulation = addDays(nextStart, -14);
+    const fertileStart = addDays(ovulation, -5);
+    const fertileEnd = ovulation;
+    const periodStart = start;
+    const periodEnd = addDays(start, periodLen-1);
+
+    return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd, periodStart, periodEnd };
+  }
+  function countLogsThisMonth(logs){
     const now = new Date();
     const from = iso(new Date(now.getFullYear(), now.getMonth(), 1));
     const to = iso(new Date(now.getFullYear(), now.getMonth()+1, 0));
-    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
-    fpLogs.textContent = (r?.items || []).length;
-  }catch{ fpLogs.textContent = "-"; }
-
-  // FP latest prediction
-  try{
-    const p = await api.fpPredLatest();
-    const item = p?.item || null;
-    if(!item){
-      fpPredText.textContent = t("dash.fpNoPred");
-      fpPredDetail.innerHTML = "";
-    } else {
-      fpPredText.textContent = "✅ " + t("dash.fpPredTitle");
-      fpPredDetail.innerHTML =
-        `<div class="pred-line">${t("dash.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b></div>` +
-        `<div class="pred-line">${t("dash.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b></div>` +
-        `<div class="pred-line">${t("dash.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b></div>`;
-    }
-  }catch{
-    fpPredText.textContent = t("dash.fpNoPred");
-    fpPredDetail.innerHTML = "";
+    return Object.keys(logs||{}).filter(d => d >= from && d <= to).length;
   }
 
-  // 7-day streak (count distinct logDate in last 7 days)
-  try{
+  const fp = readFp();
+  if(!fp || !Array.isArray(fp.cycles) || fp.cycles.length === 0){
+    fpCyclesEl.textContent = "0";
+    fpLogsEl.textContent = "0";
+    fpPredText.textContent = "ยังไม่มีข้อมูลคาดการณ์ • ไปเพิ่มรอบเดือนก่อน";
+    fpPredDetail.innerHTML = "";
+    streak7.textContent = "0 วัน";
+  }else{
+    fpCyclesEl.textContent = String(fp.cycles.length);
+    fpLogsEl.textContent = String(countLogsThisMonth(fp.logs));
+
+    const pred = computeFpPrediction(fp);
+    if(!pred){
+      fpPredText.textContent = "ยังไม่มีข้อมูลคาดการณ์ • ไปเพิ่มรอบเดือนก่อน";
+      fpPredDetail.innerHTML = "";
+    }else{
+      fpPredText.textContent =
+        `รอบที่ใช้คำนวณเริ่ม: ${fmtThai(pred.start)} • รอบเฉลี่ย ${pred.cycleLen} วัน • มาประมาณ ${pred.periodLen} วัน`;
+      fpPredDetail.innerHTML =
+        `<div class="pred-line"><b>รอบถัดไปคาดว่าจะมา:</b> ${fmtThai(pred.nextStart)}</div>` +
+        `<div class="pred-line"><b>ช่วงเสี่ยงท้อง:</b> ${fmtThai(pred.fertileStart)} – ${fmtThai(pred.fertileEnd)}</div>` +
+        `<div class="pred-line"><b>วันไข่ตก (โดยประมาณ):</b> ${fmtThai(pred.ovulation)}</div>` +
+        `<div class="pred-line"><b>ช่วงประจำเดือน (รอบนี้):</b> ${fmtThai(pred.periodStart)} – ${fmtThai(pred.periodEnd)}</div>`;
+    }
+
     const now = new Date();
     const to = iso(now);
-    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
-    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
-    const items = r?.items || [];
-    const set = new Set(items.map(x => x.logDate));
-    streak7.textContent = t("dash.days", { n: set.size });
-  }catch{
-    streak7.textContent = "-";
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate()-6));
+    const set = new Set(Object.keys(fp.logs||{}).filter(d => d >= from && d <= to));
+    streak7.textContent = `${set.size} วัน`;
   }
 
-  // Preventive counts
-  try{
-    const pv = await api.preventiveList();
-    pvDue.textContent = pv?.counts?.dueToday ?? "-";
-    pvOver.textContent = pv?.counts?.overdue ?? "-";
-  }catch{
-    pvDue.textContent = "-";
-    pvOver.textContent = "-";
+  // ================= B) แผนตรวจสุขภาพ: localStorage (เหมือน health_checklist.html) =================
+  const HC_LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
+
+  // CHECKS (ชุดเดียวกับ health_checklist.html)
+  const CHECKS = [
+    { id:"bp", title:"วัดความดันโลหิต", scope:["basic","metabolic"], minAge:15, intervalMonths:12 },
+    { id:"bmi_waist", title:"ชั่งน้ำหนัก/วัดส่วนสูง + รอบเอว", scope:["basic","metabolic"], minAge:15, intervalMonths:12 },
+    { id:"fbs_hba1c", title:"น้ำตาลในเลือด (FBS หรือ HbA1c)", scope:["metabolic"], minAge:35, intervalMonths:12 },
+    { id:"lipid", title:"ไขมันในเลือด (Cholesterol profile)", scope:["metabolic"], minAge:35, intervalMonths:12 },
+    { id:"cervical", title:"คัดกรองมะเร็งปากมดลูก (Pap smear / HPV test)", scope:["women","cancer"], minAge:21, intervalMonths:36 },
+    { id:"breast_clinical", title:"ตรวจเต้านมโดยบุคลากร (Clinical breast exam)", scope:["women","cancer"], minAge:20, intervalMonths:12 },
+    { id:"dental", title:"ตรวจสุขภาพช่องปาก/ฟัน", scope:["basic"], minAge:15, intervalMonths:12 },
+    { id:"eye", title:"ตรวจสายตา/สุขภาพตา", scope:["basic"], minAge:18, intervalMonths:24 },
+    { id:"mental", title:"ประเมินสุขภาพใจ/ความเครียด", scope:["mental"], minAge:15, intervalMonths:12 },
+    { id:"flu", title:"วัคซีนไข้หวัดใหญ่ (ตามความเหมาะสม)", scope:["basic"], minAge:15, intervalMonths:12 },
+  ];
+
+  function loadHc(){
+    try{
+      const raw = localStorage.getItem(HC_LS_KEY);
+      return raw ? JSON.parse(raw) : { age: "", year: new Date().getFullYear(), scope:"all", items:{} };
+    }catch{
+      return { age: "", year: new Date().getFullYear(), scope:"all", items:{} };
+    }
+  }
+  function ymToday(){
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return { iso: `${yyyy}-${mm}-${dd}` };
+  }
+  function addMonths(dateIso, months){
+    const d = new Date(dateIso + "T00:00:00");
+    const nd = new Date(d.getFullYear(), d.getMonth() + months, d.getDate());
+    const yyyy = nd.getFullYear();
+    const mm = String(nd.getMonth()+1).padStart(2,"0");
+    const dd = String(nd.getDate()).padStart(2,"0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  function isBefore(aIso, bIso){
+    return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
+  }
+  // getItemStatus = เหมือน health_checklist.html
+  function getItemStatus(item, rec){
+    const today = ymToday().iso;
+
+    if(!rec || !rec.status || rec.status === "todo"){
+      return { state:"todo", pillText:"ถึงกำหนด", due:true };
+    }
+
+    const last = rec.date || "";
+    if(!last){
+      return { state:"done", pillText:"ครบแล้ว", due:false };
+    }
+
+    const nextDue = addMonths(last, item.intervalMonths || 12);
+    if(isBefore(nextDue, today)){
+      const overMark = addMonths(nextDue, 3);
+      const isOver = isBefore(overMark, today);
+      return { state:"done", pillText: isOver ? "เกินกำหนด" : "ถึงกำหนด", due:true, nextDue };
+    }
+    return { state:"done", pillText:"ครบแล้ว", due:false, nextDue };
+  }
+  function inAge(item, age){
+    const a = Number(age);
+    if(!Number.isFinite(a) || !age) return true;
+    if(item.minAge != null && a < item.minAge) return false;
+    if(item.maxAge != null && a > item.maxAge) return false;
+    return true;
+  }
+  function inScope(item, scope){
+    if(scope === "all") return true;
+    return (item.scope || []).includes(scope);
   }
 
-  // Quiz last score
+  const hc = loadHc();
+  const age = hc.age ?? "";
+  const scope = hc.scope ?? "all";
+
+  const filtered = CHECKS
+    .filter(it => inAge(it, age))
+    .filter(it => inScope(it, scope))
+    .map(it => ({ st: getItemStatus(it, hc.items?.[it.id]) }));
+
+  const total = filtered.length;
+  const dueCount = filtered.filter(x => x.st.due).length;
+  const doneCount = filtered.filter(x => x.st.state === "done").length;
+  const overCount = filtered.filter(x => x.st.pillText === "เกินกำหนด").length;
+
+  hcAllEl.textContent = String(total);
+  hcDueEl.textContent = String(dueCount);
+  hcDoneEl.textContent = String(doneCount);
+  hcHintEl.textContent = overCount > 0
+    ? `เกินกำหนด ${overCount} รายการ • ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`
+    : `ไปที่ “ตารางวางแผนตรวจสุขภาพทั้งปี” เพื่อดูรายละเอียด`;
+
+  // ================= C) แบบทดสอบ: ใช้ API (เดิม) =================
   try{
-    const res = await api.quizMyResults();
-    const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
-    const last = arr[0] || null;
-    quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
-    quizHint.textContent = last
-      ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "")
-      : t("dash.quizNoData");
+    if(api && typeof api.quizMyResults === "function"){
+      const res = await api.quizMyResults();
+      const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
+      const last = arr[0] || null;
+      quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
+      quizHint.textContent = last
+        ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "")
+        : "ยังไม่มีคะแนน";
+    }else{
+      quizLast.textContent = "-";
+      quizHint.textContent = "ยังไม่มีคะแนน";
+    }
   }catch{
     quizLast.textContent = "-";
-    quizHint.textContent = t("dash.quizNoData");
+    quizHint.textContent = "ยังไม่มีคะแนน";
   }
 </script>
-
-<style>
-  .container{max-width:900px;margin:0 auto;padding:18px}
-  .muted{opacity:.7}
-  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
-  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .stat{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px}
-  .value{font-size:28px;font-weight:900;margin-top:6px}
-  .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-  .pred-line{font-size:13px;opacity:.9}
-  .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-  @media (max-width:700px){.grid2{grid-template-columns:1fr}}
-</style>
 </body>
 </html>
