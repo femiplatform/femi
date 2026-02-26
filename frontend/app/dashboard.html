@@ -5,290 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>FEMI • Dashboard</title>
   <link rel="stylesheet" href="../assets/app.css"/>
-  <style>
-    .container{max-width:980px;margin:0 auto;padding:18px}
-    .muted{opacity:.75}
-    .card{background:#fff;border:1px solid rgba(2,6,23,.08);border-radius:18px}
-    .hero{
-      padding:14px;
-      background: radial-gradient(1200px 600px at 10% 0%, rgba(186,230,253,.55), transparent 55%),
-                  radial-gradient(900px 500px at 90% 15%, rgba(253,230,138,.35), transparent 55%),
-                  radial-gradient(900px 520px at 35% 95%, rgba(221,214,254,.42), transparent 60%),
-                  rgba(255,255,255,.86);
-      box-shadow: 0 18px 60px rgba(0,0,0,.08);
-      backdrop-filter: blur(10px);
-    }
-    .heroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .hello{font-weight:1000;font-size:22px;letter-spacing:-.2px}
-    .sub{font-size:12px;line-height:1.6}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(2,6,23,.10);
-      background: rgba(255,255,255,.72);
-      font-weight:900;font-size:12px;
-      white-space:nowrap;
-    }
-    .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .btn{border:0;border-radius:14px;padding:10px 12px;font-weight:1000;cursor:pointer}
-    .btn-primary{background:#b91c1c;color:#fff}
-    .btn-ghost{background:rgba(255,255,255,.8);border:1px solid rgba(2,6,23,.10);color:#0f172a}
-
-    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
-    .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
-    @media (max-width:900px){.grid3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}}
-
-    .kpi{
-      padding:14px;
-      border-radius:18px;
-      border:1px solid rgba(2,6,23,.08);
-      background: rgba(255,255,255,.82);
-      box-shadow: 0 12px 32px rgba(0,0,0,.06);
-      position:relative;
-      overflow:hidden;
-    }
-    .kpi:before{
-      content:"";
-      position:absolute;inset:-40px -40px auto auto;
-      width:140px;height:140px;border-radius:999px;
-      filter: blur(0px);
-      opacity:.55;
-      background: radial-gradient(circle at 30% 30%, rgba(14,165,233,.35), rgba(59,130,246,.0) 65%);
-    }
-    .kpiTitle{font-weight:900;font-size:12px;opacity:.75}
-    .kpiVal{font-weight:1100;font-size:32px;line-height:1.05;margin-top:6px}
-    .kpiHint{font-size:12px;opacity:.8;margin-top:6px;line-height:1.6}
-    .kpiVal b{color:#0369a1}
-
-    .panelHead{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .panelTitle{font-weight:1000}
-    .mini{font-size:12px;opacity:.75}
-
-    /* Charts */
-    .chartBox{padding:14px}
-    canvas{max-width:100%}
-
-    /* Mini calendar */
-    .cal{padding:14px}
-    .calTop{display:flex;align-items:center;justify-content:space-between}
-    .calTitle{font-weight:1000}
-    .calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:10px}
-    .dow{font-size:11px;font-weight:1000;opacity:.55;text-align:center}
-    .day{
-      border:1px solid rgba(2,6,23,.08);
-      border-radius:14px;
-      padding:9px 8px;
-      min-height:52px;
-      background: rgba(255,255,255,.82);
-      cursor:pointer;
-    }
-    .day.muted{opacity:.45}
-    .n{font-weight:1000}
-    .dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
-    .dot{width:8px;height:8px;border-radius:999px}
-    .dot.period{background:#ef4444}
-    .dot.fertile{background:#f59e0b}
-    .dot.ovu{background:#8b5cf6}
-    .dot.next{background:#22c55e}
-    .dot.log{background:#0ea5e9}
-
-    /* Knowledge + Quiz */
-    .item{padding:14px}
-    .linkCard{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      border:1px solid rgba(2,6,23,.08);
-      border-radius:18px;
-      padding:12px 12px;
-      background: rgba(255,255,255,.82);
-      cursor:pointer;
-      text-decoration:none;
-      color:inherit;
-    }
-    .linkCard:hover{box-shadow:0 16px 44px rgba(0,0,0,.08)}
-    .linkTitle{font-weight:1000}
-    .linkSub{font-size:12px;opacity:.75;margin-top:4px;line-height:1.5}
-
-    /* Modal (reuse simple) */
-    .modal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}
-    .modal.hidden{display:none}
-    .modalCard{width:min(560px,96vw);background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.18);margin:12px;overflow:hidden}
-    .modalHead{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.06)}
-    .modalTitle{font-weight:1000}
-    .xbtn{border:1px solid rgba(0,0,0,.10);background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font-weight:900}
-    .modalBody{padding:14px;display:flex;flex-direction:column;gap:10px}
-    .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:-1}
-    .row2{display:flex;gap:12px;flex-wrap:wrap}
-    .row2 > *{flex:1 1 200px}
-  </style>
 </head>
 <body>
 <div id="app">
   <main class="container">
-    <!-- Page header inside content -->
-    <div class="card hero">
-      <div class="heroTop">
-        <div>
-          <div class="hello" id="hello">สวัสดี 👋</div>
-          <div class="sub muted" id="todayText">สรุปวันนี้เพื่อดูแลสุขภาพตัวเองแบบง่าย ๆ</div>
-        </div>
-        <div class="pill" id="todayPill">วันนี้</div>
-      </div>
+    <h1 data-i18n="page.dashboard">แดชบอร์ด</h1>
+    <p class="muted" data-i18n="dash.subtitle">สรุปภาพรวมการใช้งานและผลลัพธ์ของคุณ</p>
 
-      <div class="ctaRow">
-        <button class="btn btn-primary" id="btnGo">ไปทำเลย</button>
-        <a class="btn btn-ghost" href="./tools.html" style="text-decoration:none;display:inline-flex;align-items:center">ดูเครื่องมือทั้งหมด</a>
-      </div>
-
-      <div class="grid3" style="margin-top:14px">
-        <div class="kpi" id="kpiFp">
-          <div class="kpiTitle">รอบเดือน: รอบถัดไป</div>
-          <div class="kpiVal" id="kpiNext">-</div>
-          <div class="kpiHint" id="kpiFpHint">-</div>
+    <div class="card" style="padding:14px;margin-top:10px">
+      <div style="font-weight:900" data-i18n="dash.fpTitle">วางแผนครอบครัว</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.fpCycles">จำนวนรอบเดือนที่บันทึก</div>
+          <div class="value" id="fpCycles">-</div>
         </div>
-        <div class="kpi" id="kpiPv">
-          <div class="kpiTitle">ตารางตรวจสุขภาพรายปี</div>
-          <div class="kpiVal"><span id="kpiOver">-</span></div>
-          <div class="kpiHint" id="kpiPvHint">-</div>
-        </div>
-        <div class="kpi" id="kpiQuiz">
-          <div class="kpiTitle">แบบทดสอบล่าสุด</div>
-          <div class="kpiVal" id="kpiQuizVal">-</div>
-          <div class="kpiHint" id="kpiQuizHint">-</div>
+        <div class="stat">
+          <div class="muted" data-i18n="dash.fpLogsMonth">บันทึกรายวันเดือนนี้</div>
+          <div class="value" id="fpLogs">-</div>
         </div>
       </div>
     </div>
 
-    <div class="grid2">
-      <!-- Mini calendar -->
-      <div class="card cal">
-        <div class="calTop">
-          <div>
-            <div class="panelTitle">ปฏิทินสุขภาพ (ย่อ)</div>
-            <div class="mini muted">แตะวันที่เพื่อบันทึกอาการ/กิจกรรม</div>
-          </div>
-          <a class="btn btn-ghost" href="./family_planning.html" style="text-decoration:none">ไปหน้ารอบเดือน</a>
-        </div>
+    <!-- FP prediction summary -->
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.fpPredTitle">คาดการณ์ล่าสุด</div>
+      <div class="muted" id="fpPredText" style="margin-top:6px">-</div>
+      <div id="fpPredDetail" class="pred-detail"></div>
+    </div>
 
-        <div class="calTop" style="margin-top:10px">
-          <button class="btn btn-ghost" id="calPrev" aria-label="prev">‹</button>
-          <div class="calTitle" id="calTitle">-</div>
-          <button class="btn btn-ghost" id="calNext" aria-label="next">›</button>
-        </div>
-
-        <div class="calGrid" id="calGrid"></div>
-
-        <div class="mini muted" style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
-          <span style="display:inline-flex;align-items:center;gap:6px"><span class="dot period"></span>ประจำเดือน</span>
-          <span style="display:inline-flex;align-items:center;gap:6px"><span class="dot fertile"></span>ช่วงเสี่ยง</span>
-          <span style="display:inline-flex;align-items:center;gap:6px"><span class="dot ovu"></span>ไข่ตก</span>
-          <span style="display:inline-flex;align-items:center;gap:6px"><span class="dot next"></span>รอบถัดไป</span>
-          <span style="display:inline-flex;align-items:center;gap:6px"><span class="dot log"></span>มีบันทึก</span>
-        </div>
+    <!-- 7-day streak -->
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.streakTitle">ความสม่ำเสมอการบันทึก</div>
+      <div class="row">
+        <span class="muted" data-i18n="dash.streak7">7 วันล่าสุด บันทึกแล้ว</span>
+        <b id="streak7">-</b>
       </div>
+    </div>
 
-      <!-- Charts -->
-      <div class="card chartBox">
-        <div class="panelHead">
-          <div>
-            <div class="panelTitle">สรุปเป็นกราฟ</div>
-            <div class="mini muted">ดูแนวโน้มแบบรวดเร็ว</div>
-          </div>
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.pvTitle">Preventive</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.pvDueToday">ครบกำหนดวันนี้</div>
+          <div class="value" id="pvDue">-</div>
         </div>
-
-        <div style="margin-top:12px">
-          <div class="mini muted" style="font-weight:900">การบันทึก 14 วันล่าสุด</div>
-          <canvas id="chartLogs" height="140"></canvas>
-        </div>
-
-        <div style="margin-top:12px">
-          <div class="mini muted" style="font-weight:900">Preventive: ครบกำหนด/เลยกำหนด</div>
-          <canvas id="chartPv" height="120"></canvas>
+        <div class="stat">
+          <div class="muted" data-i18n="dash.pvOverdue">เลยกำหนด</div>
+          <div class="value" id="pvOver">-</div>
         </div>
       </div>
     </div>
 
-    <div class="grid2">
-      <div class="card item">
-        <div class="panelHead">
-          <div>
-            <div class="panelTitle">ความรู้วันนี้</div>
-            <div class="mini muted" id="kbHint">อ่านสั้น ๆ ใช้ได้จริง</div>
-          </div>
-          <a class="btn btn-ghost" href="./knowledge.html" style="text-decoration:none">ไปคลังความรู้</a>
+    <div class="card" style="padding:14px;margin-top:12px">
+      <div style="font-weight:900" data-i18n="dash.quizTitle">แบบทดสอบ</div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="stat">
+          <div class="muted" data-i18n="dash.quizLastScore">คะแนนล่าสุด</div>
+          <div class="value" id="quizLast">-</div>
+          <div class="muted" id="quizHint" style="font-size:12px"></div>
         </div>
-        <div style="margin-top:10px" class="linkCard" id="kbCard" role="button" tabindex="0">
-          <div>
-            <div class="linkTitle" id="kbTitle">-</div>
-            <div class="linkSub" id="kbSub">-</div>
-          </div>
-          <div class="pill">อ่าน</div>
-        </div>
-      </div>
-
-      <div class="card item">
-        <div class="panelHead">
-          <div>
-            <div class="panelTitle">เป้าหมายวันนี้ (เช็คอิน)</div>
-            <div class="mini muted">กดเช็คอินเพื่อช่วยให้ทำต่อเนื่อง</div>
-          </div>
-        </div>
-
-        <div class="row2" style="margin-top:10px">
-          <button class="btn btn-ghost" id="chkWater">ดื่มน้ำ</button>
-          <button class="btn btn-ghost" id="chkMove">ขยับร่างกาย</button>
-          <button class="btn btn-ghost" id="chkSleep">นอนให้พอ</button>
-        </div>
-        <div class="mini muted" id="chkHint" style="margin-top:10px">-</div>
       </div>
     </div>
   </main>
-
-  <!-- Daily log modal (quick) -->
-  <div class="modal hidden" id="logModal">
-    <div class="modalCard">
-      <div class="modalHead">
-        <div class="modalTitle">บันทึกรายวัน</div>
-        <button class="xbtn" id="logClose">✕</button>
-      </div>
-      <div class="modalBody">
-        <div class="mini muted" id="logDateLabel">-</div>
-        <div class="row2">
-          <div>
-            <div class="mini muted" style="font-weight:900">เลือดออก</div>
-            <select id="bleeding">
-              <option value="None">ไม่มี</option>
-              <option value="Spotting">กะปริบกะปรอย</option>
-              <option value="Light">น้อย</option>
-              <option value="Medium">ปานกลาง</option>
-              <option value="Heavy">มาก</option>
-            </select>
-          </div>
-          <div>
-            <div class="mini muted" style="font-weight:900">อารมณ์</div>
-            <select id="mood">
-              <option value="Good">ดี</option>
-              <option value="Neutral">ปกติ</option>
-              <option value="Bad">แย่</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <div class="mini muted" style="font-weight:900">อาการ</div>
-          <textarea id="symptoms" rows="2" placeholder="เช่น ปวดท้อง ปวดหลัง ตกขาว สิว ฯลฯ"></textarea>
-        </div>
-        <div class="row2">
-          <label style="display:flex;align-items:center;gap:8px;font-weight:900"><input type="checkbox" id="hadSex"> มีเพศสัมพันธ์</label>
-          <label style="display:flex;align-items:center;gap:8px;font-weight:900"><input type="checkbox" id="pillTaken"> กินยาคุม</label>
-        </div>
-        <div>
-          <div class="mini muted" style="font-weight:900">หมายเหตุ</div>
-          <textarea id="notes" rows="2" placeholder="บันทึกเพิ่มเติม"></textarea>
-        </div>
-        <button class="btn btn-primary" id="logSave">บันทึก</button>
-      </div>
-    </div>
-    <div class="backdrop" id="logBackdrop"></div>
-  </div>
 </div>
 
 <script type="module">
@@ -297,571 +75,115 @@
   import { t, applyI18n } from "../js/i18n.js";
 
   await initUserShell({ active: "dashboard", title: t("page.dashboard") });
-  try{ applyI18n(document); }catch{}
+  applyI18n(document);
 
-  // ---------------- Helpers ----------------
-  const el = (id)=>document.getElementById(id);
-  const pad2 = (n)=>String(n).padStart(2,"0");
-  const iso = (d)=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
-  const addDays = (isoStr, days)=>{
-    const d = new Date(isoStr + "T00:00:00");
-    d.setDate(d.getDate()+days);
-    return iso(d);
-  };
-  const fmtThai = (isoStr)=>{
-    try{
-      if(!isoStr) return "-";
-      return new Date(isoStr + "T00:00:00").toLocaleDateString("th-TH", { year:"numeric", month:"long", day:"numeric" });
-    }catch{ return "-"; }
-  };
-  const safeJson = (v)=>{ try{ return JSON.parse(v); }catch{ return null; } };
+  const fpCycles = document.getElementById("fpCycles");
+  const fpLogs = document.getElementById("fpLogs");
+  const pvDue = document.getElementById("pvDue");
+  const pvOver = document.getElementById("pvOver");
+  const quizLast = document.getElementById("quizLast");
+  const quizHint = document.getElementById("quizHint");
+  const fpPredText = document.getElementById("fpPredText");
+  const fpPredDetail = document.getElementById("fpPredDetail");
+  const streak7 = document.getElementById("streak7");
 
-  function findName(){
-    // Try common patterns in localStorage without breaking
-    const candidates = ["FEMI_USER", "FEMI_PROFILE", "FEMI_USER_PROFILE", "userProfile", "profile"];
-    for(const k of candidates){
-      const obj = safeJson(localStorage.getItem(k));
-      if(obj){
-        const name = obj.fullName || obj.name || obj.displayName || [obj.firstName, obj.lastName].filter(Boolean).join(" ");
-        if(name) return name;
-      }
-    }
-    return "";
+  function iso(d){
+    const y=d.getFullYear();
+    const m=String(d.getMonth()+1).padStart(2,"0");
+    const dd=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${dd}`;
+  }
+  function fmtThai(isoStr){
+    if(!isoStr) return "-";
+    return new Date(isoStr).toLocaleDateString("th-TH",{dateStyle:"long"});
   }
 
-  const today = new Date();
-  el("todayPill").textContent = "วันนี้ • " + today.toLocaleDateString("th-TH", { weekday:"short", day:"numeric", month:"short" });
-  const nm = findName();
-  el("hello").textContent = nm ? `สวัสดี 👋 ${nm}` : "สวัสดี 👋";
-
-  // ---------------- Family Planning from localStorage ----------------
-  const FP_LS_KEY = "FEMI_FAMILY_PLANNING_LOCAL_V2";
-  const readFp = ()=>{
-    try{
-      const raw = localStorage.getItem(FP_LS_KEY);
-      return raw ? JSON.parse(raw) : null;
-    }catch{ return null; }
-  };
-
-  const fpCompute = (st, cycleStartOverride=null)=>{
-    const cycles = Array.isArray(st?.cycles) ? st.cycles : [];
-    if(!cycles.length) return null;
-
-    const chosen = cycleStartOverride
-      ? cycles.find(c=>c.start===cycleStartOverride) || null
-      : null;
-
-    const latest = chosen || cycles.slice().sort((a,b)=>String(b.start||"").localeCompare(String(a.start||"")))[0];
-
-    const start = latest.start;
-    const cycleLen = Number(latest.cycleLen || latest.cycleLengthDays || st?.settings?.cycleLen || 28) || 28;
-    const periodLen = Number(latest.periodLen || latest.periodLengthDays || st?.settings?.periodLen || 5) || 5;
-
-    const nextStart = addDays(start, Math.round(cycleLen));
-    const ovulation = addDays(nextStart, -14);
-    const fertileStart = addDays(ovulation, -5);
-    const fertileEnd = ovulation;
-    const periodStart = start;
-    const periodEnd = addDays(start, Math.max(0, Math.round(periodLen)-1));
-
-    return { start, cycleLen, periodLen, nextStart, ovulation, fertileStart, fertileEnd, periodStart, periodEnd };
-  };
-
-  const countLogsInRange = (logs, fromIso, toIso)=>{
-    if(!logs) return 0;
-    return Object.keys(logs).filter(k => k >= fromIso && k <= toIso).length;
-  };
-
-  const fpState = readFp();
-  const fpPred = fpState ? fpCompute(fpState) : null;
-
-  // KPI: next period + CTA suggestion
-  let primaryAction = { label:"ไปทำเครื่องมือ", href:"./tools.html" };
-
-  if(!fpPred){
-    el("kpiNext").textContent = "-";
-    el("kpiFpHint").textContent = "ยังไม่มีข้อมูลรอบเดือน • เพิ่มรอบเดือนเพื่อเริ่มคาดการณ์";
-    primaryAction = { label:"เริ่มบันทึกรอบเดือน", href:"./family_planning.html" };
-  }else{
-    el("kpiNext").innerHTML = `<b>${fmtThai(fpPred.nextStart)}</b>`;
-    const inFertile = iso(today) >= fpPred.fertileStart && iso(today) <= fpPred.fertileEnd;
-    el("kpiFpHint").textContent = inFertile
-      ? `อยู่ในช่วงเสี่ยงท้อง • ${fmtThai(fpPred.fertileStart)} – ${fmtThai(fpPred.fertileEnd)}`
-      : `วันไข่ตกโดยประมาณ: ${fmtThai(fpPred.ovulation)}`;
-
-    primaryAction = inFertile
-      ? { label:"เช็ควิธีคุมกำเนิด", href:"./contraception_smart.html" }
-      : { label:"บันทึกรอบเดือน/อาการ", href:"./family_planning.html" };
-  }
-
-  // 14-day log chart data
-  const last14 = [];
-  for(let i=13;i>=0;i--){
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate()-i);
-    const k = iso(d);
-    last14.push({ k, has: !!(fpState?.logs && fpState.logs[k]) });
-  }
-
-  // Mini calendar view
-  let viewMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-
-  function renderCalendar(){
-    const p = fpPred;
-    const y=viewMonth.getFullYear(), m=viewMonth.getMonth();
-    el("calTitle").textContent = viewMonth.toLocaleDateString("th-TH", { month:"long", year:"numeric" });
-
-    const first = new Date(y,m,1);
-    const startDow = first.getDay();
-    const daysInMonth = new Date(y,m+1,0).getDate();
-    const dows = ["อา","จ","อ","พ","พฤ","ศ","ส"];
-    let html = dows.map(x=>`<div class="dow">${x}</div>`).join("");
-
-    for(let i=0;i<startDow;i++){
-      html += `<div class="day muted"><div class="n"> </div></div>`;
-    }
-
-    for(let day=1; day<=daysInMonth; day++){
-      const dateIso = iso(new Date(y,m,day));
-      const dots = [];
-
-      if(p){
-        if(dateIso >= p.periodStart && dateIso <= p.periodEnd) dots.push("period");
-        if(dateIso >= p.fertileStart && dateIso <= p.fertileEnd) dots.push("fertile");
-        if(dateIso === p.ovulation) dots.push("ovu");
-        if(dateIso === p.nextStart) dots.push("next");
-      }
-      if(fpState?.logs && fpState.logs[dateIso]) dots.push("log");
-
-      html += `
-        <div class="day" data-date="${dateIso}">
-          <div class="n">${day}</div>
-          <div class="dots">${dots.map(d=>`<span class="dot ${d}"></span>`).join("")}</div>
-        </div>
-      `;
-    }
-
-    el("calGrid").innerHTML = html;
-    el("calGrid").querySelectorAll(".day[data-date]").forEach(cell=>{
-      cell.addEventListener("click", ()=> openLog(cell.getAttribute("data-date")));
-    });
-  }
-
-  el("calPrev").addEventListener("click", ()=>{
-    viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1, 1);
-    renderCalendar();
-  });
-  el("calNext").addEventListener("click", ()=>{
-    viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1, 1);
-    renderCalendar();
-  });
-
-  // Quick log modal (writes to FP localStorage to keep consistent)
-  const logModal = el("logModal");
-  const logDateLabel = el("logDateLabel");
-  const bleeding = el("bleeding");
-  const mood = el("mood");
-  const symptoms = el("symptoms");
-  const hadSex = el("hadSex");
-  const pillTaken = el("pillTaken");
-  const notes = el("notes");
-  let currentLogDate = null;
-
-  function openLog(dateIso){
-    currentLogDate = dateIso;
-    logDateLabel.textContent = fmtThai(dateIso);
-
-    const log = fpState?.logs?.[dateIso] || null;
-    bleeding.value = log?.bleeding || "None";
-    mood.value = log?.mood || "Neutral";
-    symptoms.value = log?.symptoms || "";
-    hadSex.checked = !!log?.hadSex;
-    pillTaken.checked = !!log?.pillTaken;
-    notes.value = log?.notes || "";
-
-    logModal.classList.remove("hidden");
-  }
-  function closeLog(){
-    logModal.classList.add("hidden");
-    currentLogDate = null;
-  }
-  el("logClose").addEventListener("click", closeLog);
-  el("logBackdrop").addEventListener("click", closeLog);
-
-  el("logSave").addEventListener("click", ()=>{
-    if(!currentLogDate) return;
-
-    const st = readFp() || { cycles: [], logs: {}, settings:{ cycleLen:28, periodLen:5 }, ui:{} };
-    st.logs = st.logs || {};
-    st.logs[currentLogDate] = {
-      logDate: currentLogDate,
-      bleeding: bleeding.value,
-      mood: mood.value,
-      symptoms: String(symptoms.value||"").trim(),
-      hadSex: hadSex.checked,
-      pillTaken: pillTaken.checked,
-      notes: String(notes.value||"").trim(),
-      updatedAt: new Date().toISOString()
-    };
-    localStorage.setItem(FP_LS_KEY, JSON.stringify(st));
-
-    // keep fpState reference updated for this page
-    Object.assign(fpState || {}, st);
-
-    closeLog();
-    renderCalendar();
-    drawLogChart();
-  });
-
-  
-// ---------------- Health Checklist counts (localStorage, same logic as health_checklist.html) ----------------
-  let pvDueCount = 0, pvDoneCount = 0, pvOverCount = 0, pvTotalCount = 0;
+  // FP cycles count
+  let cyclesLen = 0;
   try{
-    const HC_LS_KEY = "FEMI_HEALTH_CHECKLIST_V1";
-    const hcRaw = localStorage.getItem(HC_LS_KEY);
-    const hcState = hcRaw ? JSON.parse(hcRaw) : null;
+    const c = await api.fpCyclesList();
+    const cycles = c?.items || [];
+    cyclesLen = cycles.length;
+    fpCycles.textContent = cyclesLen;
+  }catch{ fpCycles.textContent = "-"; }
 
-const CHECKS = [
-      // BASIC
-      { id:"bp", title:"วัดความดันโลหิต", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง หรือถ้ามีความเสี่ยงตรวจบ่อยขึ้น" },
-      { id:"bmi_waist", title:"ชั่งน้ำหนัก/วัดส่วนสูง + รอบเอว", scope:["basic","metabolic"], minAge:15, intervalMonths:12, hint:"ติดตาม BMI และรอบเอวเพื่อประเมินความเสี่ยงเมตาบอลิก" },
-
-      // METABOLIC
-      { id:"fbs_hba1c", title:"น้ำตาลในเลือด (FBS หรือ HbA1c)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีประวัติครอบครัว/น้ำหนักเกิน/ความดันสูง อาจเริ่มตรวจเร็วกว่านี้" },
-      { id:"lipid", title:"ไขมันในเลือด (Cholesterol profile)", scope:["metabolic"], minAge:35, intervalMonths:12, hint:"ถ้ามีปัจจัยเสี่ยง แนะนำตรวจตามแพทย์/หน่วยบริการ" },
-
-      // WOMEN / CANCER
-      { id:"cervical", title:"คัดกรองมะเร็งปากมดลูก (Pap smear / HPV test)", scope:["women","cancer"], minAge:21, intervalMonths:36, hint:"แนวทางขึ้นกับอายุและวิธีตรวจ (Pap/HPV) ให้ยึดคำแนะนำหน่วยบริการ" },
-      { id:"breast_clinical", title:"ตรวจเต้านมโดยบุคลากร (Clinical breast exam)", scope:["women","cancer"], minAge:20, intervalMonths:12, hint:"ควรทำร่วมกับการตรวจเต้านมด้วยตนเองเป็นประจำ" },
-
-      // WOMEN / LIFE
-      { id:"dental", title:"ตรวจสุขภาพช่องปาก/ฟัน", scope:["basic"], minAge:15, intervalMonths:12, hint:"แนะนำตรวจอย่างน้อยปีละ 1 ครั้ง" },
-      { id:"eye", title:"ตรวจสายตา/สุขภาพตา", scope:["basic"], minAge:18, intervalMonths:24, hint:"หากมีอาการหรือมีโรคประจำตัวควรตรวจถี่ขึ้น" },
-
-      // MENTAL
-      { id:"mental", title:"ประเมินสุขภาพใจ/ความเครียด", scope:["mental"], minAge:15, intervalMonths:12, hint:"ประเมินตนเองและปรึกษาหน่วยบริการเมื่อมีสัญญาณเสี่ยง" },
-
-      // VACCINE (as yearly plan reminders)
-      { id:"flu", title:"วัคซีนไข้หวัดใหญ่ (ตามความเหมาะสม)", scope:["basic"], minAge:15, intervalMonths:12, hint:"กลุ่มเสี่ยงควรรับวัคซีนทุกปี (ขึ้นกับนโยบาย/สิทธิ)" },
-    ];
-
-function ymToday(){
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,"0");
-      const dd = String(d.getDate()).padStart(2,"0");
-      return { yyyy, mm, dd, iso: `${yyyy}-${mm}-${dd}` };
-    }
-    function addMonths(dateIso, months){
-      const d = new Date(dateIso + "T00:00:00");
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const day = d.getDate();
-      const nd = new Date(y, m + months, day);
-      const yyyy = nd.getFullYear();
-      const mm = String(nd.getMonth()+1).padStart(2,"0");
-      const dd = String(nd.getDate()).padStart(2,"0");
-      return `${yyyy}-${mm}-${dd}`;
-    }
-    function isBefore(aIso, bIso){
-      return new Date(aIso+"T00:00:00").getTime() < new Date(bIso+"T00:00:00").getTime();
-    }
-function getItemStatus(item, rec, planYear){
-      // rec: { status, date, result, note, place }
-      // planYear: used for simple year planning view
-      const today = ymToday().iso;
-
-      if(!rec || !rec.status || rec.status === "todo"){
-        return { state:"todo", pillClass:"pill-due", pillText:"ถึงกำหนด", due:true };
-      }
-function inAge(item, age){
-      const a = Number(age);
-      if(!Number.isFinite(a) || !age) return true; // if age empty, show all
-      if(item.minAge != null && a < item.minAge) return false;
-      if(item.maxAge != null && a > item.maxAge) return false;
-      return true;
-    }
-function inScope(item, scope){
-      if(scope === "all") return true;
-      return (item.scope || []).includes(scope);
-    }
-
-    const nowYear = new Date().getFullYear();
-    const age = hcState?.age ?? "";
-    const scope = hcState?.scope ?? "all";
-    const planYear = String(hcState?.year || nowYear);
-
-    const filtered = CHECKS
-      .filter(it => inAge(it, age))
-      .filter(it => inScope(it, scope))
-      .map(it => {
-        const rec = hcState?.items?.[it.id];
-        const st = getItemStatus(it, rec, planYear);
-        return { it, rec, st };
-      });
-
-    pvTotalCount = filtered.length;
-    pvDueCount = filtered.filter(x => x.st.due).length;                 // ต้องทำ (ถึงกำหนด + เกินกำหนด)
-    pvDoneCount = filtered.filter(x => x.st.state === "done").length;   // ทำแล้ว
-    pvOverCount = filtered.filter(x => x.st.pillClass === "pill-over").length; // เกินกำหนด
-  }catch{}
-
-  el("kpiOver").textContent = pvDueCount ? String(pvDueCount) : "0";
-
-  if(pvTotalCount){
-    let hint = "ต้องทำ " + pvDueCount + " รายการ • ทำแล้ว " + pvDoneCount + " รายการ";
-    if(pvOverCount) hint += " • เกินกำหนด " + pvOverCount + " รายการ";
-    el("kpiPvHint").textContent = hint;
-  }else{
-    el("kpiPvHint").textContent = "ยังไม่มีรายการตรวจสุขภาพ";
-  }
-
-  if(pvOverCount > 0 || pvDueCount > 0){
-    primaryAction = { label:"ดูตารางตรวจสุขภาพ", href:"./health_checklist.html" };
-  }
-
-// ---------------- Quiz last score (API, guard) ----------------
- last score (API, guard) ----------------
+  // FP daily logs count this month
   try{
-    if(api && typeof api.quizMyResults === "function"){
-      const res = await api.quizMyResults();
-      const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
-      const last = arr[0] || null;
-      if(last){
-        el("kpiQuizVal").textContent = `${last.score}/${last.total}`;
-        el("kpiQuizHint").textContent = last.takenAt
-          ? ("ทำล่าสุด: " + new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}))
-          : "มีผลการทำแบบทดสอบล่าสุด";
-      }else{
-        el("kpiQuizVal").textContent = "-";
-        el("kpiQuizHint").textContent = "ยังไม่มีคะแนน";
-      }
-    }else{
-      el("kpiQuizVal").textContent = "-";
-      el("kpiQuizHint").textContent = "ยังไม่มีคะแนน";
+    const now = new Date();
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), 1));
+    const to = iso(new Date(now.getFullYear(), now.getMonth()+1, 0));
+    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
+    fpLogs.textContent = (r?.items || []).length;
+  }catch{ fpLogs.textContent = "-"; }
+
+  // FP latest prediction
+  try{
+    const p = await api.fpPredLatest();
+    const item = p?.item || null;
+    if(!item){
+      fpPredText.textContent = t("dash.fpNoPred");
+      fpPredDetail.innerHTML = "";
+    } else {
+      fpPredText.textContent = "✅ " + t("dash.fpPredTitle");
+      fpPredDetail.innerHTML =
+        `<div class="pred-line">${t("dash.fpNextPeriod")} <b>${fmtThai(item.nextPeriodExpectedDate)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpOvulation")} <b>${fmtThai(item.ovulationDate)}</b></div>` +
+        `<div class="pred-line">${t("dash.fpFertile")} <b>${fmtThai(item.fertileStartDate)} – ${fmtThai(item.fertileEndDate)}</b></div>`;
     }
   }catch{
-    el("kpiQuizVal").textContent = "-";
-    el("kpiQuizHint").textContent = "ยังไม่มีคะแนน";
+    fpPredText.textContent = t("dash.fpNoPred");
+    fpPredDetail.innerHTML = "";
   }
 
-  // Set CTA
-  const btnGo = el("btnGo");
-  btnGo.textContent = primaryAction.label;
-  btnGo.addEventListener("click", ()=> location.href = primaryAction.href);
-
-  // ---------------- Knowledge today (local, lightweight) ----------------
-  // Use knowledge local key if present; else fallback and point to knowledge page
-  const kb = (()=>{
-    try{
-      const raw = localStorage.getItem("FEMI_KNOWLEDGE_V1");
-      return raw ? JSON.parse(raw) : null;
-    }catch{ return null; }
-  })();
-
-  const kbFallback = {
-    title: "เคล็ดลับดูแลสุขภาพแบบง่าย",
-    sub: "ไปที่คลังความรู้เพื่ออ่านเพิ่มเติม",
-    href: "./knowledge.html"
-  };
-
-  // If you use knowledge_v2.html (local items), it stores only featuredId; so show a friendly card.
-  el("kbTitle").textContent = kbFallback.title;
-  el("kbSub").textContent = kbFallback.sub;
-
-  el("kbCard").addEventListener("click", ()=> location.href = kbFallback.href);
-  el("kbCard").addEventListener("keydown", (e)=>{ if(e.key==="Enter") location.href = kbFallback.href; });
-
-  // ---------------- Daily check-in (local) ----------------
-  const CHECK_KEY = "FEMI_DASH_CHECKIN_V1";
-  const checkState = (()=>{ try{ return JSON.parse(localStorage.getItem(CHECK_KEY) || "{}"); }catch{ return {}; } })();
-  const todayKey = iso(today);
-  if(!checkState[todayKey]) checkState[todayKey] = { water:false, move:false, sleep:false };
-
-  function renderCheck(){
-    const s = checkState[todayKey];
-    const setBtn = (btn, on)=>{
-      btn.style.background = on ? "rgba(34,197,94,.16)" : "rgba(255,255,255,.8)";
-      btn.style.border = "1px solid rgba(2,6,23,.10)";
-      btn.style.color = on ? "#166534" : "#0f172a";
-      btn.textContent = btn.dataset.label + (on ? " ✓" : "");
-    };
-    setBtn(el("chkWater"), s.water);
-    setBtn(el("chkMove"), s.move);
-    setBtn(el("chkSleep"), s.sleep);
-
-    const done = [s.water,s.move,s.sleep].filter(Boolean).length;
-    el("chkHint").textContent = done===0 ? "วันนี้ยังไม่เช็คอิน ลองเริ่มจากอย่างเดียวก่อนก็ได้" : `เช็คอินแล้ว ${done}/3 อย่าง`;
+  // 7-day streak (count distinct logDate in last 7 days)
+  try{
+    const now = new Date();
+    const to = iso(now);
+    const from = iso(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6));
+    const r = await api.fpDailyListRange({ dateFrom: from, dateTo: to });
+    const items = r?.items || [];
+    const set = new Set(items.map(x => x.logDate));
+    streak7.textContent = t("dash.days", { n: set.size });
+  }catch{
+    streak7.textContent = "-";
   }
 
-  function toggleCheck(k){
-    const s = checkState[todayKey];
-    s[k] = !s[k];
-    localStorage.setItem(CHECK_KEY, JSON.stringify(checkState));
-    renderCheck();
+  // Preventive counts
+  try{
+    const pv = await api.preventiveList();
+    pvDue.textContent = pv?.counts?.dueToday ?? "-";
+    pvOver.textContent = pv?.counts?.overdue ?? "-";
+  }catch{
+    pvDue.textContent = "-";
+    pvOver.textContent = "-";
   }
 
-  el("chkWater").dataset.label = "ดื่มน้ำ";
-  el("chkMove").dataset.label = "ขยับร่างกาย";
-  el("chkSleep").dataset.label = "นอนให้พอ";
-  el("chkWater").addEventListener("click", ()=>toggleCheck("water"));
-  el("chkMove").addEventListener("click", ()=>toggleCheck("move"));
-  el("chkSleep").addEventListener("click", ()=>toggleCheck("sleep"));
-  renderCheck();
-
-  // ---------------- Charts ----------------
-  function drawLogChart(){
-    const c = el("chartLogs");
-    const ctx = c.getContext("2d");
-    const w = c.width = c.clientWidth * devicePixelRatio;
-    const h = c.height = 140 * devicePixelRatio;
-
-    ctx.clearRect(0,0,w,h);
-
-    // background
-    ctx.fillStyle = "rgba(2,6,23,.04)";
-    roundRect(ctx, 0,0,w,h, 16*devicePixelRatio); ctx.fill();
-
-    const pad = 14*devicePixelRatio;
-    const bw = (w - pad*2) / last14.length;
-    const maxBar = h - pad*2 - 20*devicePixelRatio;
-
-    // axis baseline
-    ctx.strokeStyle = "rgba(2,6,23,.10)";
-    ctx.lineWidth = 1*devicePixelRatio;
-    ctx.beginPath();
-    ctx.moveTo(pad, h-pad);
-    ctx.lineTo(w-pad, h-pad);
-    ctx.stroke();
-
-    last14.forEach((d, i)=>{
-      const x = pad + i*bw + bw*0.15;
-      const barW = bw*0.7;
-      const barH = d.has ? maxBar : maxBar*0.18;
-      const y = h - pad - barH;
-
-      const grad = ctx.createLinearGradient(0,y,0,y+barH);
-      grad.addColorStop(0, d.has ? "rgba(14,165,233,.85)" : "rgba(148,163,184,.50)");
-      grad.addColorStop(1, d.has ? "rgba(59,130,246,.55)" : "rgba(148,163,184,.25)");
-      ctx.fillStyle = grad;
-      roundRect(ctx, x, y, barW, barH, 10*devicePixelRatio);
-      ctx.fill();
-
-      // mark today
-      if(d.k === iso(today)){
-        ctx.fillStyle = "rgba(185,28,28,.85)";
-        ctx.beginPath();
-        ctx.arc(x+barW/2, h-pad+6*devicePixelRatio, 3.5*devicePixelRatio, 0, Math.PI*2);
-        ctx.fill();
-      }
-    });
-
-    // label
-    ctx.fillStyle = "rgba(2,6,23,.75)";
-    ctx.font = `${12*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("ต่ำ", pad, 18*devicePixelRatio);
-    ctx.fillText("สูง", pad, 34*devicePixelRatio);
+  // Quiz last score
+  try{
+    const res = await api.quizMyResults();
+    const arr = Array.isArray(res) ? res : (Array.isArray(res?.items) ? res.items : []);
+    const last = arr[0] || null;
+    quizLast.textContent = last ? `${last.score}/${last.total}` : "-";
+    quizHint.textContent = last
+      ? (last.takenAt ? new Date(last.takenAt).toLocaleString("th-TH",{dateStyle:"medium",timeStyle:"short"}) : "")
+      : t("dash.quizNoData");
+  }catch{
+    quizLast.textContent = "-";
+    quizHint.textContent = t("dash.quizNoData");
   }
-
-  function drawPvChart(){
-    const c = el("chartPv");
-    const ctx = c.getContext("2d");
-    const w = c.width = c.clientWidth * devicePixelRatio;
-    const h = c.height = 120 * devicePixelRatio;
-
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle = "rgba(2,6,23,.04)";
-    roundRect(ctx, 0,0,w,h, 16*devicePixelRatio); ctx.fill();
-
-    const pad = 14*devicePixelRatio;
-
-    const overdue = pvOverCount || 0;
-    const dueAll = pvDueCount || 0;
-    const due = Math.max(0, dueAll - overdue);
-    const done = pvDoneCount || 0;
-
-    const total = Math.max(1, overdue + due + done);
-
-    const overduePct = overdue / total;
-    const duePct = due / total;
-    const donePct = done / total;
-
-    const cx = pad + 58*devicePixelRatio;
-    const cy = h/2;
-    const r  = 34*devicePixelRatio;
-    const lw = 10*devicePixelRatio;
-
-    ctx.lineWidth = lw;
-    ctx.strokeStyle = "rgba(2,6,23,.10)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
-    ctx.stroke();
-
-    let start = -Math.PI/2;
-
-    ctx.strokeStyle = "rgba(239,68,68,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*overduePct);
-    ctx.stroke();
-    start += Math.PI*2*overduePct;
-
-    ctx.strokeStyle = "rgba(245,158,11,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*duePct);
-    ctx.stroke();
-    start += Math.PI*2*duePct;
-
-    ctx.strokeStyle = "rgba(34,197,94,.92)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, start + Math.PI*2*donePct);
-    ctx.stroke();
-
-    const tx = cx + r + 18*devicePixelRatio;
-
-    ctx.fillStyle = "rgba(2,6,23,.90)";
-    ctx.font = `${13*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("ต้องทำ", tx, cy - 22*devicePixelRatio);
-    ctx.fillStyle = "rgba(245,158,11,.92)";
-    ctx.font = `${18*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(dueAll), tx, cy - 2*devicePixelRatio);
-
-    ctx.fillStyle = "rgba(2,6,23,.90)";
-    ctx.font = `${13*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("ทำแล้ว", tx + 110*devicePixelRatio, cy - 22*devicePixelRatio);
-    ctx.fillStyle = "rgba(34,197,94,.92)";
-    ctx.font = `${18*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText(String(done), tx + 110*devicePixelRatio, cy - 2*devicePixelRatio);
-
-    ctx.fillStyle = "rgba(2,6,23,.90)";
-    ctx.font = `${12*devicePixelRatio}px system-ui, -apple-system, Segoe UI, sans-serif`;
-    ctx.fillText("เกินกำหนด " + String(overdue), tx, cy + 22*devicePixelRatio);
-  }
-
-  function roundRect(ctx, x, y, w, h, r){
-    const rr = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x+rr, y);
-    ctx.arcTo(x+w, y, x+w, y+h, rr);
-    ctx.arcTo(x+w, y+h, x, y+h, rr);
-    ctx.arcTo(x, y+h, x, y, rr);
-    ctx.arcTo(x, y, x+w, y, rr);
-    ctx.closePath();
-  }
-
-  function drawAll(){
-    drawLogChart();
-    drawPvChart();
-  }
-
-  // initial render
-  renderCalendar();
-  drawAll();
-
-  // redraw on resize
-  let tmo = null;
-  window.addEventListener("resize", ()=>{
-    clearTimeout(tmo);
-    tmo = setTimeout(drawAll, 120);
-  });
 </script>
+
+<style>
+  .container{max-width:900px;margin:0 auto;padding:18px}
+  .muted{opacity:.7}
+  .card{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .stat{border:1px solid rgba(0,0,0,.08);border-radius:14px;padding:12px}
+  .value{font-size:28px;font-weight:900;margin-top:6px}
+  .pred-detail{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .pred-line{font-size:13px;opacity:.9}
+  .row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+  @media (max-width:700px){.grid2{grid-template-columns:1fr}}
+</style>
 </body>
 </html>
