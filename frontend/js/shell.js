@@ -243,23 +243,41 @@ function renderShell_(title, active) {
 
     /* ✅ FIX สำคัญ: ทำให้ส่วนเมนูเลื่อนได้จริง และไม่ตัดเมนูท้าย */
     .drawer-nav{
+      /* ทำให้ nav เป็นคอลัมน์ + มีช่องว่าง */
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      /* ให้ nav ยืด/เลื่อนได้จริง */
       flex: 1 1 auto;
-      min-height: 0;                /* จำเป็นมากสำหรับ flex + overflow */
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
 
-      padding-bottom: 120px;        /* กันโดนปุ่มออกจากระบบบัง */
+      /* ระยะขอบด้านใน */
+      padding: 10px 14px;
+
+      /* กันรายการท้าย ๆ โดนปุ่มออกจากระบบบัง */
+      padding-bottom: calc(140px + env(safe-area-inset-bottom));
     }
 
     /* ✅ Accordion menu */
-    .drawer-acc{ padding: 10px 14px; gap: 10px; }
+    /* drawer-acc ไม่ต้องใส่ gap/padding ซ้ำ (กันชนกัน) */
+    .drawer-acc{
+      display: contents; /* ให้ใช้ layout จาก .drawer-nav เป็นหลัก */
+    }
+
+    /* ✅ เพิ่มระยะกันซ้อน + กันเงาทับ */
     .drawer-section{
-      border:1px solid rgba(17,24,39,.08);
-      border-radius:16px;
-      overflow:hidden;
+      border: 1px solid rgba(17,24,39,.08);
+      border-radius: 16px;
+      overflow: hidden;
       background: rgba(255,255,255,.90);
       box-shadow: 0 10px 24px rgba(0,0,0,.06);
+
+      /* กัน “ซ้อน” แบบเห็นชัด */
+      margin: 0; /* เพราะเราใช้ gap จาก .drawer-nav แล้ว */
     }
     .drawer-section-btn{
       width:100%;
