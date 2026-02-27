@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FEMI Admin | Content</title>
+  <title>FEMI Admin | เนื้อหา</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,20 +14,44 @@
   <link rel="stylesheet" href="/assets/app.css" />
 
   <style>
+    /* ✅ Method A: ไม่ใช้ @apply */
     .glass{ background: rgba(255,255,255,.78); backdrop-filter: blur(10px); }
     dialog::backdrop{ background: rgba(15, 23, 42, .45); }
-    .inp{ width:100%; border:1px solid rgb(226 232 240); border-radius: 16px; padding: 10px 12px; background: rgba(255,255,255,.92); }
-    .btn{ @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 font-semibold; }
-    .btn-primary{ background: rgb(15 23 42); color: white; }
-    .btn-primary:hover{ background: rgb(2 6 23); }
-    .btn-ghost{ background: rgba(255,255,255,.8); border: 1px solid rgb(226 232 240); }
-    .btn-ghost:hover{ background: white; }
+    .inp{
+      width:100%;
+      border:1px solid rgb(226 232 240);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius:16px;
+      padding:8px 16px;
+      font-weight:700;
+      user-select:none;
+    }
+    .btn-ghost{
+      background: rgba(255,255,255,.85);
+      border:1px solid rgb(226 232 240);
+    }
+    .btn-ghost:hover{ background:white; }
+    .btn-dark{
+      background: rgb(15 23 42);
+      color:#fff;
+    }
+    .btn-dark:hover{ background: rgb(2 6 23); }
   </style>
 </head>
+
 <body class="gradient-bg text-slate-900">
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <div class="min-h-screen grid lg:grid-cols-[280px_1fr]">
+    <!-- Sidebar -->
     <aside class="bg-white/80 backdrop-blur border-r border-slate-200 p-4 lg:p-6">
       <a href="/admin/index.html" class="flex items-center gap-3">
         <img src="/assets/logo_femi_2.svg" class="h-8" alt="FEMI" />
@@ -65,6 +89,7 @@
       <div class="mt-8 text-xs text-slate-500">FEMI Admin</div>
     </aside>
 
+    <!-- Main -->
     <main class="p-4 lg:p-10">
       <div class="max-w-6xl">
         <div>
@@ -72,16 +97,16 @@
           <p class="text-slate-600 mt-1">จัดการข่าว/ความรู้/คำถามควิซ</p>
         </div>
 
-        <div class="mt-6 flex items-center gap-2">
-          <button data-tab="news" class="px-4 py-2 rounded-2xl border border-slate-200 bg-slate-900 text-white">ข่าว/ประกาศ</button>
-          <button data-tab="kb" class="px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50">บทความความรู้</button>
-          <button data-tab="quiz" class="px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50">คำถามควิซ</button>
+        <div class="mt-6 flex items-center gap-2 flex-wrap">
+          <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-slate-900 text-white" data-tab="news">ข่าว/ประกาศ</button>
+          <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50" data-tab="kb">บทความความรู้</button>
+          <button class="tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50" data-tab="quiz">คำถามควิซ</button>
         </div>
 
         <section class="mt-4 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 id="sectionTitle" class="font-bold flex items-center gap-2">
-              <i data-lucide="megaphone" class="w-5 h-5"></i> ข่าว/ประกาศ
+              <i data-lucide="megaphone" class="w-5 h-5 text-rose-700"></i> ข่าว/ประกาศ
             </h2>
             <button id="btnCreate" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700">
               + สร้างข่าว
@@ -92,26 +117,29 @@
         </section>
 
         <!-- Dialog -->
-        <dialog id="contentDialog" class="rounded-2xl p-0 w-full max-w-3xl border border-slate-200 shadow-card">
-          <form method="dialog" id="contentForm" class="bg-white rounded-2xl overflow-hidden">
+        <dialog id="dlg" class="rounded-2xl p-0 w-full max-w-3xl border border-slate-200 shadow-card">
+          <form method="dialog" class="bg-white rounded-2xl overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-              <div class="font-bold" id="dlgTitle">สร้างใหม่</div>
-              <!-- FIX: type=button so required won't block closing -->
+              <div class="font-bold" id="dlgTitle">—</div>
+
+              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-close class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
                 <i data-lucide="x" class="w-4 h-4"></i>
               </button>
             </div>
 
             <div class="p-5 space-y-4 max-h-[70vh] overflow-auto">
+              <input id="kind" type="hidden">
               <input id="id" type="hidden">
+
               <div class="grid sm:grid-cols-2 gap-3">
                 <div>
                   <label class="text-sm font-medium">หัวข้อ</label>
                   <input id="title" required class="mt-1 inp" placeholder="หัวข้อ">
                 </div>
                 <div>
-                  <label class="text-sm font-medium">หมวดหมู่</label>
-                  <input id="category" class="mt-1 inp" placeholder="เช่น ประกาศ / สุขภาพผู้หญิง">
+                  <label class="text-sm font-medium">หมวด/แท็ก</label>
+                  <input id="cat" class="mt-1 inp" placeholder="เช่น ประกาศ / สุขภาพผู้หญิง">
                 </div>
               </div>
 
@@ -131,17 +159,51 @@
                   <select id="status" class="mt-1 inp">
                     <option value="Published">Published</option>
                     <option value="Draft">Draft</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
                 <div>
-                  <label class="text-sm font-medium">Cover URL (optional)</label>
-                  <input id="coverUrl" class="mt-1 inp" placeholder="https://...">
+                  <label class="text-sm font-medium">Cover URL (ถ้ามี)</label>
+                  <input id="cover" class="mt-1 inp" placeholder="https://...">
                 </div>
               </div>
+
+              <!-- Quiz only -->
+              <div id="quizBox" class="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="font-semibold text-sm mb-2">ตัวเลือก (สำหรับควิซ)</div>
+
+                <div class="space-y-2">
+                  <input id="qc1" class="inp" placeholder="ตัวเลือก 1">
+                  <input id="qc2" class="inp" placeholder="ตัวเลือก 2">
+                  <input id="qc3" class="inp" placeholder="ตัวเลือก 3">
+                  <input id="qc4" class="inp" placeholder="ตัวเลือก 4">
+
+                  <select id="qcCorrect" class="inp">
+                    <option value="1">คำตอบที่ถูก: ตัวเลือก 1</option>
+                    <option value="2">คำตอบที่ถูก: ตัวเลือก 2</option>
+                    <option value="3">คำตอบที่ถูก: ตัวเลือก 3</option>
+                    <option value="4">คำตอบที่ถูก: ตัวเลือก 4</option>
+                  </select>
+
+                  <div class="grid sm:grid-cols-2 gap-3">
+                    <select id="qcCategory" class="inp">
+                      <option value="health">สุขภาพทั่วไป</option>
+                      <option value="pregnancy">ตั้งครรภ์</option>
+                      <option value="nutrition">โภชนาการ</option>
+                    </select>
+                    <select id="qcDifficulty" class="inp">
+                      <option value="easy">ง่าย</option>
+                      <option value="medium">กลาง</option>
+                      <option value="hard">ยาก</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
-              <!-- FIX: type=button so required won't block closing -->
+              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-cancel class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
               <button id="btnSave" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
             </div>
@@ -154,45 +216,47 @@
 
   <script type="module">
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
+    import { api } from "/js/api.js";
+    import { qs, qsa, toast, setLoading, esc } from "/js/ui.js";
+
     initAdminShell("content");
     await loadAdminMe();
+    lucide.createIcons();
 
-    import { api } from "/js/api.js";
-    import { qs, toast, setLoading, esc } from "/js/ui.js";
+    const listEl = qs("#list");
+    const dlg = qs("#dlg");
 
-    const list = qs("#list");
-    const dlg = qs("#contentDialog");
-
-    // Allow closing dialog even when required fields are empty
+    // ✅ ปิด dialog ได้แม้ required ยังไม่กรอก
     document.addEventListener("click", (e) => {
-      const closeBtn = e.target.closest("[data-dlg-close], [data-dlg-cancel]");
+      const closeBtn = e.target.closest("[data-dlg-close],[data-dlg-cancel]");
       if (closeBtn) {
         e.preventDefault();
         dlg.close();
       }
     });
 
-    let currentTab = "news";
+    let tab = "news";
 
-    function setTab(tab){
-      currentTab = tab;
-      document.querySelectorAll("[data-tab]").forEach(b=>{
-        const on = b.getAttribute("data-tab") === tab;
-        b.className = on
-          ? "px-4 py-2 rounded-2xl border border-slate-200 bg-slate-900 text-white"
-          : "px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50";
+    function setTab(t){
+      tab = t;
+      qsa(".tab").forEach(b=>{
+        const on = b.dataset.tab === t;
+        b.classList.toggle("bg-slate-900", on);
+        b.classList.toggle("text-white", on);
+        b.classList.toggle("bg-white", !on);
+        b.classList.toggle("hover:bg-slate-50", !on);
       });
 
-      const title = qs("#sectionTitle");
+      const sectionTitle = qs("#sectionTitle");
       const btnCreate = qs("#btnCreate");
-      if (tab === "news"){
-        title.innerHTML = `<i data-lucide="megaphone" class="w-5 h-5"></i> ข่าว/ประกาศ`;
+      if (t === "news"){
+        sectionTitle.innerHTML = `<i data-lucide="megaphone" class="w-5 h-5 text-rose-700"></i> ข่าว/ประกาศ`;
         btnCreate.textContent = "+ สร้างข่าว";
-      }else if (tab === "kb"){
-        title.innerHTML = `<i data-lucide="book-open" class="w-5 h-5"></i> บทความความรู้`;
+      }else if (t === "kb"){
+        sectionTitle.innerHTML = `<i data-lucide="book-open" class="w-5 h-5 text-cyan-700"></i> บทความความรู้`;
         btnCreate.textContent = "+ สร้างบทความ";
       }else{
-        title.innerHTML = `<i data-lucide="help-circle" class="w-5 h-5"></i> คำถามควิซ`;
+        sectionTitle.innerHTML = `<i data-lucide="clipboard-check" class="w-5 h-5 text-slate-700"></i> คำถามควิซ`;
         btnCreate.textContent = "+ สร้างคำถาม";
       }
 
@@ -200,36 +264,24 @@
       loadList();
     }
 
-    document.querySelectorAll("[data-tab]").forEach(b=>{
-      b.addEventListener("click", ()=> setTab(b.getAttribute("data-tab")));
-    });
+    qsa(".tab").forEach(b => b.addEventListener("click", ()=> setTab(b.dataset.tab)));
 
-    qs("#btnCreate").addEventListener("click", ()=>{
-      qs("#dlgTitle").textContent = "สร้างใหม่";
-      qs("#id").value = "";
-      qs("#title").value = "";
-      qs("#category").value = "";
-      qs("#summary").value = "";
-      qs("#body").value = "";
-      qs("#status").value = "Published";
-      qs("#coverUrl").value = "";
-      dlg.showModal();
-      lucide.createIcons();
-    });
+    function row(item){
+      // normalize id/title/meta by tab
+      const id = (tab === "news") ? item.newsId : (tab === "kb") ? item.kbId : item.questionId;
+      const title = (tab === "quiz") ? (item.questionText || "-") : (item.title || "-");
+      const meta = (tab === "news") ? (item.category || "-") : (tab === "kb") ? (item.tags || "-") : (item.category || "-");
+      const status = item.status || "-";
 
-    function itemCard(x){
-      const title = esc(x.title || x.question || "-");
-      const cat = esc(x.category || "-");
-      const status = esc(x.status || "-");
       return `
-        <div class="rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3">
-          <div>
-            <div class="font-bold">${title}</div>
-            <div class="text-sm text-slate-600">${cat} • ${status}</div>
+        <div class="rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3 hover:bg-slate-50">
+          <div class="min-w-0">
+            <div class="font-bold truncate">${esc(title)}</div>
+            <div class="text-sm text-slate-600 mt-1">${esc(meta)} • ${esc(status)}</div>
           </div>
-          <div class="flex items-center gap-2">
-            <button data-act="edit" data-id="${x.id}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">แก้ไข</button>
-            <button data-act="del" data-id="${x.id}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
+          <div class="flex items-center gap-2 shrink-0">
+            <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white" data-act="edit" data-id="${esc(id)}">แก้ไข</button>
+            <button class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50" data-act="del" data-id="${esc(id)}">ลบ</button>
           </div>
         </div>
       `;
@@ -238,29 +290,63 @@
     async function loadList(){
       try{
         let items = [];
-        if (currentTab === "news") items = await api.request("news.listAdmin", {});
-        else if (currentTab === "kb") items = await api.request("knowledge.listAdmin", {});
-        else items = await api.request("quiz.listAdmin", {});
-        list.innerHTML = (items||[]).map(itemCard).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
+        if (tab === "news") items = await api.request("news.listAdmin", {});
+        else if (tab === "kb") items = await api.request("knowledge.listAdmin", {});
+        else items = await api.request("quiz.questions.listAdmin", {}); // ✅ ของจริง
+
+        listEl.innerHTML = (items || []).map(row).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
       }catch(err){
         console.error(err);
+        listEl.innerHTML = `<div class="text-rose-700">โหลดข้อมูลไม่สำเร็จ: ${esc(err?.error?.message || "Unknown error")}</div>`;
         toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
       }finally{
         lucide.createIcons();
       }
     }
 
-    list.addEventListener("click", async (e)=>{
+    function openCreate(){
+      qs("#kind").value = tab;
+      qs("#id").value = "";
+      qs("#title").value = "";
+      qs("#cat").value = "";
+      qs("#summary").value = "";
+      qs("#body").value = "";
+      qs("#status").value = "Published";
+      qs("#cover").value = "";
+
+      const quizBox = qs("#quizBox");
+      quizBox.classList.toggle("hidden", tab !== "quiz");
+
+      if (tab === "quiz"){
+        qs("#qc1").value = "";
+        qs("#qc2").value = "";
+        qs("#qc3").value = "";
+        qs("#qc4").value = "";
+        qs("#qcCorrect").value = "1";
+        qs("#qcCategory").value = "health";
+        qs("#qcDifficulty").value = "easy";
+      }
+
+      qs("#dlgTitle").textContent = (tab === "news") ? "สร้างข่าว/ประกาศ" : (tab === "kb") ? "สร้างบทความความรู้" : "สร้างคำถามควิซ";
+      dlg.showModal();
+      lucide.createIcons();
+    }
+
+    qs("#btnCreate").addEventListener("click", openCreate);
+
+    listEl.addEventListener("click", async (e)=>{
       const btn = e.target.closest("button[data-act]");
       if (!btn) return;
+
+      const act = btn.dataset.act;
       const id = btn.dataset.id;
 
-      if (btn.dataset.act === "del"){
+      if (act === "del"){
         if (!confirm("ยืนยันลบรายการนี้?")) return;
         try{
-          if (currentTab === "news") await api.request("news.delete", { id });
-          else if (currentTab === "kb") await api.request("knowledge.delete", { id });
-          else await api.request("quiz.delete", { id });
+          if (tab === "news") await api.request("news.delete", { newsId: id });
+          else if (tab === "kb") await api.request("knowledge.delete", { kbId: id });
+          else await api.request("quiz.questions.delete", { questionId: id });
           toast("ลบแล้ว", "success");
           loadList();
         }catch(err){
@@ -268,21 +354,34 @@
         }
       }
 
-      if (btn.dataset.act === "edit"){
+      if (act === "edit"){
         try{
-          let x;
-          if (currentTab === "news") x = await api.request("news.get", { id });
-          else if (currentTab === "kb") x = await api.request("knowledge.get", { id });
-          else x = await api.request("quiz.get", { id });
+          let item;
+          if (tab === "news") item = await api.request("news.getAdmin", { newsId: id });
+          else if (tab === "kb") item = await api.request("knowledge.getAdmin", { kbId: id });
+          else item = await api.request("quiz.questions.getAdmin", { questionId: id });
 
+          qs("#kind").value = tab;
+          qs("#id").value = id;
+
+          if (tab === "quiz"){
+            qs("#title").value = item.questionText || "";
+            qs("#cat").value = item.category || "";
+            qs("#summary").value = "";
+            qs("#body").value = "";
+          }else{
+            qs("#title").value = item.title || "";
+            qs("#cat").value = (tab === "news") ? (item.category || "") : (item.tags || "");
+            qs("#summary").value = item.summary || "";
+            qs("#body").value = item.content || "";
+          }
+
+          qs("#status").value = item.status || "Published";
+          qs("#cover").value = item.coverImageUrl || item.coverUrl || "";
+
+          const quizBox = qs("#quizBox");
+          quizBox.classList.toggle("hidden", tab !== "quiz");
           qs("#dlgTitle").textContent = "แก้ไข";
-          qs("#id").value = x.id || id;
-          qs("#title").value = x.title || x.question || "";
-          qs("#category").value = x.category || "";
-          qs("#summary").value = x.summary || "";
-          qs("#body").value = x.body || x.answer || "";
-          qs("#status").value = x.status || "Published";
-          qs("#coverUrl").value = x.coverUrl || "";
 
           dlg.showModal();
           lucide.createIcons();
@@ -296,43 +395,77 @@
       e.preventDefault();
       const btn = qs("#btnSave");
       setLoading(btn, true);
+
       try{
-        const payload = {
-          id: qs("#id").value || undefined,
-          title: qs("#title").value.trim(),
-          category: qs("#category").value.trim(),
-          summary: qs("#summary").value.trim(),
-          body: qs("#body").value.trim(),
-          status: qs("#status").value,
-          coverUrl: qs("#coverUrl").value.trim()
-        };
+        const kind = qs("#kind").value;
+        const id = qs("#id").value.trim();
 
-        if (currentTab === "quiz"){
-          payload.question = payload.title;
-          payload.answer = payload.body;
+        if (kind === "news"){
+          const payload = {
+            title: qs("#title").value.trim(),
+            summary: qs("#summary").value.trim(),
+            content: qs("#body").value.trim(),
+            status: qs("#status").value,
+            coverImageUrl: qs("#cover").value.trim(),
+            category: qs("#cat").value.trim() || "ประกาศ"
+          };
+          if (!id) await api.request("news.create", payload);
+          else await api.request("news.update", { newsId: id, ...payload }); // ✅ backend รองรับ direct patch
         }
 
-        if (payload.id){
-          if (currentTab === "news") await api.request("news.update", payload);
-          else if (currentTab === "kb") await api.request("knowledge.update", payload);
-          else await api.request("quiz.update", payload);
-          toast("บันทึกแล้ว", "success");
-        }else{
-          if (currentTab === "news") await api.request("news.create", payload);
-          else if (currentTab === "kb") await api.request("knowledge.create", payload);
-          else await api.request("quiz.create", payload);
-          toast("สร้างแล้ว", "success");
+        if (kind === "kb"){
+          const payload = {
+            title: qs("#title").value.trim(),
+            summary: qs("#summary").value.trim(),
+            content: qs("#body").value.trim(),
+            status: qs("#status").value,
+            tags: qs("#cat").value.trim(),
+            coverImageUrl: qs("#cover").value.trim()
+          };
+          if (!id) await api.request("knowledge.create", payload);
+          else await api.request("knowledge.update", { kbId: id, ...payload }); // ✅ backend รองรับ direct patch
         }
 
+        if (kind === "quiz"){
+          const qPayload = {
+            questionText: qs("#title").value.trim(),
+            category: qs("#qcCategory").value,
+            difficulty: qs("#qcDifficulty").value,
+            status: qs("#status").value
+          };
+
+          let qid = id;
+          if (!qid){
+            const created = await api.request("quiz.questions.create", qPayload);
+            qid = created.questionId;
+            const choices = [qs("#qc1").value.trim(), qs("#qc2").value.trim(), qs("#qc3").value.trim(), qs("#qc4").value.trim()].filter(Boolean);
+            const correct = parseInt(qs("#qcCorrect").value, 10) - 1;
+
+            for (let i=0;i<choices.length;i++){
+              await api.request("quiz.choices.create", {
+                questionId: qid,
+                choiceText: choices[i],
+                isCorrect: (i===correct) ? "TRUE" : "FALSE"
+              });
+            }
+          }else{
+            await api.request("quiz.questions.update", { questionId: qid, patch: qPayload });
+          }
+        }
+
+        toast("บันทึกแล้ว", "success");
         dlg.close();
         loadList();
+
       }catch(err){
+        console.error(err);
         toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
       }finally{
         setLoading(btn, false);
       }
     });
 
+    // start
     setTab("news");
   </script>
 

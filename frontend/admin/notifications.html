@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FEMI Admin | Notifications</title>
+  <title>FEMI Admin | การแจ้งเตือน</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,20 +14,44 @@
   <link rel="stylesheet" href="/assets/app.css" />
 
   <style>
+    /* ✅ Method A: ไม่ใช้ @apply */
     .glass{ background: rgba(255,255,255,.78); backdrop-filter: blur(10px); }
     dialog::backdrop{ background: rgba(15, 23, 42, .45); }
-    .inp{ width:100%; border:1px solid rgb(226 232 240); border-radius: 16px; padding: 10px 12px; background: rgba(255,255,255,.92); }
-    .btn{ @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 font-semibold; }
-    .btn-primary{ background: rgb(15 23 42); color: white; }
-    .btn-primary:hover{ background: rgb(2 6 23); }
-    .btn-ghost{ background: rgba(255,255,255,.8); border: 1px solid rgb(226 232 240); }
-    .btn-ghost:hover{ background: white; }
+    .inp{
+      width:100%;
+      border:1px solid rgb(226 232 240);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius:16px;
+      padding:8px 16px;
+      font-weight:700;
+      user-select:none;
+    }
+    .btn-ghost{
+      background: rgba(255,255,255,.85);
+      border:1px solid rgb(226 232 240);
+    }
+    .btn-ghost:hover{ background:white; }
+    .btn-dark{
+      background: rgb(15 23 42);
+      color:#fff;
+    }
+    .btn-dark:hover{ background: rgb(2 6 23); }
   </style>
 </head>
+
 <body class="gradient-bg text-slate-900">
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <div class="min-h-screen grid lg:grid-cols-[280px_1fr]">
+    <!-- Sidebar -->
     <aside class="bg-white/80 backdrop-blur border-r border-slate-200 p-4 lg:p-6">
       <a href="/admin/index.html" class="flex items-center gap-3">
         <img src="/assets/logo_femi_2.svg" class="h-8" alt="FEMI" />
@@ -65,6 +89,7 @@
       <div class="mt-8 text-xs text-slate-500">FEMI Admin</div>
     </aside>
 
+    <!-- Main -->
     <main class="p-4 lg:p-10">
       <div class="max-w-6xl">
         <div class="flex items-end justify-between gap-4 flex-wrap">
@@ -72,6 +97,7 @@
             <h1 class="text-3xl font-bold">การแจ้งเตือน</h1>
             <p class="text-slate-600 mt-1">สร้าง/จัดการแจ้งเตือน และดูสถานะการส่ง</p>
           </div>
+
           <button id="btnCreate" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700">
             + สร้างการแจ้งเตือน
           </button>
@@ -81,11 +107,13 @@
           <div id="list" class="space-y-3"></div>
         </section>
 
+        <!-- Dialog -->
         <dialog id="dlg" class="rounded-2xl p-0 w-full max-w-2xl border border-slate-200 shadow-card">
-          <form method="dialog" id="form" class="bg-white rounded-2xl overflow-hidden">
+          <form method="dialog" class="bg-white rounded-2xl overflow-hidden">
             <div class="p-5 border-b border-slate-200 flex items-center justify-between">
               <div class="font-bold" id="dlgTitle">สร้างการแจ้งเตือน</div>
-              <!-- FIX: type=button so required won't block closing -->
+
+              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-close class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
                 <i data-lucide="x" class="w-4 h-4"></i>
               </button>
@@ -106,45 +134,68 @@
 
               <div class="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="text-sm font-medium">สถานะ</label>
-                  <select id="status" class="mt-1 inp">
-                    <option value="Ready">Ready</option>
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Draft">Draft</option>
+                  <label class="text-sm font-medium">ช่องทาง</label>
+                  <select id="channel" class="mt-1 inp">
+                    <option value="inapp">ในแอป</option>
+                    <option value="line">LINE (ถ้ามี)</option>
                   </select>
                 </div>
                 <div>
-                  <label class="text-sm font-medium">เวลา (ถ้ามี)</label>
-                  <input id="scheduledAt" class="mt-1 inp" placeholder="2026-03-01T09:00:00Z">
+                  <label class="text-sm font-medium">กลุ่มเป้าหมาย</label>
+                  <select id="target" class="mt-1 inp">
+                    <option value="all">ทุกคน</option>
+                    <option value="users">ผู้ใช้ (ไม่รวมแอดมิน)</option>
+                  </select>
                 </div>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-sm font-medium">ตั้งเวลา (ถ้ามี)</label>
+                  <input id="scheduleAt" class="mt-1 inp" placeholder="เช่น 2026-03-01T09:00:00Z">
+                </div>
+                <div>
+                  <label class="text-sm font-medium">สถานะ</label>
+                  <select id="status" class="mt-1 inp">
+                    <option value="Inactive">Draft/ปิด</option>
+                    <option value="Ready">พร้อมส่ง</option>
+                    <option value="Sent">ส่งแล้ว</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-500 leading-relaxed">
+                * ถ้าต้องการส่งทันที ให้ตั้งสถานะ “พร้อมส่ง” แล้วกดปุ่ม “ส่งทันที” ในรายการ
               </div>
             </div>
 
             <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
-              <!-- FIX: type=button so required won't block closing -->
+              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-cancel class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
               <button id="btnSave" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
             </div>
           </form>
         </dialog>
+
       </div>
     </main>
   </div>
 
   <script type="module">
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
-    initAdminShell("notifications");
-    await loadAdminMe();
-
     import { api } from "/js/api.js";
     import { qs, toast, setLoading, esc } from "/js/ui.js";
 
-    const list = qs("#list");
+    initAdminShell("notifications");
+    await loadAdminMe();
+    lucide.createIcons();
+
+    const listEl = qs("#list");
     const dlg = qs("#dlg");
 
-    // Allow closing dialog even when required fields are empty
+    // ✅ ปิด dialog ได้แม้ required ยังไม่กรอก
     document.addEventListener("click", (e) => {
-      const closeBtn = e.target.closest("[data-dlg-close], [data-dlg-cancel]");
+      const closeBtn = e.target.closest("[data-dlg-close],[data-dlg-cancel]");
       if (closeBtn) {
         e.preventDefault();
         dlg.close();
@@ -152,20 +203,27 @@
     });
 
     function card(n){
+      const id = n.notificationId;
       const title = esc(n.title || "-");
       const msg = esc(n.message || "");
       const status = esc(n.status || "-");
-      const when = esc(n.scheduledAt || "");
+      const ch = esc(n.channel || "inapp");
+      const target = esc(n.target || "all");
+      const scheduleAt = esc(n.scheduleAt || "");
+
       return `
-        <div class="rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3">
-          <div>
+        <div class="rounded-2xl border border-slate-200 p-4 flex items-start justify-between gap-3 hover:bg-slate-50">
+          <div class="min-w-0">
             <div class="font-bold">${title}</div>
-            <div class="text-sm text-slate-600">${status}${when ? " • " + when : ""}</div>
-            ${msg ? `<div class="text-sm text-slate-700 mt-1">${msg}</div>` : ""}
+            <div class="text-sm text-slate-600 mt-1">
+              สถานะ: ${status} • ช่องทาง: ${ch} • เป้าหมาย: ${target}${scheduleAt ? " • เวลา: " + scheduleAt : ""}
+            </div>
+            ${msg ? `<div class="text-sm text-slate-800 mt-2 whitespace-pre-wrap">${msg}</div>` : ""}
           </div>
-          <div class="flex items-center gap-2">
-            <button data-act="edit" data-id="${n.id}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">แก้ไข</button>
-            <button data-act="del" data-id="${n.id}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
+          <div class="flex flex-col gap-2 shrink-0">
+            <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white" data-act="edit" data-id="${esc(id)}">แก้ไข</button>
+            <button class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50" data-act="del" data-id="${esc(id)}">ลบ</button>
+            <button class="px-3 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800" data-act="send" data-id="${esc(id)}">ส่งทันที</button>
           </div>
         </div>
       `;
@@ -173,9 +231,11 @@
 
     async function loadList(){
       try{
-        const items = await api.notificationsList();
-        list.innerHTML = (items||[]).map(card).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
+        const items = await api.request("notifications.list", {});  // ✅ ของจริง
+        listEl.innerHTML = (items||[]).map(card).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
       }catch(err){
+        console.error(err);
+        listEl.innerHTML = `<div class="text-rose-700">โหลดข้อมูลไม่สำเร็จ: ${esc(err?.error?.message || "Unknown error")}</div>`;
         toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
       }finally{
         lucide.createIcons();
@@ -187,21 +247,25 @@
       qs("#id").value = "";
       qs("#title").value = "";
       qs("#message").value = "";
-      qs("#status").value = "Ready";
-      qs("#scheduledAt").value = "";
+      qs("#channel").value = "inapp";
+      qs("#target").value = "all";
+      qs("#scheduleAt").value = "";
+      qs("#status").value = "Inactive";
       dlg.showModal();
       lucide.createIcons();
     });
 
-    list.addEventListener("click", async (e)=>{
+    listEl.addEventListener("click", async (e)=>{
       const btn = e.target.closest("button[data-act]");
       if (!btn) return;
+
+      const act = btn.dataset.act;
       const id = btn.dataset.id;
 
-      if (btn.dataset.act === "del"){
+      if (act === "del"){
         if (!confirm("ยืนยันลบรายการนี้?")) return;
         try{
-          await api.notificationsDelete(id);
+          await api.request("notifications.delete", { notificationId: id });
           toast("ลบแล้ว", "success");
           loadList();
         }catch(err){
@@ -209,19 +273,32 @@
         }
       }
 
-      if (btn.dataset.act === "edit"){
+      if (act === "edit"){
         try{
-          const n = await api.notificationsGet(id);
+          const n = await api.request("notifications.get", { notificationId: id });
           qs("#dlgTitle").textContent = "แก้ไขการแจ้งเตือน";
-          qs("#id").value = n.id || id;
+          qs("#id").value = n.notificationId || id;
           qs("#title").value = n.title || "";
           qs("#message").value = n.message || "";
-          qs("#status").value = n.status || "Ready";
-          qs("#scheduledAt").value = n.scheduledAt || "";
+          qs("#channel").value = n.channel || "inapp";
+          qs("#target").value = n.target || "all";
+          qs("#scheduleAt").value = n.scheduleAt || "";
+          qs("#status").value = n.status || "Inactive";
           dlg.showModal();
           lucide.createIcons();
         }catch(err){
           toast(err?.error?.message || "เปิดข้อมูลไม่สำเร็จ", "danger");
+        }
+      }
+
+      if (act === "send"){
+        if (!confirm("ต้องการส่งแจ้งเตือนนี้ทันทีใช่ไหม?")) return;
+        try{
+          const res = await api.request("notifications.send", { notificationId: id });
+          toast(res?.alreadySent ? "รายการนี้ถูกส่งแล้ว" : "ส่งแล้ว", "success");
+          loadList();
+        }catch(err){
+          toast(err?.error?.message || "ส่งไม่สำเร็จ", "danger");
         }
       }
     });
@@ -230,26 +307,31 @@
       e.preventDefault();
       const btn = qs("#btnSave");
       setLoading(btn, true);
+
       try{
+        const id = qs("#id").value.trim();
         const payload = {
-          id: qs("#id").value || undefined,
           title: qs("#title").value.trim(),
           message: qs("#message").value.trim(),
-          status: qs("#status").value,
-          scheduledAt: qs("#scheduledAt").value.trim()
+          channel: qs("#channel").value,
+          target: qs("#target").value,
+          scheduleAt: qs("#scheduleAt").value.trim(),
+          status: qs("#status").value
         };
 
-        if (payload.id){
-          await api.notificationsUpdate(payload.id, payload);
-          toast("บันทึกแล้ว", "success");
-        }else{
-          await api.notificationsCreate(payload);
+        if (!id){
+          await api.request("notifications.create", payload); // ✅ ของจริง
           toast("สร้างแล้ว", "success");
+        }else{
+          await api.request("notifications.update", { notificationId: id, patch: payload });
+          toast("บันทึกแล้ว", "success");
         }
 
         dlg.close();
         loadList();
+
       }catch(err){
+        console.error(err);
         toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
       }finally{
         setLoading(btn, false);
