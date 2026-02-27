@@ -241,6 +241,17 @@ function renderShell_(title, active) {
     .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid rgba(0,0,0,.06)}
     .drawer-title{font-weight:900}
 
+    /* ✅ FIX สำคัญ: ทำให้ส่วนเมนูเลื่อนได้จริง และไม่ตัดเมนูท้าย */
+    .drawer-nav{
+      flex: 1 1 auto;
+      min-height: 0;                /* จำเป็นมากสำหรับ flex + overflow */
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+
+      padding-bottom: 120px;        /* กันโดนปุ่มออกจากระบบบัง */
+    }
+
     /* ✅ Accordion menu */
     .drawer-acc{ padding: 10px 14px; gap: 10px; }
     .drawer-section{
