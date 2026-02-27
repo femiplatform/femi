@@ -113,7 +113,6 @@
             <div class="p-5 border-b border-slate-200 flex items-center justify-between">
               <div class="font-bold" id="dlgTitle">สร้างการแจ้งเตือน</div>
 
-              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-close class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
                 <i data-lucide="x" class="w-4 h-4"></i>
               </button>
@@ -165,12 +164,11 @@
               </div>
 
               <div class="text-xs text-slate-500 leading-relaxed">
-                * ถ้าต้องการส่งทันที ให้ตั้งสถานะ “พร้อมส่ง” แล้วกดปุ่ม “ส่งทันที” ในรายการ
+                * ถ้าต้องการส่งทันที ให้ตั้งสถานะ “พร้อมส่ง” แล้วกด “ส่งทันที” ที่รายการ
               </div>
             </div>
 
             <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
-              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-cancel class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
               <button id="btnSave" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
             </div>
@@ -184,16 +182,23 @@
   <script type="module">
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
     import { api } from "/js/api.js";
-    import { qs, toast, setLoading, esc } from "/js/ui.js";
+    import { qs, toast, setLoading } from "/js/ui.js";
 
     initAdminShell("notifications");
     await loadAdminMe();
     lucide.createIcons();
 
+    // local esc (ไม่พึ่ง export จาก ui.js)
+    const esc = (v) => String(v ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+
     const listEl = qs("#list");
     const dlg = qs("#dlg");
 
-    // ✅ ปิด dialog ได้แม้ required ยังไม่กรอก
     document.addEventListener("click", (e) => {
       const closeBtn = e.target.closest("[data-dlg-close],[data-dlg-cancel]");
       if (closeBtn) {
@@ -231,7 +236,7 @@
 
     async function loadList(){
       try{
-        const items = await api.request("notifications.list", {});  // ✅ ของจริง
+        const items = await api.request("notifications.list", {});
         listEl.innerHTML = (items||[]).map(card).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
       }catch(err){
         console.error(err);
@@ -320,7 +325,7 @@
         };
 
         if (!id){
-          await api.request("notifications.create", payload); // ✅ ของจริง
+          await api.request("notifications.create", payload);
           toast("สร้างแล้ว", "success");
         }else{
           await api.request("notifications.update", { notificationId: id, patch: payload });

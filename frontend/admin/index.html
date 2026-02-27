@@ -14,16 +14,35 @@
   <link rel="stylesheet" href="/assets/app.css" />
 
   <style>
+    /* ✅ Method A: ไม่ใช้ @apply */
     .glass{ background: rgba(255,255,255,.78); backdrop-filter: blur(10px); }
     dialog::backdrop{ background: rgba(15, 23, 42, .45); }
-    .btn{ @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 font-semibold; }
+
+    .inp{
+      width:100%;
+      border:1px solid rgb(226 232 240);
+      border-radius: 16px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.92);
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border-radius:16px;
+      padding:8px 16px;
+      font-weight:700;
+      user-select:none;
+    }
     .btn-primary{ background: rgb(15 23 42); color: white; }
     .btn-primary:hover{ background: rgb(2 6 23); }
     .btn-ghost{ background: rgba(255,255,255,.8); border: 1px solid rgb(226 232 240); }
     .btn-ghost:hover{ background: white; }
-    .inp{ width:100%; border:1px solid rgb(226 232 240); border-radius: 16px; padding: 10px 12px; background: rgba(255,255,255,.92); }
   </style>
 </head>
+
 <body class="gradient-bg text-slate-900">
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -168,7 +187,7 @@
         const [news, kb, notis] = await Promise.all([
           api.request("news.listAdmin", {}),
           api.request("knowledge.listAdmin", {}),
-          api.notificationsList()
+          api.request("notifications.list", {})
         ]);
 
         const isDraft = (x) => String(x?.status || "").toLowerCase() === "draft";
@@ -176,7 +195,7 @@
 
         const sched = (notis||[]).filter(n => {
           const s = String(n?.status || "").toLowerCase();
-          return s === "scheduled" || s === "ready";
+          return s === "ready" || s === "scheduled";
         }).length;
 
         qs("#kDrafts").textContent = drafts;

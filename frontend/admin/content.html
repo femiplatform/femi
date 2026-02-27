@@ -122,7 +122,6 @@
             <div class="p-5 border-b border-slate-200 flex items-center justify-between">
               <div class="font-bold" id="dlgTitle">—</div>
 
-              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-close class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
                 <i data-lucide="x" class="w-4 h-4"></i>
               </button>
@@ -203,7 +202,6 @@
             </div>
 
             <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
-              <!-- ✅ ปิดได้แม้ required ยังว่าง -->
               <button type="button" data-dlg-cancel class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
               <button id="btnSave" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
             </div>
@@ -217,16 +215,23 @@
   <script type="module">
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
     import { api } from "/js/api.js";
-    import { qs, qsa, toast, setLoading, esc } from "/js/ui.js";
+    import { qs, qsa, toast, setLoading } from "/js/ui.js";
 
     initAdminShell("content");
     await loadAdminMe();
     lucide.createIcons();
 
+    // local esc (ไม่พึ่ง export จาก ui.js)
+    const esc = (v) => String(v ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#39;");
+
     const listEl = qs("#list");
     const dlg = qs("#dlg");
 
-    // ✅ ปิด dialog ได้แม้ required ยังไม่กรอก
     document.addEventListener("click", (e) => {
       const closeBtn = e.target.closest("[data-dlg-close],[data-dlg-cancel]");
       if (closeBtn) {
@@ -241,10 +246,9 @@
       tab = t;
       qsa(".tab").forEach(b=>{
         const on = b.dataset.tab === t;
-        b.classList.toggle("bg-slate-900", on);
-        b.classList.toggle("text-white", on);
-        b.classList.toggle("bg-white", !on);
-        b.classList.toggle("hover:bg-slate-50", !on);
+        b.className = on
+          ? "tab px-4 py-2 rounded-2xl border border-slate-200 bg-slate-900 text-white"
+          : "tab px-4 py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50";
       });
 
       const sectionTitle = qs("#sectionTitle");
@@ -267,7 +271,6 @@
     qsa(".tab").forEach(b => b.addEventListener("click", ()=> setTab(b.dataset.tab)));
 
     function row(item){
-      // normalize id/title/meta by tab
       const id = (tab === "news") ? item.newsId : (tab === "kb") ? item.kbId : item.questionId;
       const title = (tab === "quiz") ? (item.questionText || "-") : (item.title || "-");
       const meta = (tab === "news") ? (item.category || "-") : (tab === "kb") ? (item.tags || "-") : (item.category || "-");
@@ -292,7 +295,7 @@
         let items = [];
         if (tab === "news") items = await api.request("news.listAdmin", {});
         else if (tab === "kb") items = await api.request("knowledge.listAdmin", {});
-        else items = await api.request("quiz.questions.listAdmin", {}); // ✅ ของจริง
+        else items = await api.request("quiz.questions.listAdmin", {});
 
         listEl.innerHTML = (items || []).map(row).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
       }catch(err){
@@ -410,7 +413,7 @@
             category: qs("#cat").value.trim() || "ประกาศ"
           };
           if (!id) await api.request("news.create", payload);
-          else await api.request("news.update", { newsId: id, ...payload }); // ✅ backend รองรับ direct patch
+          else await api.request("news.update", { newsId: id, ...payload });
         }
 
         if (kind === "kb"){
@@ -423,7 +426,7 @@
             coverImageUrl: qs("#cover").value.trim()
           };
           if (!id) await api.request("knowledge.create", payload);
-          else await api.request("knowledge.update", { kbId: id, ...payload }); // ✅ backend รองรับ direct patch
+          else await api.request("knowledge.update", { kbId: id, ...payload });
         }
 
         if (kind === "quiz"){
@@ -465,7 +468,6 @@
       }
     });
 
-    // start
     setTab("news");
   </script>
 
