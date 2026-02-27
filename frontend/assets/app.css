@@ -119,10 +119,35 @@ button:focus-visible, a:focus-visible { outline: none; box-shadow: 0 0 0 4px rgb
 }
 .drawer-head { display:flex; align-items:center; justify-content:space-between; padding: 14px; border-bottom:1px solid var(--stroke); }
 .drawer-title { font-weight: 800; }
-.drawer-nav { display:flex; flex-direction:column; padding: 10px; gap: 6px; overflow:auto; }
+
+/* ✅ FIX: ให้ nav เป็นส่วนที่ยืดได้ + เลื่อนได้จริง เมื่อเมนูขยายสูง */
+.drawer-nav{
+  display:flex;
+  flex-direction:column;
+  padding: 10px;
+  gap: 6px;
+
+  /* สำคัญมากสำหรับ flex column + overflow */
+  flex: 1 1 auto;
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  /* กันรายการท้าย ๆ โดนปุ่มออกจากระบบ/ฟุตเตอร์บัง */
+  padding-bottom: 120px;
+}
+
 .drawer-nav a { padding: 10px 12px; border-radius: 14px; border: 1px solid transparent; }
 .drawer-nav a:hover { background: rgba(185,28,28,.08); border-color: rgba(185,28,28,.15); }
-.drawer-footer { padding: 14px; border-top:1px solid var(--stroke); }
+
+/* ✅ รองรับทั้งชื่อ class เดิมและที่บางหน้ามีการใช้ต่างกัน */
+.drawer-footer,
+.drawer-foot {
+  padding: 14px;
+  border-top: 1px solid var(--stroke);
+}
 
 .no-scroll { overflow: hidden; }
 
