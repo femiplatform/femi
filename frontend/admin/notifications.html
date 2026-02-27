@@ -12,6 +12,17 @@
   <script src="/assets/tailwind-theme.cdn.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/assets/app.css" />
+
+  <style>
+    .glass{ background: rgba(255,255,255,.78); backdrop-filter: blur(10px); }
+    dialog::backdrop{ background: rgba(15, 23, 42, .45); }
+    .inp{ width:100%; border:1px solid rgb(226 232 240); border-radius: 16px; padding: 10px 12px; background: rgba(255,255,255,.92); }
+    .btn{ @apply inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2 font-semibold; }
+    .btn-primary{ background: rgb(15 23 42); color: white; }
+    .btn-primary:hover{ background: rgb(2 6 23); }
+    .btn-ghost{ background: rgba(255,255,255,.8); border: 1px solid rgb(226 232 240); }
+    .btn-ghost:hover{ background: white; }
+  </style>
 </head>
 <body class="gradient-bg text-slate-900">
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -29,19 +40,16 @@
 
       <nav class="mt-6 space-y-2">
         <a data-nav="dashboard" href="/admin/index.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> แดชบอร์ด
         </a>
         <a data-nav="users" href="/admin/users.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="users" class="w-5 h-5"></i> Users
+          <i data-lucide="users" class="w-5 h-5"></i> สมาชิก
         </a>
         <a data-nav="content" href="/admin/content.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="file-text" class="w-5 h-5"></i> Content
+          <i data-lucide="file-text" class="w-5 h-5"></i> เนื้อหา
         </a>
         <a data-nav="notifications" href="/admin/notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="bell" class="w-5 h-5"></i> Notifications
-        </a>
-        <a data-nav="settings" href="/admin/settings.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="settings" class="w-5 h-5"></i> Settings
+          <i data-lucide="bell" class="w-5 h-5"></i> การแจ้งเตือน
         </a>
       </nav>
 
@@ -54,90 +62,72 @@
         </button>
       </div>
 
-      <div class="mt-8 text-xs text-slate-500">
-        FEMI Admin
-      </div>
+      <div class="mt-8 text-xs text-slate-500">FEMI Admin</div>
     </aside>
 
     <main class="p-4 lg:p-10">
-
-  <div class="max-w-6xl">
-    <div class="flex items-end justify-between gap-4 flex-wrap">
-      <div>
-        <h1 class="text-3xl font-bold">Notifications</h1>
-        <p class="text-slate-600 mt-1">สร้าง/จัดการแจ้งเตือน และบันทึกสถานะการส่ง</p>
-      </div>
-      <button id="newNoti" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">+ สร้างแจ้งเตือน</button>
-    </div>
-
-    <section class="mt-6 grid lg:grid-cols-2 gap-4">
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
-        <h2 class="font-bold">รายการแจ้งเตือน</h2>
-        <div id="list" class="mt-4 space-y-2"></div>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
-        <h2 class="font-bold">Log การส่งล่าสุด</h2>
-        <div id="logs" class="mt-4 space-y-2 text-sm"></div>
-      </div>
-    </section>
-
-    <dialog id="dlg" class="rounded-2xl p-0 w-full max-w-xl border border-slate-200 shadow-card">
-      <form method="dialog" class="bg-white rounded-2xl overflow-hidden">
-        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-          <div class="font-bold" id="dlgTitle">แจ้งเตือน</div>
-          <button class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
-            <i data-lucide="x" class="w-4 h-4"></i>
+      <div class="max-w-6xl">
+        <div class="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 class="text-3xl font-bold">การแจ้งเตือน</h1>
+            <p class="text-slate-600 mt-1">สร้าง/จัดการแจ้งเตือน และดูสถานะการส่ง</p>
+          </div>
+          <button id="btnCreate" class="px-4 py-2 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700">
+            + สร้างการแจ้งเตือน
           </button>
         </div>
-        <div class="p-5 space-y-3">
-          <input id="id" type="hidden">
-          <div>
-            <label class="text-sm font-medium">หัวข้อ</label>
-            <input id="title" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" required>
-          </div>
-          <div>
-            <label class="text-sm font-medium">ข้อความ</label>
-            <textarea id="message" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" rows="6" required></textarea>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-sm font-medium">Channel</label>
-              <select id="channel" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
-                <option value="inapp">inapp</option>
-                <option value="line">line</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm font-medium">Target</label>
-              <select id="target" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
-                <option value="all">all</option>
-                <option value="users">users</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-sm font-medium">Status</label>
-              <select id="status" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200">
-                <option value="Draft">Draft</option>
-                <option value="Ready">Ready</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-sm font-medium">ScheduleAt (optional)</label>
-              <input id="scheduleAt" class="mt-1 w-full px-4 py-3 rounded-2xl border border-slate-200" placeholder="2026-02-12T09:00:00+07:00">
-            </div>
-          </div>
-        </div>
-        <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
-          <button class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
-          <button id="saveBtn" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
-        </div>
-      </form>
-    </dialog>
-  </div>
 
+        <section class="mt-6 rounded-2xl border border-slate-200 bg-white shadow-soft p-6">
+          <div id="list" class="space-y-3"></div>
+        </section>
+
+        <dialog id="dlg" class="rounded-2xl p-0 w-full max-w-2xl border border-slate-200 shadow-card">
+          <form method="dialog" id="form" class="bg-white rounded-2xl overflow-hidden">
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+              <div class="font-bold" id="dlgTitle">สร้างการแจ้งเตือน</div>
+              <!-- FIX: type=button so required won't block closing -->
+              <button type="button" data-dlg-close class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">
+                <i data-lucide="x" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <div class="p-5 space-y-4 max-h-[70vh] overflow-auto">
+              <input id="id" type="hidden">
+
+              <div>
+                <label class="text-sm font-medium">หัวข้อ</label>
+                <input id="title" required class="mt-1 inp" placeholder="หัวข้อการแจ้งเตือน">
+              </div>
+
+              <div>
+                <label class="text-sm font-medium">ข้อความ</label>
+                <textarea id="message" required class="mt-1 inp" rows="4" placeholder="ข้อความแจ้งเตือน"></textarea>
+              </div>
+
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-sm font-medium">สถานะ</label>
+                  <select id="status" class="mt-1 inp">
+                    <option value="Ready">Ready</option>
+                    <option value="Scheduled">Scheduled</option>
+                    <option value="Draft">Draft</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="text-sm font-medium">เวลา (ถ้ามี)</label>
+                  <input id="scheduledAt" class="mt-1 inp" placeholder="2026-03-01T09:00:00Z">
+                </div>
+              </div>
+            </div>
+
+            <div class="p-5 border-t border-slate-200 flex items-center justify-end gap-2">
+              <!-- FIX: type=button so required won't block closing -->
+              <button type="button" data-dlg-cancel class="px-4 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">ยกเลิก</button>
+              <button id="btnSave" value="default" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">บันทึก</button>
+            </div>
+          </form>
+        </dialog>
+      </div>
     </main>
   </div>
 
@@ -145,128 +135,128 @@
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
     initAdminShell("notifications");
     await loadAdminMe();
-    
-    import { api } from "/js/api.js";
-    import { qs, toast, setLoading, formatDate } from "/js/ui.js";
 
+    import { api } from "/js/api.js";
+    import { qs, toast, setLoading, esc } from "/js/ui.js";
+
+    const list = qs("#list");
     const dlg = qs("#dlg");
 
-    function row(n) {
+    // Allow closing dialog even when required fields are empty
+    document.addEventListener("click", (e) => {
+      const closeBtn = e.target.closest("[data-dlg-close], [data-dlg-cancel]");
+      if (closeBtn) {
+        e.preventDefault();
+        dlg.close();
+      }
+    });
+
+    function card(n){
+      const title = esc(n.title || "-");
+      const msg = esc(n.message || "");
+      const status = esc(n.status || "-");
+      const when = esc(n.scheduledAt || "");
       return `
-        <div class="rounded-2xl border border-slate-200 p-4 hover:bg-slate-50">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <div class="font-semibold truncate">${n.title || "-"}</div>
-              <div class="text-xs text-slate-500 mt-1">${n.channel || ""} • ${n.target || ""} • ${n.status || ""}</div>
-              <div class="text-xs text-slate-500 mt-1">${formatDate(n.updatedAt || n.createdAt)}</div>
-            </div>
-            <div class="flex gap-2 shrink-0">
-              <button data-act="send" data-id="${n.notificationId}" ${String(n.status||"").toLowerCase()==="sent" ? "disabled" : ""} class="px-3 py-2 rounded-2xl ${String(n.status||"").toLowerCase()==="sent" ? "bg-slate-200 text-slate-600 cursor-not-allowed" : "bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700"}">ส่งจริง</button>
-              <button data-act="edit" data-id="${n.notificationId}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-white">แก้ไข</button>
-              <button data-act="del" data-id="${n.notificationId}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
-            </div>
+        <div class="rounded-2xl border border-slate-200 p-4 flex items-center justify-between gap-3">
+          <div>
+            <div class="font-bold">${title}</div>
+            <div class="text-sm text-slate-600">${status}${when ? " • " + when : ""}</div>
+            ${msg ? `<div class="text-sm text-slate-700 mt-1">${msg}</div>` : ""}
+          </div>
+          <div class="flex items-center gap-2">
+            <button data-act="edit" data-id="${n.id}" class="px-3 py-2 rounded-2xl border border-slate-200 hover:bg-slate-50">แก้ไข</button>
+            <button data-act="del" data-id="${n.id}" class="px-3 py-2 rounded-2xl border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
           </div>
         </div>
       `;
     }
 
-    async function load() {
-      try {
-        const list = await api.notificationsList();
-        qs("#list").innerHTML = (list||[]).map(row).join("") || `<div class="text-sm text-slate-600">—</div>`;
-
-        const logs = await api.request("notification.logs.latest", {});
-        qs("#logs").innerHTML = (logs||[]).map(l => `
-          <div class="rounded-2xl border border-slate-200 p-3">
-            <div class="flex items-center justify-between gap-2">
-              <div class="font-semibold">#${l.notificationId}</div>
-              <div class="text-xs text-slate-500">${formatDate(l.sentAt)}</div>
-            </div>
-            <div class="text-slate-600 text-xs mt-1">${l.status || ""} • ${l.userId || ""}</div>
-          </div>
-        `).join("") || `<div class="text-sm text-slate-600">—</div>`;
-
-      } catch (err) {
-        toast(err?.error?.message || "โหลดไม่สำเร็จ", "danger");
+    async function loadList(){
+      try{
+        const items = await api.notificationsList();
+        list.innerHTML = (items||[]).map(card).join("") || `<div class="text-slate-600">ยังไม่มีข้อมูล</div>`;
+      }catch(err){
+        toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
+      }finally{
+        lucide.createIcons();
       }
     }
 
-    function open(item=null) {
-      qs("#dlgTitle").textContent = item ? "แก้ไขแจ้งเตือน" : "สร้างแจ้งเตือน";
-      qs("#id").value = item?.notificationId || "";
-      qs("#title").value = item?.title || "";
-      qs("#message").value = item?.message || "";
-      qs("#channel").value = item?.channel || "inapp";
-      qs("#target").value = item?.target || "all";
-      qs("#status").value = item?.status || "Draft";
-      qs("#scheduleAt").value = item?.scheduleAt || "";
+    qs("#btnCreate").addEventListener("click", ()=>{
+      qs("#dlgTitle").textContent = "สร้างการแจ้งเตือน";
+      qs("#id").value = "";
+      qs("#title").value = "";
+      qs("#message").value = "";
+      qs("#status").value = "Ready";
+      qs("#scheduledAt").value = "";
       dlg.showModal();
       lucide.createIcons();
-    }
+    });
 
-    qs("#newNoti").addEventListener("click", () => open());
-
-    document.addEventListener("click", async (e) => {
+    list.addEventListener("click", async (e)=>{
       const btn = e.target.closest("button[data-act]");
       if (!btn) return;
       const id = btn.dataset.id;
 
-      if (btn.dataset.act === "send") {
-        if (!confirm("ยืนยันส่งแจ้งเตือนนี้?")) return;
-        try {
-          await api.notificationsSend(id);
-          toast("บันทึกการส่งแล้ว", "success");
-          load();
-        } catch (err) {
-          toast(err?.error?.message || "ส่งไม่สำเร็จ", "danger");
-        }
-      }
-
-      if (btn.dataset.act === "edit") {
-        try {
-          const item = await api.request("notifications.get", { notificationId: id });
-          open(item);
-        } catch (err) {
-          toast("เปิดข้อมูลไม่สำเร็จ", "danger");
-        }
-      }
-
-      if (btn.dataset.act === "del") {
-        if (!confirm("ยืนยันลบ?")) return;
-        try {
-          await api.request("notifications.delete", { notificationId: id });
+      if (btn.dataset.act === "del"){
+        if (!confirm("ยืนยันลบรายการนี้?")) return;
+        try{
+          await api.notificationsDelete(id);
           toast("ลบแล้ว", "success");
-          load();
-        } catch (err) { toast(err?.error?.message || "ลบไม่สำเร็จ", "danger"); }
+          loadList();
+        }catch(err){
+          toast(err?.error?.message || "ลบไม่สำเร็จ", "danger");
+        }
+      }
+
+      if (btn.dataset.act === "edit"){
+        try{
+          const n = await api.notificationsGet(id);
+          qs("#dlgTitle").textContent = "แก้ไขการแจ้งเตือน";
+          qs("#id").value = n.id || id;
+          qs("#title").value = n.title || "";
+          qs("#message").value = n.message || "";
+          qs("#status").value = n.status || "Ready";
+          qs("#scheduledAt").value = n.scheduledAt || "";
+          dlg.showModal();
+          lucide.createIcons();
+        }catch(err){
+          toast(err?.error?.message || "เปิดข้อมูลไม่สำเร็จ", "danger");
+        }
       }
     });
 
-    qs("#saveBtn").addEventListener("click", async (e) => {
+    qs("#btnSave").addEventListener("click", async (e)=>{
       e.preventDefault();
-      const btn = qs("#saveBtn");
+      const btn = qs("#btnSave");
       setLoading(btn, true);
-      try {
-        const id = qs("#id").value;
-        const item = {
+      try{
+        const payload = {
+          id: qs("#id").value || undefined,
           title: qs("#title").value.trim(),
           message: qs("#message").value.trim(),
-          channel: qs("#channel").value,
-          target: qs("#target").value,
           status: qs("#status").value,
-          scheduleAt: qs("#scheduleAt").value.trim()
+          scheduledAt: qs("#scheduledAt").value.trim()
         };
-        if (!id) await api.notificationsCreate(item);
-        else await api.request("notifications.update", { notificationId: id, patch: item });
-        toast("บันทึกแล้ว", "success");
+
+        if (payload.id){
+          await api.notificationsUpdate(payload.id, payload);
+          toast("บันทึกแล้ว", "success");
+        }else{
+          await api.notificationsCreate(payload);
+          toast("สร้างแล้ว", "success");
+        }
+
         dlg.close();
-        load();
-      } catch (err) {
+        loadList();
+      }catch(err){
         toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
-      } finally { setLoading(btn, false); }
+      }finally{
+        setLoading(btn, false);
+      }
     });
 
-    load();
-
+    loadList();
   </script>
 
   <script>lucide.createIcons();</script>

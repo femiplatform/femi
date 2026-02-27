@@ -13,8 +13,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="/assets/app.css" />
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <style>
     .glass{ background: rgba(255,255,255,.78); backdrop-filter: blur(10px); }
     dialog::backdrop{ background: rgba(15, 23, 42, .45); }
@@ -24,7 +22,6 @@
     .btn-ghost{ background: rgba(255,255,255,.8); border: 1px solid rgb(226 232 240); }
     .btn-ghost:hover{ background: white; }
     .inp{ width:100%; border:1px solid rgb(226 232 240); border-radius: 16px; padding: 10px 12px; background: rgba(255,255,255,.92); }
-    .pill{ display:inline-flex; align-items:center; gap:6px; border-radius:999px; padding: 4px 10px; border:1px solid rgb(226 232 240); font-weight:800; font-size:12px; }
   </style>
 </head>
 <body class="gradient-bg text-slate-900">
@@ -44,19 +41,16 @@
 
       <nav class="mt-6 space-y-2">
         <a data-nav="dashboard" href="/admin/index.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> แดชบอร์ด
         </a>
         <a data-nav="users" href="/admin/users.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="users" class="w-5 h-5"></i> Users
+          <i data-lucide="users" class="w-5 h-5"></i> สมาชิก
         </a>
         <a data-nav="content" href="/admin/content.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="file-text" class="w-5 h-5"></i> Content
+          <i data-lucide="file-text" class="w-5 h-5"></i> เนื้อหา
         </a>
         <a data-nav="notifications" href="/admin/notifications.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="bell" class="w-5 h-5"></i> Notifications
-        </a>
-        <a data-nav="settings" href="/admin/settings.html" class="flex items-center gap-3 px-4 py-3 rounded-2xl hover:bg-slate-100">
-          <i data-lucide="settings" class="w-5 h-5"></i> Settings
+          <i data-lucide="bell" class="w-5 h-5"></i> การแจ้งเตือน
         </a>
 
         <button id="logout" class="w-full mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl bg-rose-50 text-rose-700 hover:bg-rose-100">
@@ -72,7 +66,7 @@
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div class="text-xs uppercase tracking-wide text-slate-500">Overview</div>
-            <h1 class="text-2xl font-extrabold">Admin Dashboard</h1>
+            <h1 class="text-2xl font-extrabold">แดชบอร์ดผู้ดูแล</h1>
             <div id="subTitle" class="text-sm text-slate-600 mt-1">—</div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -94,13 +88,13 @@
       <!-- KPI -->
       <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">Users ทั้งหมด</div>
+          <div class="text-xs text-slate-500">สมาชิกทั้งหมด</div>
           <div id="kUsersTotal" class="text-3xl font-black mt-1">—</div>
           <div class="text-xs text-slate-500 mt-1">Active: <span id="kUsersActive">—</span></div>
         </div>
 
         <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">New Users</div>
+          <div class="text-xs text-slate-500">สมาชิกใหม่</div>
           <div class="flex items-end gap-2 mt-1">
             <div class="text-3xl font-black" id="kUsersNew7">—</div>
             <div class="text-xs text-slate-500 pb-1">ใน 7 วัน</div>
@@ -121,592 +115,86 @@
           <div class="text-xs text-slate-500">งานค้าง</div>
           <div class="flex items-end gap-2 mt-1">
             <div class="text-3xl font-black" id="kDrafts">—</div>
-            <div class="text-xs text-slate-500 pb-1">Draft content</div>
+            <div class="text-xs text-slate-500 pb-1">เนื้อหาที่ร่างไว้</div>
           </div>
           <div class="text-xs text-slate-500 mt-1">แจ้งเตือนรอส่ง: <span id="kNotif">—</span></div>
-        </div>
-
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">Quiz activity</div>
-          <div class="flex items-end gap-2 mt-1">
-            <div class="text-3xl font-black" id="kQuiz7">—</div>
-            <div class="text-xs text-slate-500 pb-1">ส่งคำตอบใน 7 วัน</div>
-          </div>
-          <div class="text-xs text-slate-500 mt-1">—</div>
-        </div>
-
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">Preventive overdue</div>
-          <div class="flex items-end gap-2 mt-1">
-            <div class="text-3xl font-black" id="kOverdue">—</div>
-            <div class="text-xs text-slate-500 pb-1">รายการเลยกำหนด</div>
-          </div>
-          <div class="text-xs text-slate-500 mt-1">—</div>
-        </div>
-
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">System</div>
-          <div class="text-3xl font-black mt-1" id="kPing">—</div>
-          <div class="text-xs text-slate-500 mt-1">Ping API (ms)</div>
-        </div>
-
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="text-xs text-slate-500">เวลาอัปเดต</div>
-          <div class="text-3xl font-black mt-1" id="kUpdated">—</div>
-          <div class="text-xs text-slate-500 mt-1">Server time</div>
-        </div>
-      </section>
-
-      <!-- Charts -->
-      <section class="grid lg:grid-cols-3 gap-4">
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">New Users / วัน</div>
-            <span class="pill">line</span>
-          </div>
-          <canvas id="chUsers" class="mt-3"></canvas>
-        </div>
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">Quiz submissions</div>
-            <span class="pill">bar</span>
-          </div>
-          <canvas id="chQuiz" class="mt-3"></canvas>
-        </div>
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="flex items-center justify-between">
-            <div class="font-extrabold">Notifications sent</div>
-            <span class="pill">bar</span>
-          </div>
-          <canvas id="chNotif" class="mt-3"></canvas>
-        </div>
-      </section>
-
-      <!-- Action Center + Members -->
-      <section class="grid lg:grid-cols-2 gap-4">
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div class="font-extrabold">Action Center</div>
-              <div class="text-xs text-slate-500">สร้างคอนเทนต์/ควิซ/แจ้งเตือนแบบเร็ว</div>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnQuickQuiz" class="btn btn-ghost"><i data-lucide="help-circle" class="w-4 h-4"></i> เพิ่มคำถามควิซ</button>
-              <button id="btnQuickNotif" class="btn btn-ghost"><i data-lucide="bell-plus" class="w-4 h-4"></i> สร้างแจ้งเตือน</button>
-              <a href="/admin/content.html" class="btn btn-ghost"><i data-lucide="file-text" class="w-4 h-4"></i> ไปหน้า Content</a>
-            </div>
-          </div>
-
-          <div class="mt-4 grid sm:grid-cols-2 gap-3">
-            <div class="rounded-2xl border border-slate-200 bg-white/70 p-3">
-              <div class="text-xs text-slate-500">Draft News</div>
-              <div id="boxDraftNews" class="mt-2 space-y-2"></div>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white/70 p-3">
-              <div class="text-xs text-slate-500">Draft Knowledge</div>
-              <div id="boxDraftKb" class="mt-2 space-y-2"></div>
-            </div>
-          </div>
-
-          <div class="mt-3 rounded-2xl border border-slate-200 bg-white/70 p-3">
-            <div class="text-xs text-slate-500">Scheduled Notifications</div>
-            <div id="boxSchedNotif" class="mt-2 space-y-2"></div>
-          </div>
-        </div>
-
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div class="font-extrabold">จัดการสมาชิก (Quick)</div>
-              <div class="text-xs text-slate-500">ค้นหา/สร้าง/แก้ไข/ลบ แบบเร็ว (แบบเต็มอยู่หน้า Users)</div>
-            </div>
-            <div class="flex gap-2">
-              <button id="btnUserCreate" class="btn btn-primary"><i data-lucide="user-plus" class="w-4 h-4"></i> สร้างสมาชิก</button>
-              <a href="/admin/users.html" class="btn btn-ghost"><i data-lucide="external-link" class="w-4 h-4"></i> ไปหน้า Users</a>
-            </div>
-          </div>
-
-          <div class="mt-4 flex gap-2">
-            <input id="userQ" class="inp" placeholder="ค้นหา: อีเมล / ชื่อ / userId" />
-            <button id="btnUserSearch" class="btn btn-ghost"><i data-lucide="search" class="w-4 h-4"></i> ค้นหา</button>
-          </div>
-
-          <div id="userResults" class="mt-3 space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- Recent activity -->
-      <section class="grid lg:grid-cols-2 gap-4">
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="font-extrabold">Recent Logins</div>
-          <div id="boxLogins" class="mt-3 space-y-2"></div>
-        </div>
-        <div class="glass rounded-3xl border border-slate-200 p-4">
-          <div class="font-extrabold">Latest Quiz Results</div>
-          <div id="boxQuiz" class="mt-3 space-y-2"></div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Modals -->
-  <dialog id="dlgNews" class="rounded-3xl w-full max-w-2xl p-0 overflow-hidden">
-    <form method="dialog" class="glass border border-slate-200 p-5">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-extrabold">สร้างข่าว/ประกาศ</div>
-        <button class="btn btn-ghost" value="cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div class="grid gap-3 mt-4">
-        <input id="n_title" class="inp" placeholder="หัวข้อ" required />
-        <input id="n_summary" class="inp" placeholder="สรุป (สั้น ๆ)" />
-        <textarea id="n_content" class="inp" placeholder="เนื้อหา" style="min-height:140px"></textarea>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <input id="n_category" class="inp" placeholder="หมวดหมู่ (เช่น Preventive)" />
-          <select id="n_status" class="inp">
-            <option value="Draft">Draft</option>
-            <option value="Published">Published</option>
-          </select>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btnNewsSave" type="button" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> บันทึก</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="dlgQuiz" class="rounded-3xl w-full max-w-2xl p-0 overflow-hidden">
-    <form method="dialog" class="glass border border-slate-200 p-5">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-extrabold">เพิ่มคำถามควิซ</div>
-        <button class="btn btn-ghost" value="cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div class="grid gap-3 mt-4">
-        <input id="q_category" class="inp" placeholder="หมวดหมู่ (เช่น สุขภาพผู้หญิง)" />
-        <textarea id="q_text" class="inp" placeholder="คำถาม" style="min-height:90px"></textarea>
-        <div class="grid gap-2">
-          <input id="c1" class="inp" placeholder="ตัวเลือก 1" />
-          <input id="c2" class="inp" placeholder="ตัวเลือก 2" />
-          <input id="c3" class="inp" placeholder="ตัวเลือก 3" />
-          <input id="c4" class="inp" placeholder="ตัวเลือก 4" />
-        </div>
-        <select id="q_correct" class="inp">
-          <option value="1">คำตอบที่ถูก: ตัวเลือก 1</option>
-          <option value="2">คำตอบที่ถูก: ตัวเลือก 2</option>
-          <option value="3">คำตอบที่ถูก: ตัวเลือก 3</option>
-          <option value="4">คำตอบที่ถูก: ตัวเลือก 4</option>
-        </select>
-      </div>
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btnQuizSave" type="button" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> บันทึก</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="dlgNotif" class="rounded-3xl w-full max-w-2xl p-0 overflow-hidden">
-    <form method="dialog" class="glass border border-slate-200 p-5">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-extrabold">สร้างแจ้งเตือน</div>
-        <button class="btn btn-ghost" value="cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div class="grid gap-3 mt-4">
-        <input id="t_title" class="inp" placeholder="หัวข้อ" />
-        <textarea id="t_message" class="inp" placeholder="ข้อความ" style="min-height:120px"></textarea>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <select id="t_channel" class="inp">
-            <option value="INAPP">INAPP</option>
-            <option value="LINE">LINE (ถ้าตั้งค่าไว้)</option>
-          </select>
-          <select id="t_target" class="inp">
-            <option value="ALL">ส่งถึงทุกคน</option>
-            <option value="ACTIVE">เฉพาะ Active</option>
-          </select>
-        </div>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <input id="t_scheduleAt" class="inp" type="datetime-local" />
-          <select id="t_status" class="inp">
-            <option value="Draft">Draft</option>
-            <option value="Scheduled">Scheduled</option>
-          </select>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btnNotifSave" type="button" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> บันทึก</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="dlgUser" class="rounded-3xl w-full max-w-xl p-0 overflow-hidden">
-    <form method="dialog" class="glass border border-slate-200 p-5">
-      <div class="flex items-center justify-between">
-        <div id="u_title" class="text-lg font-extrabold">สร้างสมาชิก</div>
-        <button class="btn btn-ghost" value="cancel"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-
-      <input id="u_mode" type="hidden" value="create" />
-      <input id="u_userId" type="hidden" value="" />
-
-      <div class="grid gap-3 mt-4">
-        <input id="u_email" class="inp" placeholder="อีเมล" />
-        <input id="u_password" class="inp" placeholder="รหัสผ่าน (เว้นว่างถ้าไม่เปลี่ยน)" type="password" />
-        <div class="grid sm:grid-cols-2 gap-3">
-          <input id="u_firstName" class="inp" placeholder="ชื่อ" />
-          <input id="u_lastName" class="inp" placeholder="สกุล" />
-        </div>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <select id="u_role" class="inp">
-            <option value="user">user</option>
-            <option value="admin">admin</option>
-          </select>
-          <select id="u_status" class="inp">
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="btnUserSave" type="button" class="btn btn-primary"><i data-lucide="save" class="w-4 h-4"></i> บันทึก</button>
-      </div>
-    </form>
-  </dialog>
-
   <script type="module">
     import { initAdminShell, loadAdminMe } from "/admin/admin.js";
     import { api } from "/js/api.js";
-    import { qs, toast, setLoading, formatDate } from "/js/ui.js";
+    import { qs, toast } from "/js/ui.js";
 
     initAdminShell("dashboard");
     await loadAdminMe();
-
     lucide.createIcons();
 
-    // ---------- charts ----------
-    let chUsers, chQuiz, chNotif;
+    const toDate = (v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
+    };
+    const getCreatedAt = (u) => toDate(u.createdAt);
+    const getLastLogin = (u) => toDate(u.lastLoginAt);
 
-    function buildCharts(labels, newUsers, quizSub, quizAvg, notifSent) {
-      const ctx1 = qs("#chUsers");
-      const ctx2 = qs("#chQuiz");
-      const ctx3 = qs("#chNotif");
-
-      if (chUsers) chUsers.destroy();
-      if (chQuiz) chQuiz.destroy();
-      if (chNotif) chNotif.destroy();
-
-      chUsers = new Chart(ctx1, {
-        type: "line",
-        data: { labels, datasets: [{ label: "New users", data: newUsers, tension: 0.35 }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 6 } } } }
-      });
-
-      chQuiz = new Chart(ctx2, {
-        type: "bar",
-        data: { labels, datasets: [
-          { label: "Submissions", data: quizSub },
-          { label: "Avg %", data: quizAvg }
-        ]},
-        options: { responsive: true, plugins: { legend: { display: true } }, scales: { x: { ticks: { maxTicksLimit: 6 } } } }
-      });
-
-      chNotif = new Chart(ctx3, {
-        type: "bar",
-        data: { labels, datasets: [{ label: "Sent", data: notifSent }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxTicksLimit: 6 } } } }
-      });
+    function inLastDays(d, days){
+      if (!d) return false;
+      const ms = days * 24 * 60 * 60 * 1000;
+      return (Date.now() - d.getTime()) <= ms;
     }
 
-    function renderQueue(queue) {
-      const dn = queue?.drafts?.news || [];
-      const dk = queue?.drafts?.knowledge || [];
-      const sn = queue?.scheduledNotifications || [];
-      const ll = queue?.latestLogins || [];
-      const lq = queue?.latestQuiz || [];
+    async function loadDashboard(){
+      const days = Number(qs("#rangeDays")?.value || 30);
+      const sub = qs("#subTitle");
+      if (sub) sub.textContent = `ช่วงเวลา: ${days} วันล่าสุด`;
 
-      qs("#boxDraftNews").innerHTML = dn.map(n => `
-        <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-          <div class="min-w-0">
-            <div class="font-semibold truncate">${n.title || "-"}</div>
-            <div class="text-xs text-slate-500">อัปเดต: ${formatDate(n.updatedAt || n.createdAt)}</div>
-          </div>
-          <a href="/admin/content.html" class="pill">edit</a>
-        </div>
-      `).join("") || `<div class="text-sm text-slate-500">—</div>`;
+      try{
+        const users = await api.usersList("");
+        const total = (users || []).length;
+        const active = (users || []).filter(u => String(u.status||"").toLowerCase() === "active").length;
+        const new7 = (users || []).filter(u => inLastDays(getCreatedAt(u), 7)).length;
+        const new30 = (users || []).filter(u => inLastDays(getCreatedAt(u), 30)).length;
+        const active7 = (users || []).filter(u => inLastDays(getLastLogin(u), 7)).length;
 
-      qs("#boxDraftKb").innerHTML = dk.map(k => `
-        <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-          <div class="min-w-0">
-            <div class="font-semibold truncate">${k.title || "-"}</div>
-            <div class="text-xs text-slate-500">อัปเดต: ${formatDate(k.updatedAt || k.createdAt)}</div>
-          </div>
-          <a href="/admin/content.html" class="pill">edit</a>
-        </div>
-      `).join("") || `<div class="text-sm text-slate-500">—</div>`;
+        qs("#kUsersTotal").textContent = total;
+        qs("#kUsersActive").textContent = active;
+        qs("#kUsersNew7").textContent = new7;
+        qs("#kUsersNew30").textContent = new30;
+        qs("#kUsersActive7").textContent = active7;
 
-      qs("#boxSchedNotif").innerHTML = sn.map(n => `
-        <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-          <div class="min-w-0">
-            <div class="font-semibold truncate">${n.title || "-"}</div>
-            <div class="text-xs text-slate-500">เวลา: ${formatDate(n.scheduleAt || n.createdAt)} • ${n.status || ""}</div>
-          </div>
-          <a href="/admin/notifications.html" class="pill">open</a>
-        </div>
-      `).join("") || `<div class="text-sm text-slate-500">—</div>`;
+        const [news, kb, notis] = await Promise.all([
+          api.request("news.listAdmin", {}),
+          api.request("knowledge.listAdmin", {}),
+          api.notificationsList()
+        ]);
 
-      qs("#boxLogins").innerHTML = ll.map(u => `
-        <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-          <div class="min-w-0">
-            <div class="font-semibold truncate">${(u.firstName||"") + " " + (u.lastName||"")}</div>
-            <div class="text-xs text-slate-500 truncate">${u.email || ""}</div>
-          </div>
-          <div class="text-xs text-slate-500">${formatDate(u.lastLoginAt)}</div>
-        </div>
-      `).join("") || `<div class="text-sm text-slate-500">—</div>`;
+        const isDraft = (x) => String(x?.status || "").toLowerCase() === "draft";
+        const drafts = (news||[]).filter(isDraft).length + (kb||[]).filter(isDraft).length;
 
-      qs("#boxQuiz").innerHTML = lq.map(r => `
-        <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-          <div class="font-semibold">คะแนน ${r.score}/${r.total}</div>
-          <div class="text-xs text-slate-500">${formatDate(r.takenAt)}</div>
-        </div>
-      `).join("") || `<div class="text-sm text-slate-500">—</div>`;
-    }
+        const sched = (notis||[]).filter(n => {
+          const s = String(n?.status || "").toLowerCase();
+          return s === "scheduled" || s === "ready";
+        }).length;
 
-    async function ping() {
-      try {
-        const t0 = performance.now();
-        await api.ping();
-        const t1 = performance.now();
-        qs("#kPing").textContent = Math.round(t1 - t0);
-      } catch {
-        qs("#kPing").textContent = "—";
-      }
-    }
+        qs("#kDrafts").textContent = drafts;
+        qs("#kNotif").textContent = sched;
 
-    async function loadDashboard() {
-      const days = Number(qs("#rangeDays").value || 30);
-      qs("#subTitle").textContent = `ช่วงเวลา: ${days} วันล่าสุด`;
-
-      try {
-        await ping();
-        const data = await api.adminStatsV2(days);
-
-        // KPIs
-        const k = data.kpis || {};
-        qs("#kUsersTotal").textContent = k.usersTotal ?? 0;
-        qs("#kUsersActive").textContent = k.usersActive ?? 0;
-        qs("#kUsersNew7").textContent = k.usersNew7 ?? 0;
-        qs("#kUsersNew30").textContent = k.usersNew30 ?? 0;
-        qs("#kUsersActive7").textContent = k.usersActive7 ?? 0;
-        qs("#kDrafts").textContent = k.contentDrafts ?? 0;
-        qs("#kNotif").textContent = k.notificationsScheduled ?? 0;
-        qs("#kQuiz7").textContent = k.quizSubmissions7 ?? 0;
-        qs("#kOverdue").textContent = k.preventiveOverdue ?? 0;
-
-        qs("#kUpdated").textContent = (data.system?.now || "").slice(11, 19) || "—";
-
-        // charts
-        const c = data.charts || {};
-        buildCharts(c.labels || [], c.newUsers || [], c.quizSubmissions || [], c.quizAvgScore || [], c.notifSent || []);
-
-        // queue
-        renderQueue(data.queue || {});
-      } catch (err) {
+      }catch(err){
         console.error(err);
         toast(err?.error?.message || "โหลดข้อมูลไม่สำเร็จ", "danger");
-      } finally {
+      }finally{
         lucide.createIcons();
       }
     }
 
-    qs("#btnRefresh").addEventListener("click", loadDashboard);
-    qs("#rangeDays").addEventListener("change", loadDashboard);
+    qs("#btnRefresh")?.addEventListener("click", loadDashboard);
+    qs("#rangeDays")?.addEventListener("change", loadDashboard);
+    qs("#btnQuickNews")?.addEventListener("click", ()=>{ window.location.href = "/admin/content.html"; });
 
-    // ---------- quick actions ----------
-    const dlgNews = qs("#dlgNews");
-    const dlgQuiz = qs("#dlgQuiz");
-    const dlgNotif = qs("#dlgNotif");
-
-    qs("#btnQuickNews").addEventListener("click", ()=>{ dlgNews.showModal(); lucide.createIcons(); });
-    qs("#btnQuickQuiz").addEventListener("click", ()=>{ dlgQuiz.showModal(); lucide.createIcons(); });
-    qs("#btnQuickNotif").addEventListener("click", ()=>{ dlgNotif.showModal(); lucide.createIcons(); });
-
-    qs("#btnNewsSave").addEventListener("click", async ()=>{
-      const btn = qs("#btnNewsSave");
-      setLoading(btn, true);
-      try{
-        await api.newsCreate({
-          title: qs("#n_title").value.trim(),
-          summary: qs("#n_summary").value.trim(),
-          content: qs("#n_content").value,
-          category: qs("#n_category").value.trim(),
-          status: qs("#n_status").value
-        });
-        toast("บันทึกข่าวแล้ว", "success");
-        dlgNews.close();
-        await loadDashboard();
-      }catch(err){
-        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
-      }finally{ setLoading(btn, false); }
-    });
-
-    qs("#btnQuizSave").addEventListener("click", async ()=>{
-      const btn = qs("#btnQuizSave");
-      setLoading(btn, true);
-      try{
-        const choices = [qs("#c1").value, qs("#c2").value, qs("#c3").value, qs("#c4").value].map(s=>String(s||"").trim()).filter(Boolean);
-        if (choices.length < 2) throw { error: { message: "กรุณาใส่ตัวเลือกอย่างน้อย 2 ข้อ" } };
-        await api.quizQuestionsCreate({
-          category: qs("#q_category").value.trim(),
-          questionText: qs("#q_text").value.trim(),
-          choices,
-          correctIndex: Number(qs("#q_correct").value) - 1
-        });
-        toast("เพิ่มคำถามแล้ว", "success");
-        dlgQuiz.close();
-        await loadDashboard();
-      }catch(err){
-        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
-      }finally{ setLoading(btn, false); }
-    });
-
-    qs("#btnNotifSave").addEventListener("click", async ()=>{
-      const btn = qs("#btnNotifSave");
-      setLoading(btn, true);
-      try{
-        const scheduleAt = qs("#t_scheduleAt").value ? new Date(qs("#t_scheduleAt").value).toISOString() : "";
-        await api.notificationsCreate({
-          title: qs("#t_title").value.trim(),
-          message: qs("#t_message").value.trim(),
-          channel: qs("#t_channel").value,
-          target: qs("#t_target").value,
-          scheduleAt,
-          status: qs("#t_status").value
-        });
-        toast("บันทึกแจ้งเตือนแล้ว", "success");
-        dlgNotif.close();
-        await loadDashboard();
-      }catch(err){
-        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
-      }finally{ setLoading(btn, false); }
-    });
-
-    // ---------- quick user management ----------
-    const dlgUser = qs("#dlgUser");
-    function openUserCreate(){
-      qs("#u_title").textContent = "สร้างสมาชิก";
-      qs("#u_mode").value = "create";
-      qs("#u_userId").value = "";
-      qs("#u_email").value = "";
-      qs("#u_password").value = "";
-      qs("#u_firstName").value = "";
-      qs("#u_lastName").value = "";
-      qs("#u_role").value = "user";
-      qs("#u_status").value = "Active";
-      dlgUser.showModal();
-      lucide.createIcons();
-    }
-
-    function openUserEdit(u){
-      qs("#u_title").textContent = "แก้ไขสมาชิก";
-      qs("#u_mode").value = "edit";
-      qs("#u_userId").value = u.userId;
-      qs("#u_email").value = u.email || "";
-      qs("#u_password").value = "";
-      qs("#u_firstName").value = u.firstName || "";
-      qs("#u_lastName").value = u.lastName || "";
-      qs("#u_role").value = u.role || "user";
-      qs("#u_status").value = u.status || "Active";
-      dlgUser.showModal();
-      lucide.createIcons();
-    }
-
-    qs("#btnUserCreate").addEventListener("click", openUserCreate);
-
-    async function searchUsers(){
-      const q = qs("#userQ").value.trim();
-      try{
-        const list = await api.usersList(q);
-        const top = (list || []).slice(0, 8);
-        qs("#userResults").innerHTML = top.map(u => `
-          <div class="flex items-center justify-between gap-2 rounded-2xl border border-slate-200 bg-white/80 p-3">
-            <div class="min-w-0">
-              <div class="font-semibold truncate">${(u.firstName||"") + " " + (u.lastName||"")}</div>
-              <div class="text-xs text-slate-500 truncate">${u.email || ""}</div>
-              <div class="text-xs text-slate-400 truncate">${u.userId || ""}</div>
-            </div>
-            <div class="flex gap-2">
-              <button class="btn btn-ghost" data-uact="edit" data-uid="${u.userId}"><i data-lucide="pencil" class="w-4 h-4"></i></button>
-              <button class="btn btn-ghost" data-uact="del" data-uid="${u.userId}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-          </div>
-        `).join("") || `<div class="text-sm text-slate-500">ไม่พบข้อมูล</div>`;
-        lucide.createIcons();
-      }catch(err){
-        toast(err?.error?.message || "ค้นหาไม่สำเร็จ", "danger");
-      }
-    }
-
-    qs("#btnUserSearch").addEventListener("click", searchUsers);
-    qs("#userQ").addEventListener("keydown", (e)=>{ if(e.key==="Enter"){ e.preventDefault(); searchUsers(); }});
-
-    document.addEventListener("click", async (e)=>{
-      const btn = e.target.closest("[data-uact]");
-      if(!btn) return;
-      const act = btn.getAttribute("data-uact");
-      const userId = btn.getAttribute("data-uid");
-      if(act === "edit"){
-        try{
-          const u = await api.usersGet(userId);
-          openUserEdit(u);
-        }catch(err){ toast("เปิดข้อมูลไม่สำเร็จ", "danger"); }
-      }
-      if(act === "del"){
-        if(!confirm("ยืนยันลบสมาชิกนี้?")) return;
-        try{
-          await api.usersDelete(userId);
-          toast("ลบแล้ว", "success");
-          await searchUsers();
-          await loadDashboard();
-        }catch(err){
-          toast(err?.error?.message || "ลบไม่สำเร็จ", "danger");
-        }
-      }
-    });
-
-    qs("#btnUserSave").addEventListener("click", async ()=>{
-      const btn = qs("#btnUserSave");
-      setLoading(btn, true);
-      try{
-        const mode = qs("#u_mode").value;
-        const email = qs("#u_email").value.trim();
-        const pw = qs("#u_password").value;
-        const payload = {
-          firstName: qs("#u_firstName").value.trim(),
-          lastName: qs("#u_lastName").value.trim(),
-          role: qs("#u_role").value,
-          status: qs("#u_status").value
-        };
-        if(mode === "create"){
-          if(!email || !pw) throw { error:{ message:"กรุณาใส่ email และ password" } };
-          await api.usersCreate({ email, password: pw, ...payload });
-          toast("สร้างสมาชิกแล้ว", "success");
-        }else{
-          const userId = qs("#u_userId").value;
-          const patch = { ...payload };
-          if(pw) patch.password = pw;
-          await api.usersUpdate(userId, patch);
-          toast("บันทึกแล้ว", "success");
-        }
-        dlgUser.close();
-        await searchUsers();
-        await loadDashboard();
-      }catch(err){
-        toast(err?.error?.message || "บันทึกไม่สำเร็จ", "danger");
-      }finally{ setLoading(btn, false); }
-    });
-
-    // init
     await loadDashboard();
-    await searchUsers();
-
   </script>
 
   <script>lucide.createIcons();</script>
